@@ -68,6 +68,8 @@ class SecurityConfig {
 				.requestMatchers(HttpMethod.POST, "/api/auth/register", "/api/auth/login",
 						"/api/auth/refresh", "/api/auth/logout").permitAll()
 				.requestMatchers("/error").permitAll()
+				// Para el healthcheck de Docker; solo dice {"status":"UP"}, sin detalles internos
+				.requestMatchers(HttpMethod.GET, "/actuator/health").permitAll()
 				.anyRequest().authenticated())
 			// Valida el JWT con el JwtDecoder de abajo; si falla responde 401
 			.oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));

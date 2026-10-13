@@ -61,6 +61,9 @@ export function RegisterPage() {
           Inicia sesión
         </Link>
       </p>
+      <p className="muted small">
+        <Link to="/privacidad">Privacidad</Link>
+      </p>
     </main>
   )
 }

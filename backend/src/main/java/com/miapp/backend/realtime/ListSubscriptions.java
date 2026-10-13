@@ -8,6 +8,8 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import org.springframework.context.event.ContextClosedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -16,7 +18,6 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter.SseEvent
 
 import com.miapp.backend.common.ListEvent;
 
-import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -83,8 +84,13 @@ class ListSubscriptions {
 		return byList.getOrDefault(listId, Set.of()).size();
 	}
 
-	/** Al apagar el servidor, cerrar las conexiones para no retrasar el apagado. */
-	@PreDestroy
+	/**
+	 * Al apagar, cerrar las conexiones lo primero. Con el apagado "graceful", Tomcat espera a que
+	 * terminen las peticiones en curso, y una conexión SSE no termina nunca: sin esto, cada
+	 * reinicio esperaría el tiempo máximo (30 s). ContextClosedEvent llega antes de esa espera
+	 * (un @PreDestroy llegaría después).
+	 */
+	@EventListener(ContextClosedEvent.class)
 	void closeAll() {
 		byList.values().forEach(subscriptions -> subscriptions.forEach(subscription -> subscription.emitter().complete()));
 	}

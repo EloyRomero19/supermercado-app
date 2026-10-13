@@ -61,6 +61,9 @@ export function LoginPage() {
           Regístrate
         </Link>
       </p>
+      <p className="muted small">
+        <Link to="/privacidad">Privacidad</Link>
+      </p>
     </main>
   )
 }

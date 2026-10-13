@@ -652,3 +652,20 @@ button.search-result:hover {
 .topbar {
   padding-top: max(1rem, env(safe-area-inset-top));
 }
+
+.small {
+  font-size: 0.85rem;
+}
+
+.center {
+  text-align: center;
+}
+
+.prose ul {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.prose p {
+  margin: 0;
+}

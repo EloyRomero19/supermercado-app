@@ -1,3 +1,10 @@
+server:
+  # Detrás de Caddy: Tomcat toma la IP del cliente y el esquema (https) de las cabeceras
+  # X-Forwarded-*, pero solo si la petición llega desde una IP interna (nuestro proxy)
+  forward-headers-strategy: native
+  # Al parar, terminar las peticiones en curso antes de apagar (p. ej. al desplegar)
+  shutdown: graceful
+
 spring:
   application:
     name: backend
@@ -12,7 +19,8 @@ spring:
       - optional:file:.env[.properties]
 
   datasource:
-    url: jdbc:postgresql://localhost:${POSTGRES_PORT:5432}/${POSTGRES_DB:supermercado}
+    # En Docker (producción) el host es el nombre del servicio: POSTGRES_HOST=postgres
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:supermercado}
     username: ${POSTGRES_USER:supermercado}
     password: ${POSTGRES_PASSWORD}
 
@@ -49,3 +57,12 @@ app:
     cookie-secure: true
     # Único origen desde el que se aceptan /api/auth/refresh y /logout
     frontend-url: ${FRONTEND_URL:http://localhost:5173}
+
+  rate-limit:
+    enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health

@@ -35,6 +35,8 @@ cd frontend && npm run lint
 cd frontend && npm test          # Vitest
 cd frontend && npm run build && npm run preview   # build de producción con service worker (http://localhost:4173)
 cd frontend && npm run generate-pwa-assets         # regenerar iconos desde public/favicon.svg
+
+docker compose -f docker-compose.prod.yml up -d --build   # producción (ver README); necesita DOMAIN y PUBLIC_URL
 ```
 
 ## Arquitectura backend
@@ -45,6 +47,9 @@ cd frontend && npm run generate-pwa-assets         # regenerar iconos desde publ
 - Búsqueda de productos con SQL nativo (`JdbcClient`) sobre `product.search_name` (normalizado como `ProductService.normalize`):
   primero por inicio de palabra; si no hay resultados, por similitud (`pg_trgm`, umbral 0.4 con `SET LOCAL`).
 - Tests: `@SpringBootTest` + `@Import(TestcontainersConfiguration.class)`; `TestUsers.registerAndGetBearer(mvc)` para peticiones autenticadas.
+- Rate limiting en `ratelimit.RateLimitInterceptor` (reglas por ruta, por IP o por usuario); desactivado en tests (`app.rate-limit.enabled`).
+- Producción: Caddy (`frontend/Caddyfile`) sirve la SPA, hace proxy de `/api`, `/oauth2`, `/login/oauth2` y pone HTTPS y la CSP.
+  Si se añaden orígenes externos (imágenes, scripts…), hay que permitirlos en la CSP.
 - Usuario actual en controladores: `@CurrentUserId UUID userId` (meta-anotación de `@AuthenticationPrincipal`).
 - Invitaciones: QR (qrcode.react) con el enlace `/unirse/:codigo` + botón "Compartir enlace"; en "Mis listas" se puede pegar el enlace (`extractInviteCode`).
 - Autorización de listas SIEMPRE con `ListAccessService.requireMember/requireOwner` (404 a no-miembros, 403 a miembros sin permiso).
@@ -93,4 +98,4 @@ Plan completo (esquema de BD, endpoints, seguridad): `~/.claude/plans/estoy-crea
 - [x] 7. Items de la lista
 - [x] 8. Tiempo real con SSE
 - [x] 9. PWA (`vite-plugin-pwa`)
-- [ ] 10. Endurecimiento (rate limiting) y despliegue (Docker + Caddy)
+- [x] 10. Endurecimiento (rate limiting) y despliegue (Docker + Caddy)

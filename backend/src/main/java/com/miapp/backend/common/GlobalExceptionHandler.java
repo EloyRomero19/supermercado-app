@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import com.miapp.backend.ratelimit.TooManyRequestsException;
+
 /**
  * Convierte las excepciones en respuestas ProblemDetail (RFC 9457):
  * {@code {"status": 409, "title": "Conflict", "detail": "...", "instance": "/api/..."}}.
@@ -27,6 +29,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	@ExceptionHandler(ApiException.class)
 	ProblemDetail handleApiException(ApiException ex) {
 		return ProblemDetail.forStatusAndDetail(ex.getStatus(), ex.getMessage());
+	}
+
+	/** 429 con la cabecera estándar Retry-After (segundos que hay que esperar). */
+	@ExceptionHandler(TooManyRequestsException.class)
+	ResponseEntity<ProblemDetail> handleTooManyRequests(TooManyRequestsException ex) {
+		return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+			.header(HttpHeaders.RETRY_AFTER, String.valueOf(ex.getRetryAfterSeconds()))
+			.body(ProblemDetail.forStatusAndDetail(HttpStatus.TOO_MANY_REQUESTS, ex.getMessage()));
 	}
 
 	/** Dos personas modificaron lo mismo a la vez (ver @Version en ListItem): gana la primera. */

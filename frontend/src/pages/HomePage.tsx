@@ -117,6 +117,10 @@ export function HomePage() {
         </form>
 
         <InstallCard />
+
+        <p className="muted small center">
+          <Link to="/privacidad">Privacidad</Link>
+        </p>
       </main>
     </div>
   )

@@ -1,0 +1,36 @@
+# Caddy: servidor web de producción. Con un dominio real obtiene y renueva solo el certificado
+# HTTPS (Let's Encrypt). Con DOMAIN=localhost usa un certificado local de prueba.
+{$DOMAIN} {
+	encode zstd gzip
+
+	header {
+		# Obliga a usar HTTPS durante un año (el navegador no volverá a probar con http)
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		# CSP: el navegador solo ejecuta scripts y estilos de nuestro dominio. Si alguien lograra
+		# inyectar HTML (XSS), su <script> no se ejecutaría. Las fotos de Google son la excepción.
+		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: https://*.googleusercontent.com; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		-Server
+	}
+
+	# API (incluido el tiempo real SSE, que Caddy reenvía sin almacenar) y login con Google
+	@backend path /api/* /oauth2/* /login/oauth2/*
+	handle @backend {
+		reverse_proxy backend:8080
+	}
+
+	# Todo lo demás es la web (SPA): si el archivo no existe, index.html y React Router decide
+	handle {
+		root * /srv
+		# Los archivos de /assets llevan un hash en el nombre: se pueden cachear para siempre.
+		# El resto (index.html, sw.js, manifiesto) se revalida siempre para recibir las nuevas versiones.
+		@immutable path /assets/*
+		header @immutable Cache-Control "public, max-age=31536000, immutable"
+		@revalidate not path /assets/*
+		header @revalidate Cache-Control "no-cache"
+		try_files {path} /index.html
+		file_server
+	}
+}

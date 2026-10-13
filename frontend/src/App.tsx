@@ -6,6 +6,7 @@ import { HomePage } from './pages/HomePage'
 import { JoinPage } from './pages/JoinPage'
 import { ListPage } from './pages/ListPage'
 import { LoginPage } from './pages/LoginPage'
+import { PrivacyPage } from './pages/PrivacyPage'
 import { RegisterPage } from './pages/RegisterPage'
 import { UpdatePrompt } from './pwa/UpdatePrompt'
 
@@ -24,6 +25,7 @@ function App() {
             <Route path="registro" element={<RegisterPage />} />
           </Route>
           <Route path="auth/callback" element={<AuthCallbackPage />} />
+          <Route path="privacidad" element={<PrivacyPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>

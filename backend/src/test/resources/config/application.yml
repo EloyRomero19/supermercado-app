@@ -13,5 +13,7 @@ spring:
             client-secret: test-client-secret
 
 app:
+  rate-limit:
+    enabled: false  # los tests registran cientos de usuarios desde la misma IP
   auth:
     jwt-secret: mEz0mXobCEt4ZvAARRNJ6fkp7mZoxdCjzTElje4luNt7WTsj2kfTFZCCvGzHIt7P
