@@ -206,3 +206,35 @@ a {
   border: 0;
   cursor: pointer;
 }
+
+.button-google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  text-decoration: none;
+}
+
+.button.button-google:hover {
+  background: var(--bg);
+}
+
+/* Texto centrado entre dos líneas: ——— o con tu email ——— */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  border-top: 1px solid var(--border);
+}

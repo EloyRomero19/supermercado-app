@@ -7,6 +7,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -20,9 +21,35 @@ import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.context.RequestAttributeSecurityContextRepository;
 
 @Configuration
 class SecurityConfig {
+
+	/**
+	 * Login con Google (OAuth2 / OpenID Connect, "authorization code flow"):
+	 * 1. GET /oauth2/authorization/google → Spring guarda un "state" aleatorio en la sesión y redirige a Google.
+	 * 2. El usuario acepta y Google vuelve a /login/oauth2/code/google?code=...&state=...
+	 * 3. Spring comprueba el state (anti-CSRF), cambia el code por un ID token y valida su firma.
+	 * 4. GoogleLoginSuccessHandler crea/enlaza la cuenta y deja la cookie de refresh.
+	 * Es la única parte que usa sesión HTTP, y solo durante esos segundos.
+	 * Order(1): para estas rutas se evalúa antes que la cadena de la API.
+	 */
+	@Bean
+	@Order(1)
+	SecurityFilterChain googleLoginSecurity(HttpSecurity http, GoogleLoginSuccessHandler successHandler,
+			AuthProperties props) throws Exception {
+		http
+			.securityMatcher("/oauth2/**", "/login/oauth2/**")
+			.authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+			// No guardar el usuario autenticado en la sesión: después del login, la API va por JWT
+			.securityContext(context -> context.securityContextRepository(new RequestAttributeSecurityContextRepository()))
+			.oauth2Login(oauth2 -> oauth2
+				.successHandler(successHandler)
+				// Error de Google o el usuario canceló: vuelta al login del frontend con un aviso
+				.failureHandler((request, response, ex) -> response.sendRedirect(props.frontendUrl() + "/login?error=google")));
+		return http.build();
+	}
 
 	/**
 	 * API sin estado: cada petición se autentica con "Authorization: Bearer <jwt>".
@@ -32,6 +59,7 @@ class SecurityConfig {
 	 *   (Los endpoints que usan la cookie de refresh se protegen aparte en AuthController.)
 	 */
 	@Bean
+	@Order(2)
 	SecurityFilterChain apiSecurity(HttpSecurity http) throws Exception {
 		http
 			.csrf(csrf -> csrf.disable())

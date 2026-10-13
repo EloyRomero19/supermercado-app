@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useLocation } from 'react-router'
 import { useAuth } from '../auth/useAuth'
 import { FormField } from '../components/FormField'
+import { GoogleButton } from '../components/GoogleButton'
 import { useSubmit } from '../components/useSubmit'
 
 export function RegisterPage() {
@@ -18,6 +19,8 @@ export function RegisterPage() {
       <form className="card" onSubmit={onSubmit}>
         <h2>Crear cuenta</h2>
         {error && <p className="alert" role="alert">{error}</p>}
+        <GoogleButton />
+        <p className="divider">o con tu email</p>
         <FormField
           label="Nombre"
           autoComplete="name"

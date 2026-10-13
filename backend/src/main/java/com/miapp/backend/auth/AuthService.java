@@ -28,16 +28,18 @@ class AuthService {
 	private final PasswordEncoder passwordEncoder;
 	private final AccessTokenService accessTokens;
 	private final RefreshTokenService refreshTokens;
+	private final GoogleAccountService googleAccounts;
 
 	/** Hash de una contraseña cualquiera, para comparar contra algo cuando el email no existe. */
 	private final String dummyPasswordHash;
 
 	AuthService(UserRepository users, PasswordEncoder passwordEncoder, AccessTokenService accessTokens,
-			RefreshTokenService refreshTokens) {
+			RefreshTokenService refreshTokens, GoogleAccountService googleAccounts) {
 		this.users = users;
 		this.passwordEncoder = passwordEncoder;
 		this.accessTokens = accessTokens;
 		this.refreshTokens = refreshTokens;
+		this.googleAccounts = googleAccounts;
 		this.dummyPasswordHash = passwordEncoder.encode(UUID.randomUUID().toString());
 	}
 
@@ -78,6 +80,11 @@ class AuthService {
 			throw new ApiException(HttpStatus.UNAUTHORIZED, "Email o contraseña incorrectos");
 		}
 		return startSession(user, UUID.randomUUID());
+	}
+
+	@Transactional
+	AuthResult loginWithGoogle(GoogleProfile profile) {
+		return startSession(googleAccounts.findOrCreate(profile), UUID.randomUUID());
 	}
 
 	/**

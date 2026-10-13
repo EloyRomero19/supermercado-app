@@ -27,6 +27,7 @@ docker compose down               # parar (añadir -v borra los datos)
 
 cd backend && ./mvnw spring-boot:run
 cd backend && ./mvnw test        # necesita Docker (Testcontainers arranca su propio Postgres)
+                                  # config de tests: backend/src/test/resources/config/application.yml (no usa .env)
 
 cd frontend && npm run dev        # http://localhost:5173
 cd frontend && npm run build
@@ -56,7 +57,9 @@ cd frontend && npm test          # Vitest
 - Contraseñas con BCrypt (8–72 bytes). Login con mensaje genérico de error.
 - Access token JWT (HS256, 15 min) **solo en memoria** en el frontend; nunca en `localStorage`.
 - Refresh token opaco en cookie `HttpOnly; Secure; SameSite=Strict; Path=/api/auth`, guardado en BD como SHA-256, con rotación y revocación de familia si se reutiliza.
-- Login con Google por el flujo OAuth2 del backend; el JWT nunca viaja en la URL.
+- Login con Google por el flujo OAuth2 del backend (cadena `@Order(1)` en `/oauth2/**` y `/login/oauth2/**`, única con sesión);
+  el JWT nunca viaja en la URL. Se enlaza con una cuenta existente solo si Google verifica el email, y entonces se anula la contraseña.
+- En `.env`, una variable vacía (`VAR=`) anula el valor por defecto `${VAR:def}`: comentar las que no se usen.
 - Toda operación sobre una lista comprueba pertenencia en el servicio (`requireMember` / `requireOwner`).
   A un no-miembro se le responde **404**. Los items se buscan siempre por `(listId, itemId)`.
 - SSE autenticado con `Authorization: Bearer` (cliente `@microsoft/fetch-event-source`).
@@ -68,7 +71,7 @@ Plan completo (esquema de BD, endpoints, seguridad): `~/.claude/plans/estoy-crea
 - [x] 1. Base backend: configuración (`.env` importado), Flyway V1 (usuarios y tokens), Testcontainers, proxy Vite
 - [x] 2. Auth email/contraseña + JWT (añadir `spring-boot-starter-security-oauth2-resource-server`), errores `ProblemDetail`
 - [x] 3. Frontend base: router, `AuthContext`, cliente API, login/registro
-- [ ] 4. Login con Google
+- [x] 4. Login con Google
 - [ ] 5. Catálogo y buscador (`pg_trgm` + `unaccent`)
 - [ ] 6. Listas, miembros e invitaciones
 - [ ] 7. Items de la lista

@@ -1,0 +1,17 @@
+# Configuración solo para tests. Spring carga classpath:/config/application.yml además de
+# application.yml, con más prioridad, así que estos valores sustituyen a los de main.
+# Así los tests no dependen del .env de cada desarrollador (ni de que exista, como en CI).
+spring:
+  datasource:
+    password: no-se-usa  # Testcontainers (@ServiceConnection) pone la conexión real
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: test-client-id
+            client-secret: test-client-secret
+
+app:
+  auth:
+    jwt-secret: mEz0mXobCEt4ZvAARRNJ6fkp7mZoxdCjzTElje4luNt7WTsj2kfTFZCCvGzHIt7P

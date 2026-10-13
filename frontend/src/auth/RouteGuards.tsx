@@ -1,4 +1,5 @@
 import { Navigate, Outlet, useLocation, type Location } from 'react-router'
+import { LoadingScreen } from '../components/LoadingScreen'
 import { useAuth } from './useAuth'
 
 /** Rutas que requieren sesión: si no la hay, manda a /login recordando a dónde iba. */
@@ -20,12 +21,4 @@ export function GuestOnly() {
   if (status === 'loading') return <LoadingScreen />
   if (status === 'authenticated') return <Navigate to={from} replace />
   return <Outlet />
-}
-
-function LoadingScreen() {
-  return (
-    <main className="center-screen" aria-busy="true">
-      <p className="muted">Cargando…</p>
-    </main>
-  )
 }

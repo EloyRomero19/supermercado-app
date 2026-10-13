@@ -50,4 +50,11 @@ public class AppUser {
 		this.passwordHash = passwordHash;
 	}
 
+	public static AppUser fromGoogle(String email, String displayName, String googleSub, String avatarUrl) {
+		AppUser user = new AppUser(email, displayName, null);
+		user.googleSub = googleSub;
+		user.avatarUrl = avatarUrl;
+		return user;
+	}
+
 }
