@@ -1,0 +1,27 @@
+# Infraestructura local de desarrollo.
+# Uso: cp .env.example .env  (rellena POSTGRES_PASSWORD)  &&  docker compose up -d
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: supermercado-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-supermercado}
+      POSTGRES_USER: ${POSTGRES_USER:-supermercado}
+      # ":?" hace que compose falle con este mensaje si la variable no está definida
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD en .env}
+    ports:
+      # Solo accesible desde tu máquina (no desde la red local)
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      # Desde PostgreSQL 18 el volumen se monta en /var/lib/postgresql (no en .../data)
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      # "$$" escapa el "$" para que la variable la expanda el contenedor, no compose
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:
