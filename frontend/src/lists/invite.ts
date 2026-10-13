@@ -1,8 +1,3 @@
-/** "K7MX4QPA" → "K7MX-4QPA": más fácil de leer y dictar. El backend acepta ambos formatos. */
-export function formatInviteCode(code: string): string {
-  return `${code.slice(0, 4)}-${code.slice(4)}`
-}
-
 export function inviteUrl(code: string): string {
   return `${window.location.origin}/unirse/${code}`
 }

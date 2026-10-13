@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { ApiError } from '../api/client'
-import { createList, getMyLists, joinList } from '../api/lists'
+import { createList, getMyLists } from '../api/lists'
 import type { ListSummary } from '../api/types'
 import { useAuth } from '../auth/useAuth'
 import { useSubmit } from '../components/useSubmit'
@@ -12,7 +12,6 @@ export function HomePage() {
   const [lists, setLists] = useState<ListSummary[] | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [newName, setNewName] = useState('')
-  const [code, setCode] = useState('')
 
   useEffect(() => {
     // "ignore" evita guardar una respuesta si el componente ya se desmontó (o en el doble efecto de StrictMode)
@@ -27,11 +26,6 @@ export function HomePage() {
 
   const create = useSubmit(async () => {
     const list = await createList(newName)
-    navigate(`/listas/${list.id}`)
-  })
-
-  const join = useSubmit(async () => {
-    const list = await joinList(code)
     navigate(`/listas/${list.id}`)
   })
 
@@ -52,7 +46,7 @@ export function HomePage() {
         {lists === null && !loadError && <p className="muted">Cargando…</p>}
         {lists?.length === 0 && (
           <section className="card empty">
-            <p className="muted">Todavía no tienes listas. Crea una o únete con un código.</p>
+            <p className="muted">Todavía no tienes listas. Crea una, o escanea el QR de la lista de otra persona para unirte.</p>
           </section>
         )}
         {lists && lists.length > 0 && (
@@ -85,26 +79,6 @@ export function HomePage() {
             />
             <button type="submit" className="button" disabled={create.submitting}>
               Crear
-            </button>
-          </div>
-        </form>
-
-        <form className="card" onSubmit={join.onSubmit}>
-          <h2>Unirse a una lista</h2>
-          {join.error && <p className="alert" role="alert">{join.fieldErrors.code ?? join.error}</p>}
-          <div className="inline-form">
-            <input
-              aria-label="Código de invitación"
-              placeholder="K7MX-4QPA"
-              required
-              maxLength={20}
-              autoCapitalize="characters"
-              autoComplete="off"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-            />
-            <button type="submit" className="button" disabled={join.submitting}>
-              Unirse
             </button>
           </div>
         </form>

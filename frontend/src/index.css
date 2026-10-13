@@ -419,13 +419,12 @@ button.search-result:hover {
   border-radius: 8px;
 }
 
-.invite-code {
-  margin: 0;
-  font-family: ui-monospace, Consolas, monospace;
-  font-size: 1.6rem;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  text-align: center;
+.invite-qr {
+  align-self: center;
+  padding: 8px;
+  line-height: 0; /* sin hueco extra bajo el SVG */
+  background: #ffffff;
+  border-radius: var(--radius);
 }
 
 .members {

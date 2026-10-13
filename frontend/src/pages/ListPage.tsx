@@ -1,3 +1,4 @@
+import { QRCodeSVG } from 'qrcode.react'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { ApiError } from '../api/client'
@@ -9,7 +10,7 @@ import { LoadingScreen } from '../components/LoadingScreen'
 import { ProductSearch } from '../components/ProductSearch'
 import { ItemList } from '../items/ItemList'
 import { sortItems } from '../items/sortItems'
-import { formatInviteCode, shareInvite } from '../lists/invite'
+import { inviteUrl, shareInvite } from '../lists/invite'
 
 type LoadState =
   | { status: 'loading' }
@@ -130,7 +131,7 @@ export function ListPage() {
 
   const newCode = () =>
     run(async () => {
-      if (!window.confirm('Se generará un código nuevo y el actual dejará de funcionar. ¿Continuar?')) return
+      if (!window.confirm('Se generará un QR nuevo y el QR y el enlace actuales dejarán de funcionar. ¿Continuar?')) return
       const { inviteCode } = await regenerateInviteCode(list.id)
       setList({ ...list, inviteCode })
     })
@@ -200,17 +201,28 @@ export function ListPage() {
 
         <section className="card">
           <h2>Invitar</h2>
-          <p className="muted">Comparte el enlace o el código con quien quieras que use esta lista.</p>
-          <p className="invite-code" aria-label="Código de invitación">
-            {formatInviteCode(list.inviteCode)}
+          <p className="muted">
+            Quien esté contigo puede escanear el QR con la cámara del móvil. A quien no, envíale el enlace.
           </p>
+          {/* El QR contiene el enlace de invitación. Fondo blanco siempre (también en modo oscuro):
+              muchos lectores no reconocen un QR con los colores invertidos. */}
+          <div className="invite-qr">
+            <QRCodeSVG
+              value={inviteUrl(list.inviteCode)}
+              size={208}
+              marginSize={2}
+              bgColor="#ffffff"
+              fgColor="#000000"
+              title={`Código QR para unirse a «${list.name}»`}
+            />
+          </div>
           <div className="actions">
             <button type="button" className="button" onClick={share}>
               Compartir enlace
             </button>
             {isOwner && (
               <button type="button" className="button button-secondary" onClick={newCode}>
-                Nuevo código
+                Generar QR nuevo
               </button>
             )}
           </div>

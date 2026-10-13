@@ -44,6 +44,7 @@ cd frontend && npm test          # Vitest
   primero por inicio de palabra; si no hay resultados, por similitud (`pg_trgm`, umbral 0.4 con `SET LOCAL`).
 - Tests: `@SpringBootTest` + `@Import(TestcontainersConfiguration.class)`; `TestUsers.registerAndGetBearer(mvc)` para peticiones autenticadas.
 - Usuario actual en controladores: `@CurrentUserId UUID userId` (meta-anotación de `@AuthenticationPrincipal`).
+- Invitaciones: QR (qrcode.react) con el enlace `/unirse/:codigo` + botón "Compartir enlace"; no hay campo para escribir el código.
 - Autorización de listas SIEMPRE con `ListAccessService.requireMember/requireOwner` (404 a no-miembros, 403 a miembros sin permiso).
 - Entidades con clave asignada por nosotros (p. ej. `ListMember`) implementan `Persistable` para que `save()` haga INSERT y no merge.
 - Items siempre por `(listId, itemId)` (`findByIdAndListId`) para evitar IDOR. `ListItem` usa `@Version` (409 si hay edición concurrente).
