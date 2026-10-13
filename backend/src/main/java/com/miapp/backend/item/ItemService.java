@@ -1,0 +1,121 @@
+package com.miapp.backend.item;
+
+import java.text.Collator;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.miapp.backend.common.ApiException;
+import com.miapp.backend.list.ListAccessService;
+import com.miapp.backend.list.ListMember;
+import com.miapp.backend.product.Product;
+import com.miapp.backend.product.ProductRepository;
+
+import lombok.RequiredArgsConstructor;
+
+@Service
+@RequiredArgsConstructor
+public class ItemService {
+
+	// Collator ordena como un diccionario español: "ñ" va después de "n", las tildes no descolocan
+	private static final Collator SPANISH = Collator.getInstance(Locale.forLanguageTag("es"));
+
+	/** Orden del supermercado: por sección (los escritos a mano al final) y luego alfabético. */
+	private static final Comparator<ItemDto> STORE_ORDER = Comparator
+		.comparing(ItemDto::categoryOrder, Comparator.nullsLast(Comparator.naturalOrder()))
+		.thenComparing(ItemDto::name, SPANISH);
+
+	private final ListItemRepository items;
+	private final ListAccessService access;
+	private final ProductRepository products;
+
+	@Transactional(readOnly = true)
+	public List<ItemDto> list(UUID listId, UUID userId) {
+		access.requireMember(listId, userId);
+		return items.findAllForList(listId).stream().map(ItemDto::from).sorted(STORE_ORDER).toList();
+	}
+
+	/** Si ya hay uno igual pendiente de coger, suma la cantidad en vez de duplicarlo. */
+	@Transactional
+	public ItemDto add(UUID listId, UUID userId, ItemRequests.Add request) {
+		ListMember me = access.requireMember(listId, userId);
+		String customName = blankToNull(request.customName());
+		if ((request.productId() == null) == (customName == null)) {
+			throw new ApiException(HttpStatus.BAD_REQUEST, "Elige un producto del catálogo o escribe un nombre");
+		}
+		int quantity = request.quantity() != null ? request.quantity() : 1;
+		String note = blankToNull(request.note());
+
+		Product product = null;
+		Optional<ListItem> existing;
+		if (request.productId() != null) {
+			product = products.findById(request.productId())
+				.orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "Ese producto no existe en el catálogo"));
+			existing = items.findFirstByListIdAndProductIdAndCheckedFalse(listId, product.getId());
+		}
+		else {
+			existing = items.findUncheckedCustom(listId, customName);
+		}
+
+		if (existing.isPresent()) {
+			ListItem item = existing.get();
+			item.addQuantity(quantity);
+			if (note != null) {
+				item.setNote(note);
+			}
+			return ItemDto.from(item);
+		}
+		ListItem item = new ListItem(me.getList(), product, customName, (short) quantity, note, me.getUser());
+		return ItemDto.from(items.saveAndFlush(item)); // flush: rellena createdAt antes de construir el DTO
+	}
+
+	@Transactional
+	public ItemDto update(UUID listId, UUID itemId, UUID userId, ItemRequests.Update request) {
+		ListMember me = access.requireMember(listId, userId);
+		ListItem item = findItem(listId, itemId);
+		if (request.checked() != null) {
+			if (request.checked()) {
+				item.check(me.getUser());
+			}
+			else {
+				item.uncheck();
+			}
+		}
+		if (request.quantity() != null) {
+			item.setQuantity(request.quantity().shortValue());
+		}
+		if (request.note() != null) {
+			item.setNote(blankToNull(request.note()));
+		}
+		return ItemDto.from(item);
+	}
+
+	@Transactional
+	public void remove(UUID listId, UUID itemId, UUID userId) {
+		access.requireMember(listId, userId);
+		items.delete(findItem(listId, itemId));
+	}
+
+	/** "Vaciar el carro": borra los ya cogidos. Devuelve cuántos se borraron. */
+	@Transactional
+	public int clearChecked(UUID listId, UUID userId) {
+		access.requireMember(listId, userId);
+		return items.deleteChecked(listId);
+	}
+
+	private ListItem findItem(UUID listId, UUID itemId) {
+		return items.findByIdAndListId(itemId, listId)
+			.orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Ese producto ya no está en la lista"));
+	}
+
+	private static String blankToNull(String text) {
+		return text == null || text.isBlank() ? null : text.trim();
+	}
+
+}

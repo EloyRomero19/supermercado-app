@@ -463,3 +463,120 @@ button.search-result:hover {
   border-radius: 50%;
   object-fit: cover;
 }
+
+/* --- Productos de la lista --- */
+
+.item-group {
+  gap: 0.25rem;
+  padding: 1rem 1.25rem;
+}
+
+.item-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.item-group-title {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.items {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.item:last-child {
+  border-bottom: 0;
+}
+
+.item-main {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+  min-height: 52px;
+  cursor: pointer;
+}
+
+.item-checkbox {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.item-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.item-name {
+  overflow-wrap: anywhere;
+}
+
+.item-quantity {
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.item-note {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.item-checked .item-name {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+.item-actions {
+  display: flex;
+  flex-shrink: 0;
+}
+
+.icon-button {
+  width: 36px;
+  height: 36px;
+  font: inherit;
+  font-size: 1.1rem;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.icon-button:hover:not(:disabled) {
+  color: var(--text);
+  background: var(--bg);
+}
+
+.icon-button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.icon-button.danger:hover {
+  color: var(--danger);
+}
+
+.search-result-custom {
+  color: var(--accent);
+}

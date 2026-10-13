@@ -1,16 +1,19 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { ApiError } from '../api/client'
+import { addItem, clearCheckedItems, deleteItem, getItems, updateItem, type NewItem } from '../api/items'
 import { deleteList, getList, regenerateInviteCode, removeMember, renameList } from '../api/lists'
-import type { ListDetail, Member } from '../api/types'
+import type { Item, ListDetail, Member } from '../api/types'
 import { useAuth } from '../auth/useAuth'
 import { LoadingScreen } from '../components/LoadingScreen'
 import { ProductSearch } from '../components/ProductSearch'
+import { ItemList } from '../items/ItemList'
+import { sortItems } from '../items/sortItems'
 import { formatInviteCode, shareInvite } from '../lists/invite'
 
 type LoadState =
   | { status: 'loading' }
-  | { status: 'ready'; list: ListDetail }
+  | { status: 'ready'; list: ListDetail; items: Item[] }
   | { status: 'error'; message: string }
 
 export function ListPage() {
@@ -23,8 +26,9 @@ export function ListPage() {
 
   useEffect(() => {
     let ignore = false
-    getList(listId)
-      .then((list) => !ignore && setState({ status: 'ready', list }))
+    // Las dos peticiones a la vez, no una detrás de otra
+    Promise.all([getList(listId), getItems(listId)])
+      .then(([list, items]) => !ignore && setState({ status: 'ready', list, items }))
       .catch((error: unknown) => {
         if (ignore) return
         const message =
@@ -50,10 +54,17 @@ export function ListPage() {
     )
   }
 
-  const { list } = state
+  const { list, items } = state
   const isOwner = list.myRole === 'OWNER'
   const others = list.members.filter((member) => member.userId !== user?.id)
-  const setList = (updated: ListDetail) => setState({ status: 'ready', list: updated })
+
+  // Actualizaciones con función (prev => ...): parten del estado más reciente aunque varias
+  // respuestas lleguen seguidas, en vez de una copia que podría estar ya desfasada.
+  const setList = (updated: ListDetail) =>
+    setState((prev) => (prev.status === 'ready' ? { ...prev, list: updated } : prev))
+  const setItems = (update: (items: Item[]) => Item[]) =>
+    setState((prev) => (prev.status === 'ready' ? { ...prev, items: sortItems(update(prev.items)) } : prev))
+  const upsertItem = (item: Item) => setItems((current) => [...current.filter((i) => i.id !== item.id), item])
 
   /** Ejecuta una acción mostrando su error, si lo hay, encima de la página. */
   async function run(action: () => Promise<void>) {
@@ -65,6 +76,45 @@ export function ListPage() {
       setActionError(error instanceof ApiError ? error.message : 'Ha ocurrido un error')
     }
   }
+
+  const add = (newItem: NewItem) => run(async () => upsertItem(await addItem(list.id, newItem)))
+
+  /**
+   * Actualización optimista: se marca en pantalla al instante, sin esperar al servidor (en el
+   * súper la cobertura suele ser mala). Si la petición falla, se deshace el cambio.
+   */
+  const toggle = (item: Item) =>
+    run(async () => {
+      upsertItem({ ...item, checked: !item.checked, checkedByName: item.checked ? null : (user?.displayName ?? null) })
+      try {
+        upsertItem(await updateItem(list.id, item.id, { checked: !item.checked }))
+      } catch (error) {
+        upsertItem(item)
+        throw error
+      }
+    })
+
+  const changeQuantity = (item: Item, quantity: number) =>
+    run(async () => upsertItem(await updateItem(list.id, item.id, { quantity })))
+
+  const editNote = (item: Item) =>
+    run(async () => {
+      const note = window.prompt(`Nota para «${item.name}» (marca, tamaño…)`, item.note ?? '')
+      if (note !== null) upsertItem(await updateItem(list.id, item.id, { note }))
+    })
+
+  const removeItem = (item: Item) =>
+    run(async () => {
+      await deleteItem(list.id, item.id)
+      setItems((current) => current.filter((i) => i.id !== item.id))
+    })
+
+  const clearCart = () =>
+    run(async () => {
+      if (!window.confirm('¿Quitar de la lista todo lo que ya está en el carro?')) return
+      await clearCheckedItems(list.id)
+      setItems((current) => current.filter((i) => !i.checked))
+    })
 
   const rename = () =>
     run(async () => {
@@ -132,6 +182,23 @@ export function ListPage() {
         {notice && <p className="notice" role="status">{notice}</p>}
 
         <section className="card">
+          <h2>Añadir productos</h2>
+          <ProductSearch
+            onSelect={(product) => add({ productId: product.id })}
+            onAddCustom={(customName) => add({ customName })}
+          />
+        </section>
+
+        <ItemList
+          items={items}
+          onToggle={toggle}
+          onQuantity={changeQuantity}
+          onNote={editNote}
+          onDelete={removeItem}
+          onClearChecked={clearCart}
+        />
+
+        <section className="card">
           <h2>Invitar</h2>
           <p className="muted">Comparte el enlace o el código con quien quieras que use esta lista.</p>
           <p className="invite-code" aria-label="Código de invitación">
@@ -168,11 +235,6 @@ export function ListPage() {
               </li>
             ))}
           </ul>
-        </section>
-
-        <section className="card">
-          <h2>Catálogo</h2>
-          <ProductSearch />
         </section>
 
         <div className="actions">

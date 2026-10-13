@@ -58,3 +58,19 @@ export type ListDetail = {
   myRole: ListRole
   members: Member[]
 }
+
+export type Item = {
+  id: string
+  productId: number | null
+  name: string
+  categoryId: number | null
+  categoryName: string | null
+  categoryOrder: number | null
+  quantity: number
+  note: string | null
+  checked: boolean
+  checkedByName: string | null
+  checkedAt: string | null
+  addedByName: string | null
+  createdAt: string
+}

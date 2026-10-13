@@ -46,6 +46,8 @@ cd frontend && npm test          # Vitest
 - Usuario actual en controladores: `@CurrentUserId UUID userId` (meta-anotación de `@AuthenticationPrincipal`).
 - Autorización de listas SIEMPRE con `ListAccessService.requireMember/requireOwner` (404 a no-miembros, 403 a miembros sin permiso).
 - Entidades con clave asignada por nosotros (p. ej. `ListMember`) implementan `Persistable` para que `save()` haga INSERT y no merge.
+- Items siempre por `(listId, itemId)` (`findByIdAndListId`) para evitar IDOR. `ListItem` usa `@Version` (409 si hay edición concurrente).
+- FKs cuyo nombre no sigue la convención JPA `<campo>_id` necesitan `@JoinColumn(name = ...)` (p. ej. `checked_by`, `added_by`).
 - Eventos de tiempo real publicados con `@TransactionalEventListener(phase = AFTER_COMMIT)`.
 
 ## Convenciones
@@ -80,7 +82,7 @@ Plan completo (esquema de BD, endpoints, seguridad): `~/.claude/plans/estoy-crea
 - [x] 4. Login con Google
 - [x] 5. Catálogo y buscador (`pg_trgm` + `unaccent`)
 - [x] 6. Listas, miembros e invitaciones
-- [ ] 7. Items de la lista
+- [x] 7. Items de la lista
 - [ ] 8. Tiempo real con SSE
 - [ ] 9. PWA (`vite-plugin-pwa`)
 - [ ] 10. Endurecimiento (rate limiting) y despliegue (Docker + Caddy)

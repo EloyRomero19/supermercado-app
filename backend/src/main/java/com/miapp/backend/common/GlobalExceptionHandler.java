@@ -4,9 +4,11 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -25,6 +27,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	@ExceptionHandler(ApiException.class)
 	ProblemDetail handleApiException(ApiException ex) {
 		return ProblemDetail.forStatusAndDetail(ex.getStatus(), ex.getMessage());
+	}
+
+	/** Dos personas modificaron lo mismo a la vez (ver @Version en ListItem): gana la primera. */
+	@ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+	ProblemDetail handleOptimisticLock() {
+		return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT,
+				"Otro miembro acaba de cambiar este producto. Vuelve a intentarlo.");
 	}
 
 	/** Errores de Bean Validation: añade {@code errors: {campo: mensaje}} para que el frontend los pinte. */
