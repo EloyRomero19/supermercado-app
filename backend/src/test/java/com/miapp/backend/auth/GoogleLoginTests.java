@@ -6,6 +6,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -25,6 +27,7 @@ import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.jayway.jsonpath.JsonPath;
 import com.miapp.backend.TestcontainersConfiguration;
@@ -56,9 +59,14 @@ class GoogleLoginTests {
 			.andExpect(status().is3xxRedirection())
 			.andReturn();
 
-		assertThat(result.getResponse().getRedirectedUrl())
+		String location = result.getResponse().getRedirectedUrl();
+		assertThat(location)
 			.startsWith("https://accounts.google.com/o/oauth2/v2/auth")
-			.contains("client_id=", "state=", "scope=openid%20email%20profile", "login/oauth2/code/google");
+			.contains("client_id=", "state=", "scope=openid%20email%20profile");
+		// Debe ser la URL pública del frontend (la registrada en Google), no la del backend
+		String redirectUri = UriComponentsBuilder.fromUriString(location).build().getQueryParams().getFirst("redirect_uri");
+		assertThat(URLDecoder.decode(redirectUri, StandardCharsets.UTF_8))
+			.isEqualTo(props.frontendUrl() + "/login/oauth2/code/google");
 	}
 
 	@Test

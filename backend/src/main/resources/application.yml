@@ -27,6 +27,10 @@ spring:
             client-id: ${GOOGLE_CLIENT_ID:sin-configurar}
             client-secret: ${GOOGLE_CLIENT_SECRET:sin-configurar}
             scope: openid, email, profile
+            # URL a la que Google devuelve al usuario. Debe coincidir EXACTAMENTE con la registrada
+            # en Google Cloud. Por defecto Spring la deduce de la cabecera Host, pero el proxy de
+            # Vite la cambia a localhost:8080; así siempre sale del dominio público del frontend.
+            redirect-uri: ${app.auth.frontend-url}/login/oauth2/code/google
 
   jpa:
     # El esquema lo gestiona Flyway; Hibernate solo comprueba que las entidades encajan.
