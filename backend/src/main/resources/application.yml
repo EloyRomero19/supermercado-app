@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: backend
+
+  config:
+    # Lee el .env de la raíz del monorepo (se ejecuta desde backend/) como si fuera
+    # un .properties. "optional:" evita fallar si no existe (p. ej. en producción,
+    # donde las variables vienen del entorno).
+    import: optional:file:../.env[.properties]
+
+  datasource:
+    url: jdbc:postgresql://localhost:${POSTGRES_PORT:5432}/${POSTGRES_DB:supermercado}
+    username: ${POSTGRES_USER:supermercado}
+    password: ${POSTGRES_PASSWORD}
+
+  jpa:
+    # El esquema lo gestiona Flyway; Hibernate solo comprueba que las entidades encajan.
+    hibernate:
+      ddl-auto: validate
+    # Sin sesión de BD abierta durante toda la petición HTTP: las consultas ocurren en los servicios.
+    open-in-view: false

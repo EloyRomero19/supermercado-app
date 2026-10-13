@@ -8,8 +8,9 @@ PWA para gestionar listas de la compra compartidas entre varios usuarios:
 
 ## Modo de trabajo (importante)
 - El usuario está **aprendiendo**. Claude escribe el código y **explica el porqué** de cada pieza.
-- Pasos pequeños: al terminar cada paso, verificar (arrancar, test, `curl`) y preguntar antes de seguir.
-- No saltarse fases ni adelantar trabajo de fases futuras sin preguntar.
+- Ritmo: una **fase completa por turno** (código + tests + verificación) sin pausas entre sub-pasos.
+  Al final de la fase: resumen de lo hecho y de los conceptos importantes, y preguntar antes de la siguiente.
+- Una rama por fase (`fase-N-descripcion`); no adelantar trabajo de fases futuras sin preguntar.
 - Comunicación en español.
 
 ## Stack
@@ -25,7 +26,7 @@ docker compose ps                 # debe estar "healthy"
 docker compose down               # parar (añadir -v borra los datos)
 
 cd backend && ./mvnw spring-boot:run
-cd backend && ./mvnw test
+cd backend && ./mvnw test        # necesita Docker (Testcontainers arranca su propio Postgres)
 
 cd frontend && npm run dev        # http://localhost:5173
 cd frontend && npm run build
@@ -61,8 +62,8 @@ cd frontend && npm run lint
 Plan completo (esquema de BD, endpoints, seguridad): `~/.claude/plans/estoy-creando-una-pwa-delightful-hejlsberg.md`
 
 - [x] 0. Infraestructura: docker-compose, `.env.example`, este archivo
-- [ ] 1. Base backend: configuración, Flyway V1 (usuarios y tokens), `ProblemDetail`, Testcontainers, proxy Vite
-- [ ] 2. Auth email/contraseña + JWT (añadir `spring-boot-starter-security-oauth2-resource-server`)
+- [x] 1. Base backend: configuración (`.env` importado), Flyway V1 (usuarios y tokens), Testcontainers, proxy Vite
+- [ ] 2. Auth email/contraseña + JWT (añadir `spring-boot-starter-security-oauth2-resource-server`), errores `ProblemDetail`
 - [ ] 3. Frontend base: router, `AuthContext`, cliente API, login/registro
 - [ ] 4. Login con Google
 - [ ] 5. Catálogo y buscador (`pg_trgm` + `unaccent`)
