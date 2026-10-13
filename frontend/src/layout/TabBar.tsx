@@ -1,19 +1,13 @@
 import { Link, useLocation } from 'react-router'
-import { lastListId } from '../lists/lastList'
 
 /** Barra de navegación inferior, como en las apps del móvil: siempre a mano del pulgar. */
 export function TabBar() {
   const { pathname } = useLocation()
-  const lastList = lastListId()
 
   const tabs = [
     { to: '/', label: 'Listas', icon: <ListsIcon />, active: pathname === '/' },
-    {
-      to: lastList ? `/listas/${lastList}` : '/',
-      label: 'Comprar',
-      icon: <CartIcon />,
-      active: pathname.startsWith('/listas/'),
-    },
+    // /comprar decide qué lista abrir (la última usada o la que tenga más pendientes)
+    { to: '/comprar', label: 'Comprar', icon: <CartIcon />, active: pathname.startsWith('/listas/') || pathname === '/comprar' },
     { to: '/ajustes', label: 'Ajustes', icon: <SettingsIcon />, active: pathname === '/ajustes' },
   ]
 

@@ -10,6 +10,7 @@ import { LoginPage } from './pages/LoginPage'
 import { PrivacyPage } from './pages/PrivacyPage'
 import { RegisterPage } from './pages/RegisterPage'
 import { SettingsPage } from './pages/SettingsPage'
+import { ShopPage } from './pages/ShopPage'
 import { UpdatePrompt } from './pwa/UpdatePrompt'
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
             <Route element={<AppLayout />}>
               <Route index element={<HomePage />} />
               <Route path="listas/:listId" element={<ListPage />} />
+              <Route path="comprar" element={<ShopPage />} />
               <Route path="ajustes" element={<SettingsPage />} />
             </Route>
             <Route path="unirse/:code" element={<JoinPage />} />
