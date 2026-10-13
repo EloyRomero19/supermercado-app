@@ -33,7 +33,7 @@ class ProductControllerTests {
 
 	@BeforeEach
 	void login() throws Exception {
-		bearer = TestUsers.registerAndGetBearer(mvc);
+		bearer = TestUsers.register(mvc).bearer();
 	}
 
 	@Test

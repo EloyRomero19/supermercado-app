@@ -9,21 +9,24 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.jayway.jsonpath.JsonPath;
 
-/** Utilidades para tests que necesitan un usuario autenticado. */
+/** Utilidades para tests que necesitan usuarios autenticados. */
 public final class TestUsers {
+
+	/** Usuario registrado: su id y la cabecera "Bearer <token>" lista para usar. */
+	public record TestUser(String id, String bearer) {
+	}
 
 	private TestUsers() {
 	}
 
-	/** Registra un usuario nuevo y devuelve la cabecera "Bearer <token>" lista para usar. */
-	public static String registerAndGetBearer(MockMvc mvc) throws Exception {
+	public static TestUser register(MockMvc mvc) throws Exception {
 		String body = mvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON).content("""
 				{"email": "user-%s@test.com", "password": "contraseña-segura", "displayName": "Test"}
 				""".formatted(UUID.randomUUID())))
 			.andReturn()
 			.getResponse()
 			.getContentAsString();
-		return "Bearer " + JsonPath.read(body, "$.accessToken");
+		return new TestUser(JsonPath.read(body, "$.user.id"), "Bearer " + JsonPath.read(body, "$.accessToken"));
 	}
 
 }

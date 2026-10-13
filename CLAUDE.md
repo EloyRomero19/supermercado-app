@@ -43,6 +43,9 @@ cd frontend && npm test          # Vitest
 - Búsqueda de productos con SQL nativo (`JdbcClient`) sobre `product.search_name` (normalizado como `ProductService.normalize`):
   primero por inicio de palabra; si no hay resultados, por similitud (`pg_trgm`, umbral 0.4 con `SET LOCAL`).
 - Tests: `@SpringBootTest` + `@Import(TestcontainersConfiguration.class)`; `TestUsers.registerAndGetBearer(mvc)` para peticiones autenticadas.
+- Usuario actual en controladores: `@CurrentUserId UUID userId` (meta-anotación de `@AuthenticationPrincipal`).
+- Autorización de listas SIEMPRE con `ListAccessService.requireMember/requireOwner` (404 a no-miembros, 403 a miembros sin permiso).
+- Entidades con clave asignada por nosotros (p. ej. `ListMember`) implementan `Persistable` para que `save()` haga INSERT y no merge.
 - Eventos de tiempo real publicados con `@TransactionalEventListener(phase = AFTER_COMMIT)`.
 
 ## Convenciones
@@ -76,7 +79,7 @@ Plan completo (esquema de BD, endpoints, seguridad): `~/.claude/plans/estoy-crea
 - [x] 3. Frontend base: router, `AuthContext`, cliente API, login/registro
 - [x] 4. Login con Google
 - [x] 5. Catálogo y buscador (`pg_trgm` + `unaccent`)
-- [ ] 6. Listas, miembros e invitaciones
+- [x] 6. Listas, miembros e invitaciones
 - [ ] 7. Items de la lista
 - [ ] 8. Tiempo real con SSE
 - [ ] 9. PWA (`vite-plugin-pwa`)

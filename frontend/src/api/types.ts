@@ -34,3 +34,27 @@ export type Category = {
   name: string
   sortOrder: number
 }
+
+export type ListRole = 'OWNER' | 'MEMBER'
+
+export type ListSummary = {
+  id: string
+  name: string
+  myRole: ListRole
+  memberCount: number
+}
+
+export type Member = {
+  userId: string
+  displayName: string
+  avatarUrl: string | null
+  role: ListRole
+}
+
+export type ListDetail = {
+  id: string
+  name: string
+  inviteCode: string
+  myRole: ListRole
+  members: Member[]
+}
