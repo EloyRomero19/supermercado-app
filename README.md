@@ -10,10 +10,10 @@ secciones del supermercado y cambios en tiempo real entre todos los miembros.
 - Instalable en el móvil (PWA)
 
 <p>
-  <img src="docs/capturas/light-1-login.webp" width="220" alt="Inicio de sesión">
-  <img src="docs/capturas/light-2-home.webp" width="220" alt="Mis listas">
-  <img src="docs/capturas/light-3-lista.webp" width="220" alt="Lista agrupada por secciones">
-  <img src="docs/capturas/dark-3-lista.webp" width="220" alt="Lista en modo oscuro">
+  <img src="docs/capturas/light-1-inicio.webp" width="200" alt="Mis listas">
+  <img src="docs/capturas/light-2-lista.webp" width="200" alt="Productos de la lista en tarjetas">
+  <img src="docs/capturas/light-5-seccion.webp" width="200" alt="Explorar una sección del súper">
+  <img src="docs/capturas/dark-2-lista.webp" width="200" alt="Lista en modo oscuro">
 </p>
 
 **Stack:** Spring Boot 4 · Java 21 · PostgreSQL 18 · React 19 · Vite · TypeScript · Caddy · Docker

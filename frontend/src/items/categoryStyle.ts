@@ -21,7 +21,6 @@ const STYLES: Record<string, CategoryStyle> = {
   'Bebé y mascotas': { icon: '🐾', color: '#d6880f' },
 }
 
-export const OTHER_CATEGORY = 'Otros'
 const OTHER: CategoryStyle = { icon: '📝', color: '#6b7a72' }
 
 export function categoryStyle(categoryName: string | null): CategoryStyle {

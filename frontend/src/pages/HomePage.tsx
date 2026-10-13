@@ -8,10 +8,9 @@ import { Progress } from '../components/Progress'
 import { useSubmit } from '../components/useSubmit'
 import { listColor } from '../items/categoryStyle'
 import { extractInviteCode } from '../lists/invite'
-import { InstallCard } from '../pwa/InstallCard'
 
 export function HomePage() {
-  const { user, logout } = useAuth()
+  const { user } = useAuth()
   const navigate = useNavigate()
   const [lists, setLists] = useState<ListSummary[] | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -51,9 +50,13 @@ export function HomePage() {
             <img src="/favicon.svg" alt="" width="28" height="28" />
             Compra
           </span>
-          <button type="button" className="hero-action" onClick={logout}>
-            Salir
-          </button>
+          <Link to="/ajustes" className="hero-avatar" aria-label="Ajustes">
+            {user?.avatarUrl ? (
+              <img className="avatar" src={user.avatarUrl} alt="" referrerPolicy="no-referrer" />
+            ) : (
+              <span className="avatar">{firstName.charAt(0).toUpperCase()}</span>
+            )}
+          </Link>
         </div>
         <h1>Hola, {firstName} 👋</h1>
         <p className="hero-subtitle">¿Qué toca comprar hoy?</p>
@@ -134,38 +137,38 @@ export function HomePage() {
           </form>
         </details>
 
-        <InstallCard />
-
-        <p className="footer-link">
-          <Link to="/privacidad">Privacidad</Link>
-        </p>
       </main>
     </div>
   )
 }
 
+/** Tarjeta grande y a color de cada lista, con lo que falta por comprar y el progreso. */
 function ListCard({ list, color }: { list: ListSummary; color: string }) {
   const pending = list.itemCount - list.checkedCount
-  const status =
-    list.itemCount === 0 ? 'Vacía' : pending === 0 ? '¡Completada! 🎉' : `${pending} por comprar`
   const people = list.memberCount === 1 ? 'Solo tú' : `${list.memberCount} personas`
 
   return (
     <Link to={`/listas/${list.id}`} className="list-card" style={{ '--tone': color } as CSSProperties}>
-      <span className="list-card-icon" aria-hidden="true">
+      <span className="list-card-emoji" aria-hidden="true">
         🛒
       </span>
-      <span className="list-card-body">
-        <span className="list-card-name">{list.name}</span>
-        <span className="list-card-meta">
-          {status} · {people}
-          {list.myRole === 'OWNER' && ' · tuya'}
+      <span className="list-card-top">
+        <span className="list-card-pending">
+          {list.itemCount === 0 ? (
+            'Vacía'
+          ) : pending === 0 ? (
+            '¡Completada! 🎉'
+          ) : (
+            <>
+              <strong>{pending}</strong> por comprar
+            </>
+          )}
         </span>
-        {list.itemCount > 0 && <Progress done={list.checkedCount} total={list.itemCount} />}
+        {list.myRole === 'OWNER' && <span className="list-card-badge">Tuya</span>}
       </span>
-      <span className="chevron" aria-hidden="true">
-        ›
-      </span>
+      <span className="list-card-name">{list.name}</span>
+      <span className="list-card-meta">👥 {people}</span>
+      {list.itemCount > 0 && <Progress done={list.checkedCount} total={list.itemCount} />}
     </Link>
   )
 }

@@ -3,6 +3,7 @@ package com.miapp.backend.product;
 import java.util.List;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -28,6 +29,11 @@ class ProductController {
 	@GetMapping("/api/categories")
 	List<CategoryDto> categories() {
 		return productService.categories();
+	}
+
+	@GetMapping("/api/categories/{categoryId}/products")
+	List<ProductDto> byCategory(@PathVariable short categoryId) {
+		return productService.byCategory(categoryId);
 	}
 
 }

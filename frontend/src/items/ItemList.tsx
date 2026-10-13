@@ -1,22 +1,27 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { useState, type CSSProperties } from 'react'
 import type { Item } from '../api/types'
 import { ProductIcon } from '../components/ProductIcon'
-import { categoryStyle, OTHER_CATEGORY } from './categoryStyle'
-import { groupByCategory } from './sortItems'
+import { Sheet } from '../components/Sheet'
+import { categoryStyle } from './categoryStyle'
 
 type Props = {
   items: Item[]
   onToggle: (item: Item) => void
   onQuantity: (item: Item, quantity: number) => void
-  onNote: (item: Item) => void
+  onNote: (item: Item, note: string) => void
   onDelete: (item: Item) => void
   onClearChecked: () => void
 }
 
+/** Los productos de la lista como tarjetas grandes, agrupadas por sección del súper. */
 export function ItemList({ items, onToggle, onQuantity, onNote, onDelete, onClearChecked }: Props) {
+  // Se guarda el id (no el objeto): si otro miembro lo cambia en tiempo real, el panel muestra
+  // siempre la versión actual, y si lo borra, el panel se cierra solo
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const editing = items.find((item) => item.id === editingId) ?? null
+
   const pending = items.filter((item) => !item.checked)
   const inCart = items.filter((item) => item.checked)
-  const rowProps = { onToggle, onQuantity, onNote, onDelete }
 
   if (items.length === 0) {
     return (
@@ -25,7 +30,7 @@ export function ItemList({ items, onToggle, onQuantity, onNote, onDelete, onClea
           🛒
         </span>
         <h2>Tu lista está vacía</h2>
-        <p className="muted">Busca arriba lo que necesitas: aparecerá aquí, ordenado por secciones del súper.</p>
+        <p className="muted">Busca arriba o explora las secciones de abajo: lo que añadas aparecerá aquí.</p>
       </section>
     )
   }
@@ -41,27 +46,22 @@ export function ItemList({ items, onToggle, onQuantity, onNote, onDelete, onClea
           <p className="muted">Ya tienes todo lo de la lista.</p>
         </section>
       ) : (
-        groupByCategory(pending).map((group) => {
-          const style = categoryStyle(group.category === OTHER_CATEGORY ? null : group.category)
-          return (
-            <section key={group.category} className="item-group" style={{ '--tone': style.color } as CSSProperties}>
-              <h2 className="group-title">
-                <span aria-hidden="true">{style.icon}</span>
-                {group.category}
-                <span className="group-count">{group.items.length}</span>
-              </h2>
-              <ul className="items">
-                {group.items.map((item) => (
-                  <ItemRow key={item.id} item={item} {...rowProps} />
-                ))}
-              </ul>
-            </section>
-          )
-        })
+        // Una sola cuadrícula, en el orden del súper: el color de cada tarjeta ya indica su sección
+        <section className="tile-group">
+          <h2 className="group-title">
+            Por comprar
+            <span className="group-count">{pending.length}</span>
+          </h2>
+          <ul className="tiles">
+            {pending.map((item) => (
+              <ItemTile key={item.id} item={item} onToggle={onToggle} onMore={() => setEditingId(item.id)} />
+            ))}
+          </ul>
+        </section>
       )}
 
       {inCart.length > 0 && (
-        <section className="item-group item-group-cart">
+        <section className="tile-group tile-group-cart">
           <div className="group-header">
             <h2 className="group-title">
               <span aria-hidden="true">🛒</span>
@@ -72,111 +72,144 @@ export function ItemList({ items, onToggle, onQuantity, onNote, onDelete, onClea
               Vaciar el carro
             </button>
           </div>
-          <ul className="items">
+          <p className="group-hint">Toca un producto para devolverlo a la lista.</p>
+          <ul className="tiles">
             {inCart.map((item) => (
-              <ItemRow key={item.id} item={item} {...rowProps} />
+              <ItemTile key={item.id} item={item} onToggle={onToggle} onMore={() => setEditingId(item.id)} />
             ))}
           </ul>
         </section>
+      )}
+
+      {editing && (
+        <ItemSheet
+          // key: al abrir otro producto, el formulario de la nota empieza de cero
+          key={editing.id}
+          item={editing}
+          onClose={() => setEditingId(null)}
+          onToggle={onToggle}
+          onQuantity={onQuantity}
+          onNote={onNote}
+          onDelete={(item) => {
+            setEditingId(null)
+            onDelete(item)
+          }}
+        />
       )}
     </>
   )
 }
 
-type RowProps = Omit<Props, 'items' | 'onClearChecked'> & { item: Item }
+function ItemTile({ item, onToggle, onMore }: { item: Item; onToggle: (item: Item) => void; onMore: () => void }) {
+  const style = categoryStyle(item.categoryName)
+  const label = `${item.name}${item.quantity > 1 ? `, ${item.quantity} unidades` : ''}`
 
-function ItemRow({ item, onToggle, onQuantity, onNote, onDelete }: RowProps) {
   return (
-    <li className={item.checked ? 'item item-checked' : 'item'}>
-      {/* Toda la fila (icono y nombre incluidos) marca el producto: fácil de acertar con el dedo */}
-      <label className="item-main">
-        <input type="checkbox" className="check" checked={item.checked} onChange={() => onToggle(item)} />
-        <ProductIcon icon={item.icon} categoryName={item.categoryName} />
-        <span className="item-text">
-          <span className="item-name">
-            {item.name}
-            {item.quantity > 1 && <span className="quantity-badge"> ×{item.quantity}</span>}
-          </span>
-          {item.note && <span className="item-note">{item.note}</span>}
-          {item.checked && item.checkedByName && <span className="item-note">✓ {item.checkedByName}</span>}
+    <li className={item.checked ? 'tile tile-checked' : 'tile'} style={{ '--tone': style.color } as CSSProperties}>
+      {/* Toda la tarjeta es el botón: un toque la manda al carro (aria-pressed = "marcada") */}
+      <button type="button" className="tile-main" aria-pressed={item.checked} aria-label={label} onClick={() => onToggle(item)}>
+        <span className="tile-icon" aria-hidden="true">
+          {item.icon ?? style.icon}
         </span>
-      </label>
-
-      <ItemMenu item={item} onQuantity={onQuantity} onNote={onNote} onDelete={onDelete} />
+        <span className="tile-name">{item.name}</span>
+        {item.note && <span className="tile-note">{item.note}</span>}
+      </button>
+      {item.quantity > 1 && <span className="tile-quantity">×{item.quantity}</span>}
+      {item.checked && (
+        <span className="tile-done" aria-hidden="true">
+          ✓
+        </span>
+      )}
+      <button type="button" className="tile-more" aria-label={`Opciones de ${item.name}`} onClick={onMore}>
+        ⋯
+      </button>
     </li>
   )
 }
 
-/**
- * Menú "⋯" con las acciones menos frecuentes (cantidad, nota, quitar). Fuera de la fila, para
- * que el nombre del producto tenga todo el ancho en pantallas pequeñas.
- */
-function ItemMenu({ item, onQuantity, onNote, onDelete }: Pick<RowProps, 'item' | 'onQuantity' | 'onNote' | 'onDelete'>) {
-  const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
+type SheetProps = {
+  item: Item
+  onClose: () => void
+  onToggle: (item: Item) => void
+  onQuantity: (item: Item, quantity: number) => void
+  onNote: (item: Item, note: string) => void
+  onDelete: (item: Item) => void
+}
 
-  // Cerrar al pulsar fuera del menú
-  useEffect(() => {
-    if (!open) return
-    const close = (event: PointerEvent) => {
-      if (!ref.current?.contains(event.target as Node)) setOpen(false)
-    }
-    document.addEventListener('pointerdown', close)
-    return () => document.removeEventListener('pointerdown', close)
-  }, [open])
-
-  const choose = (action: () => void) => () => {
-    setOpen(false)
-    action()
-  }
+/** Panel con todo lo que se puede hacer con un producto. */
+function ItemSheet({ item, onClose, onToggle, onQuantity, onNote, onDelete }: SheetProps) {
+  const [note, setNote] = useState(item.note ?? '')
 
   return (
-    <div className="item-menu" ref={ref}>
-      <button
-        type="button"
-        className="icon-button"
-        aria-label={`Más opciones de ${item.name}`}
-        aria-expanded={open}
-        onClick={() => setOpen((value) => !value)}
-      >
-        ⋯
-      </button>
-      {open && (
-        <div className="menu" role="menu">
-          {!item.checked && (
-            // El selector de cantidad no cierra el menú: se puede pulsar "+" varias veces seguidas
-            <div className="menu-stepper">
-              <span>Cantidad</span>
-              <div className="stepper" role="group" aria-label={`Cantidad de ${item.name}`}>
-                <button
-                  type="button"
-                  aria-label={`Quitar uno de ${item.name}`}
-                  disabled={item.quantity <= 1}
-                  onClick={() => onQuantity(item, item.quantity - 1)}
-                >
-                  −
-                </button>
-                <span aria-live="polite">{item.quantity}</span>
-                <button
-                  type="button"
-                  aria-label={`Añadir uno más de ${item.name}`}
-                  onClick={() => onQuantity(item, item.quantity + 1)}
-                >
-                  +
-                </button>
-              </div>
-            </div>
-          )}
-          {!item.checked && (
-            <button type="button" role="menuitem" onClick={choose(() => onNote(item))}>
-              ✎ {item.note ? 'Editar nota' : 'Añadir nota'}
-            </button>
-          )}
-          <button type="button" role="menuitem" className="danger" onClick={choose(() => onDelete(item))}>
-            🗑 Quitar de la lista
+    <Sheet open onClose={onClose} title={item.name}>
+      <div className="item-sheet-head">
+        <ProductIcon icon={item.icon} categoryName={item.categoryName} size="lg" />
+        <div>
+          <p className="muted">{item.categoryName ?? 'Escrito a mano'}</p>
+          {item.addedByName && <p className="muted small">Lo añadió {item.addedByName}</p>}
+          {item.checked && item.checkedByName && <p className="muted small">✓ Lo cogió {item.checkedByName}</p>}
+        </div>
+      </div>
+
+      <div className="sheet-row">
+        <span className="sheet-label">Cantidad</span>
+        <div className="stepper" role="group" aria-label={`Cantidad de ${item.name}`}>
+          <button
+            type="button"
+            aria-label="Quitar uno"
+            disabled={item.quantity <= 1}
+            onClick={() => onQuantity(item, item.quantity - 1)}
+          >
+            −
+          </button>
+          <span aria-live="polite">{item.quantity}</span>
+          <button type="button" aria-label="Añadir uno más" onClick={() => onQuantity(item, item.quantity + 1)}>
+            +
           </button>
         </div>
-      )}
-    </div>
+      </div>
+
+      <form
+        className="form"
+        onSubmit={(e) => {
+          e.preventDefault()
+          onNote(item, note)
+          onClose()
+        }}
+      >
+        <label className="sheet-label" htmlFor="item-note">
+          Nota
+        </label>
+        <div className="inline-form">
+          <input
+            id="item-note"
+            className="input"
+            placeholder="Marca, tamaño, sin lactosa…"
+            maxLength={200}
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+          />
+          <button type="submit" className="button" disabled={note === (item.note ?? '')}>
+            Guardar
+          </button>
+        </div>
+      </form>
+
+      <div className="actions">
+        <button
+          type="button"
+          className="button button-secondary"
+          onClick={() => {
+            onToggle(item)
+            onClose()
+          }}
+        >
+          {item.checked ? '↩ Devolver a la lista' : '🛒 Al carro'}
+        </button>
+        <button type="button" className="button button-danger" onClick={() => onDelete(item)}>
+          🗑 Quitar
+        </button>
+      </div>
+    </Sheet>
   )
 }

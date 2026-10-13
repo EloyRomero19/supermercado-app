@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import * as authApi from '../api/auth'
 import { onSessionExpired } from '../api/client'
+import { forgetLastList } from '../lists/lastList'
 import type { User } from '../api/types'
 import { AuthContext, type AuthContextValue, type AuthStatus } from './auth-context'
 
@@ -41,6 +42,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
           await authApi.logout()
         } finally {
+          // Si otra persona entra después en este navegador, que "Comprar" no apunte a nuestra lista
+          forgetLastList()
           setSession(null)
         }
       },

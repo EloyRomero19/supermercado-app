@@ -1,6 +1,8 @@
 package com.miapp.backend.product;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.everyItem;
+import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -107,6 +109,22 @@ class ProductControllerTests {
 			.andExpect(jsonPath("$.length()").value(13))
 			.andExpect(jsonPath("$[0].name").value("Frutas y verduras"))
 			.andExpect(jsonPath("$[12].name").value("Bebé y mascotas"));
+	}
+
+	@Test
+	void browseProductsOfACategory() throws Exception {
+		String body = mvc.perform(get("/api/categories").header(HttpHeaders.AUTHORIZATION, bearer))
+			.andReturn().getResponse().getContentAsString();
+		List<Number> ids = JsonPath.read(body, "$[?(@.name == 'Pescadería')].id");
+
+		mvc.perform(get("/api/categories/" + ids.get(0) + "/products").header(HttpHeaders.AUTHORIZATION, bearer))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.length()").value(12))
+			.andExpect(jsonPath("$[0].name").value("Atún fresco")) // alfabético, sin tener en cuenta la tilde
+			.andExpect(jsonPath("$[*].categoryName").value(everyItem(is("Pescadería"))))
+			.andExpect(jsonPath("$[0].icon").isNotEmpty());
+		mvc.perform(get("/api/categories/999/products").header(HttpHeaders.AUTHORIZATION, bearer))
+			.andExpect(jsonPath("$.length()").value(0));
 	}
 
 	private List<String> search(String query) throws Exception {

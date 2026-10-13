@@ -27,6 +27,12 @@ public class ProductService {
 		return byWord.isEmpty() ? searchRepository.findSimilar(normalized, limit) : byWord;
 	}
 
+	/** Lista vacía si la sección no existe: no hay nada secreto que proteger con un 404. */
+	@Transactional(readOnly = true)
+	public List<ProductDto> byCategory(short categoryId) {
+		return searchRepository.findByCategory(categoryId);
+	}
+
 	@Transactional(readOnly = true)
 	public List<CategoryDto> categories() {
 		return categories.findAllByOrderBySortOrder().stream().map(CategoryDto::from).toList();

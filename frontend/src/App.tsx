@@ -1,5 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router'
 import { AuthProvider } from './auth/AuthProvider'
+import { AppLayout } from './layout/AppLayout'
 import { GuestOnly, RequireAuth } from './auth/RouteGuards'
 import { AuthCallbackPage } from './pages/AuthCallbackPage'
 import { HomePage } from './pages/HomePage'
@@ -8,6 +9,7 @@ import { ListPage } from './pages/ListPage'
 import { LoginPage } from './pages/LoginPage'
 import { PrivacyPage } from './pages/PrivacyPage'
 import { RegisterPage } from './pages/RegisterPage'
+import { SettingsPage } from './pages/SettingsPage'
 import { UpdatePrompt } from './pwa/UpdatePrompt'
 
 function App() {
@@ -16,8 +18,12 @@ function App() {
       <AuthProvider>
         <Routes>
           <Route element={<RequireAuth />}>
-            <Route index element={<HomePage />} />
-            <Route path="listas/:listId" element={<ListPage />} />
+            {/* Rutas anidadas: AppLayout pinta la página y debajo la barra de navegación */}
+            <Route element={<AppLayout />}>
+              <Route index element={<HomePage />} />
+              <Route path="listas/:listId" element={<ListPage />} />
+              <Route path="ajustes" element={<SettingsPage />} />
+            </Route>
             <Route path="unirse/:code" element={<JoinPage />} />
           </Route>
           <Route element={<GuestOnly />}>

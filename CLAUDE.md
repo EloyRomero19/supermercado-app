@@ -71,6 +71,8 @@ docker compose -f docker-compose.prod.yml up -d --build   # producción (ver REA
   `src/auth/` (`AuthProvider`, `useAuth`, `RequireAuth`/`GuestOnly`), `src/pages/`, `src/components/`. React Router 8 en modo declarativo.
 - PWA: el service worker NO debe interceptar `/api`, `/oauth2`, `/login/oauth2` (`navigateFallbackDenylist`) ni cachear la API
   (datos privados). Solo se cachea el app shell. Nuevas versiones con aviso (`UpdatePrompt`), no automáticas.
+- Navegación: las páginas con sesión cuelgan de `layout/AppLayout` (barra inferior `TabBar`: Listas, Comprar = última lista, Ajustes).
+  Los productos de la lista se muestran como tarjetas (`items/ItemList`); acciones de un producto en un `Sheet`.
 - Diseño: variables CSS en `src/index.css` (modo oscuro = redefinir variables). Color e icono de cada sección en
   `src/items/categoryStyle.ts`; se aplican con la variable `--tone` y `color-mix()`. Iconos de producto = emoji en `product.icon` (V5).
 - En desarrollo, Vite hace proxy de `/api`, `/oauth2` y `/login/oauth2` a `http://localhost:8080` (mismo origen, sin CORS).

@@ -13,6 +13,8 @@ import { Sheet } from '../components/Sheet'
 import { ItemList } from '../items/ItemList'
 import { sortItems } from '../items/sortItems'
 import { inviteUrl, shareInvite } from '../lists/invite'
+import { rememberLastList } from '../lists/lastList'
+import { CategoryBrowser } from '../products/CategoryBrowser'
 import { applyListEvent } from '../lists/listEvents'
 import { useListEvents, type ConnectionStatus } from '../lists/useListEvents'
 
@@ -50,7 +52,12 @@ export function ListPage() {
 
   useEffect(() => {
     let ignore = false
-    loadList(listId).then((loaded) => !ignore && setState(loaded))
+    loadList(listId).then((loaded) => {
+      if (ignore) return
+      setState(loaded)
+      // Para la pestaña "Comprar" de la barra inferior
+      if (loaded.status === 'ready') rememberLastList(listId)
+    })
     return () => {
       ignore = true
     }
@@ -125,11 +132,8 @@ export function ListPage() {
   const changeQuantity = (item: Item, quantity: number) =>
     run(async () => upsertItem(await updateItem(list.id, item.id, { quantity })))
 
-  const editNote = (item: Item) =>
-    run(async () => {
-      const note = window.prompt(`Nota para «${item.name}» (marca, tamaño…)`, item.note ?? '')
-      if (note !== null) upsertItem(await updateItem(list.id, item.id, { note }))
-    })
+  const editNote = (item: Item, note: string) =>
+    run(async () => upsertItem(await updateItem(list.id, item.id, { note })))
 
   const removeItem = (item: Item) =>
     run(async () => {
@@ -251,6 +255,8 @@ export function ListPage() {
           onDelete={removeItem}
           onClearChecked={clearCart}
         />
+
+        <CategoryBrowser items={items} onAdd={(product) => add({ productId: product.id })} />
       </main>
 
       <Sheet open={shareOpen} onClose={() => setShareOpen(false)} title="Compartir lista">

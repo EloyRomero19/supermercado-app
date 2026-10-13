@@ -41,6 +41,17 @@ class ProductSearchRepository {
 			.list();
 	}
 
+	/** Todos los productos de una sección, en orden alfabético (para "explorar por secciones"). */
+	List<ProductDto> findByCategory(short categoryId) {
+		return jdbc.sql(SELECT_PRODUCT + """
+				WHERE c.id = :categoryId
+				ORDER BY p.search_name
+				""")
+			.param("categoryId", categoryId)
+			.query(ProductDto.class)
+			.list();
+	}
+
 	/**
 	 * Productos parecidos, para erratas: "tomte" → "Tomate".
 	 * word_similarity compara el texto con el trozo más parecido del nombre (0 = nada, 1 = idéntico).

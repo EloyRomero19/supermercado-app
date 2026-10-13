@@ -6,6 +6,10 @@ export function searchProducts(query: string, limit: number, signal?: AbortSigna
   return api<Product[]>(`/api/products?${params}`, { signal })
 }
 
+export function getCategoryProducts(categoryId: number): Promise<Product[]> {
+  return api<Product[]>(`/api/categories/${categoryId}/products`)
+}
+
 export function getCategories(): Promise<Category[]> {
   return api<Category[]>('/api/categories')
 }

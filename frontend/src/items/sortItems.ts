@@ -12,13 +12,3 @@ export function sortItems(items: Item[]): Item[] {
       a.name.localeCompare(b.name, 'es'),
   )
 }
-
-/** Agrupa los pendientes por sección, conservando el orden. */
-export function groupByCategory(items: Item[]): { category: string; items: Item[] }[] {
-  const groups = new Map<string, Item[]>()
-  for (const item of items) {
-    const category = item.categoryName ?? 'Otros'
-    groups.set(category, [...(groups.get(category) ?? []), item])
-  }
-  return [...groups].map(([category, items]) => ({ category, items }))
-}
