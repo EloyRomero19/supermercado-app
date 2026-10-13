@@ -101,7 +101,9 @@ async function send(path: string, init: RequestInit): Promise<Response> {
   try {
     // same-origin: el navegador envía la cookie de refresh (gracias al proxy de Vite somos el mismo origen)
     return await fetch(path, { ...init, headers, credentials: 'same-origin' })
-  } catch {
+  } catch (error) {
+    // Cancelada a propósito con AbortController: no es un fallo de red, se propaga tal cual
+    if (init.signal?.aborted) throw error
     throw new ApiError(0, 'No se pudo conectar con el servidor')
   }
 }

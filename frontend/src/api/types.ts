@@ -21,3 +21,16 @@ export type ProblemDetail = {
   detail?: string
   errors?: Record<string, string>
 }
+
+export type Product = {
+  id: number
+  name: string
+  categoryId: number
+  categoryName: string
+}
+
+export type Category = {
+  id: number
+  name: string
+  sortOrder: number
+}

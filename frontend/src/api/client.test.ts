@@ -88,4 +88,16 @@ describe('api()', () => {
 
     await expect(api('/api/me')).rejects.toThrow('No se pudo conectar con el servidor')
   })
+
+  it('una petición cancelada no se confunde con un fallo de red', async () => {
+    const controller = new AbortController()
+    vi.stubGlobal('fetch', vi.fn(() => {
+      controller.abort()
+      return Promise.reject(new DOMException('Aborted', 'AbortError'))
+    }))
+
+    const error = await api('/api/products?q=le', { signal: controller.signal }).catch((e: unknown) => e)
+    expect(error).not.toBeInstanceOf(ApiError)
+    expect(error).toMatchObject({ name: 'AbortError' })
+  })
 })

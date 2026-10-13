@@ -40,6 +40,9 @@ cd frontend && npm test          # Vitest
 - Capas: `Controller` → `Service` → `Repository`. La lógica y la autorización viven en el servicio.
 - DTOs de entrada/salida como `record` con Bean Validation. **Nunca** se devuelven entidades JPA.
 - Errores con `ProblemDetail` (RFC 9457) desde un `@RestControllerAdvice` en `common`.
+- Búsqueda de productos con SQL nativo (`JdbcClient`) sobre `product.search_name` (normalizado como `ProductService.normalize`):
+  primero por inicio de palabra; si no hay resultados, por similitud (`pg_trgm`, umbral 0.4 con `SET LOCAL`).
+- Tests: `@SpringBootTest` + `@Import(TestcontainersConfiguration.class)`; `TestUsers.registerAndGetBearer(mvc)` para peticiones autenticadas.
 - Eventos de tiempo real publicados con `@TransactionalEventListener(phase = AFTER_COMMIT)`.
 
 ## Convenciones
@@ -72,7 +75,7 @@ Plan completo (esquema de BD, endpoints, seguridad): `~/.claude/plans/estoy-crea
 - [x] 2. Auth email/contraseña + JWT (añadir `spring-boot-starter-security-oauth2-resource-server`), errores `ProblemDetail`
 - [x] 3. Frontend base: router, `AuthContext`, cliente API, login/registro
 - [x] 4. Login con Google
-- [ ] 5. Catálogo y buscador (`pg_trgm` + `unaccent`)
+- [x] 5. Catálogo y buscador (`pg_trgm` + `unaccent`)
 - [ ] 6. Listas, miembros e invitaciones
 - [ ] 7. Items de la lista
 - [ ] 8. Tiempo real con SSE

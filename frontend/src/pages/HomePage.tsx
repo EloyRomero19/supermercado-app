@@ -1,4 +1,5 @@
 import { useAuth } from '../auth/useAuth'
+import { ProductSearch } from '../components/ProductSearch'
 
 export function HomePage() {
   const { user, logout } = useAuth()
@@ -17,6 +18,10 @@ export function HomePage() {
         </p>
         <section className="card empty">
           <p className="muted">Todavía no tienes listas de la compra.</p>
+        </section>
+        <section className="card">
+          <h2>Catálogo</h2>
+          <ProductSearch />
         </section>
       </main>
     </div>
