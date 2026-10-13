@@ -3,10 +3,13 @@ spring:
     name: backend
 
   config:
-    # Lee el .env de la raíz del monorepo (se ejecuta desde backend/) como si fuera
-    # un .properties. "optional:" evita fallar si no existe (p. ej. en producción,
-    # donde las variables vienen del entorno).
-    import: optional:file:../.env[.properties]
+    # Lee el .env de la raíz del monorepo como si fuera un .properties. Las rutas son
+    # relativas a la carpeta desde la que se arranca: "../.env" si es backend/ (mvnw),
+    # ".env" si es la raíz (IntelliJ a veces arranca desde ahí). "optional:" evita fallar
+    # si no existe (p. ej. en producción, donde las variables vienen del entorno).
+    import:
+      - optional:file:../.env[.properties]
+      - optional:file:.env[.properties]
 
   datasource:
     url: jdbc:postgresql://localhost:${POSTGRES_PORT:5432}/${POSTGRES_DB:supermercado}
