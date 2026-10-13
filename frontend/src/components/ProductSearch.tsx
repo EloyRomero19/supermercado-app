@@ -1,6 +1,7 @@
 import { useId, useState } from 'react'
 import type { Product } from '../api/types'
 import { useProductSearch } from '../products/useProductSearch'
+import { ProductIcon } from './ProductIcon'
 
 type Props = {
   /** Si se indica, cada resultado es un botón que llama a esta función. */
@@ -34,7 +35,7 @@ export function ProductSearch({ onSelect, onAddCustom }: Props) {
         id={inputId}
         className="search-input"
         type="search"
-        placeholder="Buscar productos: leche, tomate…"
+        placeholder="¿Qué necesitas? Leche, tomates…"
         autoComplete="off"
         maxLength={onAddCustom ? 120 : 50}
         value={query}
@@ -73,8 +74,14 @@ export function ProductSearch({ onSelect, onAddCustom }: Props) {
           {onAddCustom && text && (
             <li>
               <button type="button" className="search-result search-result-custom" onClick={addCustom}>
-                <span>Añadir «{text}»</span>
-                <span className="category-tag">Texto libre</span>
+                <ProductIcon icon="✏️" categoryName={null} size="sm" />
+                <span className="search-result-text">
+                  <span className="search-result-name">Añadir «{text}»</span>
+                  <span className="search-result-category">Escrito a mano, sin sección</span>
+                </span>
+                <span className="search-result-add" aria-hidden="true">
+                  +
+                </span>
               </button>
             </li>
           )}
@@ -87,8 +94,14 @@ export function ProductSearch({ onSelect, onAddCustom }: Props) {
 function ProductLabel({ product }: { product: Product }) {
   return (
     <>
-      <span>{product.name}</span>
-      <span className="category-tag">{product.categoryName}</span>
+      <ProductIcon icon={product.icon} categoryName={product.categoryName} size="sm" />
+      <span className="search-result-text">
+        <span className="search-result-name">{product.name}</span>
+        <span className="search-result-category">{product.categoryName}</span>
+      </span>
+      <span className="search-result-add" aria-hidden="true">
+        +
+      </span>
     </>
   )
 }

@@ -9,6 +9,13 @@ secciones del supermercado y cambios en tiempo real entre todos los miembros.
 - Marcar productos como cogidos en tiempo real (Server-Sent Events)
 - Instalable en el móvil (PWA)
 
+<p>
+  <img src="docs/capturas/light-1-login.webp" width="220" alt="Inicio de sesión">
+  <img src="docs/capturas/light-2-home.webp" width="220" alt="Mis listas">
+  <img src="docs/capturas/light-3-lista.webp" width="220" alt="Lista agrupada por secciones">
+  <img src="docs/capturas/dark-3-lista.webp" width="220" alt="Lista en modo oscuro">
+</p>
+
 **Stack:** Spring Boot 4 · Java 21 · PostgreSQL 18 · React 19 · Vite · TypeScript · Caddy · Docker
 
 ## Desarrollo local

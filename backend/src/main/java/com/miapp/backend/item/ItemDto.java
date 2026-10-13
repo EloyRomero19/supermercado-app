@@ -5,11 +5,12 @@ import java.util.UUID;
 
 import com.miapp.backend.user.AppUser;
 
-/** categoryId/Name/Order son null en los productos escritos a mano (el frontend los agrupa en "Otros"). */
+/** icon y categoryId/Name/Order son null en los productos escritos a mano (el frontend los agrupa en "Otros"). */
 public record ItemDto(
 		UUID id,
 		Long productId,
 		String name,
+		String icon,
 		Short categoryId,
 		String categoryName,
 		Short categoryOrder,
@@ -25,6 +26,7 @@ public record ItemDto(
 		var product = item.getProduct();
 		var category = product != null ? product.getCategory() : null;
 		return new ItemDto(item.getId(), product != null ? product.getId() : null, item.displayName(),
+				product != null ? product.getIcon() : null,
 				category != null ? category.getId() : null, category != null ? category.getName() : null,
 				category != null ? category.getSortOrder() : null, item.getQuantity(), item.getNote(), item.isChecked(),
 				nameOf(item.getCheckedBy()), item.getCheckedAt(), nameOf(item.getAddedBy()), item.getCreatedAt());

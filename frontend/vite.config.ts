@@ -39,7 +39,8 @@ export default defineConfig({
       },
       workbox: {
         // Se guardan en caché los archivos de la app (el "app shell"): abre al instante y sin red
-        globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
+        // De la tipografía, solo los alfabetos que usamos (el navegador descarga los demás si hicieran falta)
+        globPatterns: ['**/*.{js,css,html,svg,png,ico}', '**/nunito-latin-*.woff2'],
         cleanupOutdatedCaches: true,
         // Al navegar a cualquier ruta (/listas/123…), el service worker sirve index.html y React
         // Router pinta la página. EXCEPTO estas rutas, que deben llegar al backend: si no, el login

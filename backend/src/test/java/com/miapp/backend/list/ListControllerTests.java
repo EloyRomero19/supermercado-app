@@ -182,7 +182,21 @@ class ListControllerTests {
 		as(ana, get("/api/lists"))
 			.andExpect(jsonPath("$[*].name").value(contains("Segunda", "Primera")))
 			.andExpect(jsonPath("$[0].myRole").value("OWNER"))
-			.andExpect(jsonPath("$[0].memberCount").value(1));
+			.andExpect(jsonPath("$[0].memberCount").value(1))
+			.andExpect(jsonPath("$[0].itemCount").value(0));
+	}
+
+	@Test
+	void myListsShowShoppingProgress() throws Exception {
+		String id = (String) createList(ana, "Casa").get("id");
+		String items = "/api/lists/" + id + "/items";
+		String first = JsonPath.read(body(as(ana, post(items), "{\"customName\": \"A\"}")), "$.id");
+		as(ana, post(items), "{\"customName\": \"B\"}");
+		as(ana, patch(items + "/" + first), "{\"checked\": true}");
+
+		as(ana, get("/api/lists"))
+			.andExpect(jsonPath("$[0].itemCount").value(2))
+			.andExpect(jsonPath("$[0].checkedCount").value(1));
 	}
 
 	@Test
@@ -215,6 +229,11 @@ class ListControllerTests {
 			.andExpect(status().isCreated())
 			.andReturn().getResponse().getContentAsString();
 		return JsonPath.read(body, "$");
+	}
+
+
+	private static String body(ResultActions result) throws Exception {
+		return result.andReturn().getResponse().getContentAsString();
 	}
 
 }

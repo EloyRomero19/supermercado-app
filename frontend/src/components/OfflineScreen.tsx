@@ -5,7 +5,7 @@ export function OfflineScreen() {
   const { retry } = useAuth()
   return (
     <main className="center-screen">
-      <div className="card empty">
+      <div className="card empty-state">
         <h2>Sin conexión</h2>
         <p className="muted">No se puede conectar con el servidor. Comprueba tu conexión a internet.</p>
         <button type="button" className="button" onClick={retry}>

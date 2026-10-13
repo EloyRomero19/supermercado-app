@@ -67,6 +67,7 @@ class ItemControllerTests {
 		add(ana, "{\"productId\": %d, \"quantity\": 2, \"note\": \" sin sal \"}".formatted(productId("salmon")))
 			.andExpect(status().isCreated())
 			.andExpect(jsonPath("$.name").value("Salmón"))
+			.andExpect(jsonPath("$.icon").value("🐟"))
 			.andExpect(jsonPath("$.categoryName").value("Pescadería"))
 			.andExpect(jsonPath("$.quantity").value(2))
 			.andExpect(jsonPath("$.note").value("sin sal"))
@@ -101,6 +102,7 @@ class ItemControllerTests {
 		add(ana, "{\"customName\": \"Regalo cumple\"}")
 			.andExpect(status().isCreated())
 			.andExpect(jsonPath("$.productId").value(nullValue()))
+			.andExpect(jsonPath("$.icon").value(nullValue()))
 			.andExpect(jsonPath("$.categoryName").value(nullValue()));
 	}
 

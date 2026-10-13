@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useLocation, useSearchParams } from 'react-router'
 import { useAuth } from '../auth/useAuth'
+import { AuthLayout } from '../components/AuthLayout'
 import { FormField } from '../components/FormField'
 import { GoogleButton } from '../components/GoogleButton'
 import { useSubmit } from '../components/useSubmit'
@@ -22,17 +23,25 @@ export function LoginPage() {
   const { onSubmit, submitting, error, fieldErrors } = useSubmit(() => login(email, password))
 
   return (
-    <main className="auth-page">
-      <h1 className="brand">Lista de la compra</h1>
-      <form className="card" onSubmit={onSubmit}>
-        <h2>Iniciar sesión</h2>
-        {(error ?? googleError) && (
-          <p className="alert" role="alert">
-            {error ?? googleError}
-          </p>
-        )}
-        <GoogleButton />
-        <p className="divider">o con tu email</p>
+    <AuthLayout
+      title="Iniciar sesión"
+      footer={
+        <>
+          ¿No tienes cuenta?{' '}
+          <Link to="/registro" state={location.state}>
+            Regístrate gratis
+          </Link>
+        </>
+      }
+    >
+      {(error ?? googleError) && (
+        <p className="alert" role="alert">
+          {error ?? googleError}
+        </p>
+      )}
+      <GoogleButton />
+      <p className="divider">o con tu email</p>
+      <form className="form" onSubmit={onSubmit}>
         <FormField
           label="Email"
           type="email"
@@ -51,19 +60,10 @@ export function LoginPage() {
           onChange={(e) => setPassword(e.target.value)}
           error={fieldErrors.password}
         />
-        <button type="submit" className="button" disabled={submitting}>
+        <button type="submit" className="button button-block" disabled={submitting}>
           {submitting ? 'Entrando…' : 'Entrar'}
         </button>
       </form>
-      <p className="muted">
-        ¿No tienes cuenta?{' '}
-        <Link to="/registro" state={location.state}>
-          Regístrate
-        </Link>
-      </p>
-      <p className="muted small">
-        <Link to="/privacidad">Privacidad</Link>
-      </p>
-    </main>
+    </AuthLayout>
   )
 }

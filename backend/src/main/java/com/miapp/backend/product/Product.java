@@ -24,6 +24,9 @@ public class Product {
 
 	private String searchName;
 
+	/** Emoji que representa el producto (ver migración V5). */
+	private String icon;
+
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	private Category category;
 

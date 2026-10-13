@@ -25,6 +25,7 @@ export type ProblemDetail = {
 export type Product = {
   id: number
   name: string
+  icon: string
   categoryId: number
   categoryName: string
 }
@@ -42,6 +43,8 @@ export type ListSummary = {
   name: string
   myRole: ListRole
   memberCount: number
+  itemCount: number
+  checkedCount: number
 }
 
 export type Member = {
@@ -63,6 +66,8 @@ export type Item = {
   id: string
   productId: number | null
   name: string
+  /** Emoji del producto; null en los escritos a mano */
+  icon: string | null
   categoryId: number | null
   categoryName: string | null
   categoryOrder: number | null

@@ -7,7 +7,9 @@ import { deleteList, getList, regenerateInviteCode, removeMember, renameList } f
 import type { Item, ListDetail, Member } from '../api/types'
 import { useAuth } from '../auth/useAuth'
 import { LoadingScreen } from '../components/LoadingScreen'
+import { Progress } from '../components/Progress'
 import { ProductSearch } from '../components/ProductSearch'
+import { Sheet } from '../components/Sheet'
 import { ItemList } from '../items/ItemList'
 import { sortItems } from '../items/sortItems'
 import { inviteUrl, shareInvite } from '../lists/invite'
@@ -40,6 +42,7 @@ export function ListPage() {
   const [state, setState] = useState<LoadState>({ status: 'loading' })
   const [notice, setNotice] = useState<string | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
+  const [shareOpen, setShareOpen] = useState(false)
 
   // Mientras salimos o borramos la lista nosotros mismos, ignoramos los eventos: si no, se vería
   // un instante "ya no eres miembro" antes de volver a "Mis listas"
@@ -71,7 +74,7 @@ export function ListPage() {
   if (state.status === 'error') {
     return (
       <main className="center-screen">
-        <div className="card empty">
+        <div className="card empty-state">
           <p>{state.message}</p>
           <Link to="/">Volver a mis listas</Link>
         </div>
@@ -198,29 +201,42 @@ export function ListPage() {
       navigate('/', { replace: true })
     })
 
+  const inCart = items.filter((item) => item.checked).length
+  const messages = (
+    <>
+      {actionError && <p className="alert" role="alert">{actionError}</p>}
+      {notice && <p className="notice" role="status">{notice}</p>}
+    </>
+  )
+
   return (
-    <div className="app">
-      <header className="topbar">
-        <Link to="/" className="link-button" aria-label="Volver a mis listas">
-          ←
-        </Link>
-        <h1 className="topbar-title">{list.name}</h1>
-        {isOwner ? (
-          <button type="button" className="link-button" onClick={rename}>
-            Renombrar
+    <div className="page">
+      <header className="hero hero-list">
+        <div className="hero-top">
+          <Link to="/" className="hero-action hero-back" aria-label="Volver a mis listas">
+            ←
+          </Link>
+          <LiveStatus status={connection} />
+          <button type="button" className="hero-action" onClick={() => setShareOpen(true)}>
+            Compartir
           </button>
-        ) : (
-          <span />
-        )}
+        </div>
+        <h1>{list.name}</h1>
+        <div className="hero-meta">
+          <button type="button" className="avatar-stack" aria-label="Ver miembros" onClick={() => setShareOpen(true)}>
+            {list.members.slice(0, 4).map((member) => (
+              <Avatar key={member.userId} member={member} />
+            ))}
+            {list.members.length > 4 && <span className="avatar avatar-more">+{list.members.length - 4}</span>}
+          </button>
+          {items.length > 0 && <Progress done={inCart} total={items.length} label={`${inCart} de ${items.length} en el carro`} />}
+        </div>
       </header>
 
       <main className="content">
-        <LiveStatus status={connection} />
-        {actionError && <p className="alert" role="alert">{actionError}</p>}
-        {notice && <p className="notice" role="status">{notice}</p>}
+        {messages}
 
-        <section className="card">
-          <h2>Añadir productos</h2>
+        <section className="card search-card">
           <ProductSearch
             onSelect={(product) => add({ productId: product.id })}
             onAddCustom={(customName) => add({ customName })}
@@ -235,59 +251,64 @@ export function ListPage() {
           onDelete={removeItem}
           onClearChecked={clearCart}
         />
+      </main>
 
-        <section className="card">
-          <h2>Invitar</h2>
-          <p className="muted">
-            Quien esté contigo puede escanear el QR con la cámara del móvil. A quien no, envíale el enlace:
-            al abrirlo (o pegarlo en «Unirse con un enlace») entrará en la lista.
-          </p>
+      <Sheet open={shareOpen} onClose={() => setShareOpen(false)} title="Compartir lista">
+        {messages}
+        <div className="share-qr">
           {/* El QR contiene el enlace de invitación. Fondo blanco siempre (también en modo oscuro):
               muchos lectores no reconocen un QR con los colores invertidos. */}
           <div className="invite-qr">
             <QRCodeSVG
               value={inviteUrl(list.inviteCode)}
-              size={208}
+              size={192}
               marginSize={2}
               bgColor="#ffffff"
               fgColor="#000000"
               title={`Código QR para unirse a «${list.name}»`}
             />
           </div>
-          <div className="actions">
-            <button type="button" className="button" onClick={share}>
-              Compartir enlace
-            </button>
-            {isOwner && (
-              <button type="button" className="button button-secondary" onClick={newCode}>
-                Generar QR nuevo
-              </button>
-            )}
-          </div>
-        </section>
-
-        <section className="card">
-          <h2>Miembros ({list.members.length})</h2>
-          <ul className="members">
-            {list.members.map((member) => (
-              <li key={member.userId} className="member">
-                <Avatar member={member} />
-                <span className="member-name">
-                  {member.displayName}
-                  {member.userId === user?.id && <span className="muted"> (tú)</span>}
-                </span>
-                {member.role === 'OWNER' && <span className="category-tag">Propietario</span>}
-                {isOwner && member.userId !== user?.id && (
-                  <button type="button" className="link-button danger" onClick={() => expel(member)}>
-                    Expulsar
-                  </button>
-                )}
-              </li>
-            ))}
-          </ul>
-        </section>
-
+          <p className="muted center">
+            Escanéalo con la cámara del móvil para unirte. A quien no esté contigo, envíale el enlace.
+          </p>
+        </div>
         <div className="actions">
+          <button type="button" className="button" onClick={share}>
+            Compartir enlace
+          </button>
+          {isOwner && (
+            <button type="button" className="button button-secondary" onClick={newCode}>
+              Generar QR nuevo
+            </button>
+          )}
+        </div>
+
+        <h3 className="sheet-section">Miembros ({list.members.length})</h3>
+        <ul className="members">
+          {list.members.map((member) => (
+            <li key={member.userId} className="member">
+              <Avatar member={member} />
+              <span className="member-name">
+                {member.displayName}
+                {member.userId === user?.id && <span className="muted"> (tú)</span>}
+              </span>
+              {member.role === 'OWNER' && <span className="category-tag">Propietario</span>}
+              {isOwner && member.userId !== user?.id && (
+                <button type="button" className="chip-button danger" onClick={() => expel(member)}>
+                  Expulsar
+                </button>
+              )}
+            </li>
+          ))}
+        </ul>
+
+        <h3 className="sheet-section">Opciones</h3>
+        <div className="actions">
+          {isOwner && (
+            <button type="button" className="button button-secondary" onClick={rename}>
+              Renombrar
+            </button>
+          )}
           <button type="button" className="button button-secondary" onClick={leave}>
             Salir de la lista
           </button>
@@ -297,7 +318,7 @@ export function ListPage() {
             </button>
           )}
         </div>
-      </main>
+      </Sheet>
     </div>
   )
 }
@@ -305,15 +326,15 @@ export function ListPage() {
 const LIVE_STATUS_TEXT: Record<ConnectionStatus, string> = {
   connecting: 'Conectando…',
   live: 'En directo',
-  reconnecting: 'Sin conexión, reintentando…',
+  reconnecting: 'Reconectando…',
 }
 
 /** Indica si los cambios de los demás están llegando en tiempo real. */
 function LiveStatus({ status }: { status: ConnectionStatus }) {
   return (
-    <p className={`live-status live-status-${status}`} role="status">
+    <span className={`live-status live-status-${status}`} role="status">
       {LIVE_STATUS_TEXT[status]}
-    </p>
+    </span>
   )
 }
 

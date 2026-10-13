@@ -4,7 +4,7 @@ import { groupByCategory, sortItems } from './sortItems'
 
 function item(name: string, categoryName: string | null, categoryOrder: number | null): Item {
   return {
-    id: name, productId: null, name, categoryId: null, categoryName, categoryOrder, quantity: 1, note: null,
+    id: name, productId: null, name, icon: null, categoryId: null, categoryName, categoryOrder, quantity: 1, note: null,
     checked: false, checkedByName: null, checkedAt: null, addedByName: null, createdAt: '',
   }
 }

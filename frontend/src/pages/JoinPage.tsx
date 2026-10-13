@@ -26,7 +26,7 @@ export function JoinPage() {
   if (!error) return <LoadingScreen message="Uniéndote a la lista…" />
   return (
     <main className="center-screen">
-      <div className="card empty">
+      <div className="card empty-state">
         <p className="alert" role="alert">{error}</p>
         <Link to="/">Ir a mis listas</Link>
       </div>

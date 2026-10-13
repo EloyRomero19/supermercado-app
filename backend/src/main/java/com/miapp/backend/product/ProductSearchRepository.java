@@ -17,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 class ProductSearchRepository {
 
 	private static final String SELECT_PRODUCT = """
-			SELECT p.id, p.name, c.id AS category_id, c.name AS category_name
+			SELECT p.id, p.name, p.icon, c.id AS category_id, c.name AS category_name
 			FROM product p
 			JOIN category c ON c.id = p.category_id
 			""";

@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type CSSProperties } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { ApiError } from '../api/client'
 import { createList, getMyLists, joinList } from '../api/lists'
 import type { ListSummary } from '../api/types'
 import { useAuth } from '../auth/useAuth'
+import { Progress } from '../components/Progress'
 import { useSubmit } from '../components/useSubmit'
+import { listColor } from '../items/categoryStyle'
 import { extractInviteCode } from '../lists/invite'
 import { InstallCard } from '../pwa/InstallCard'
 
@@ -39,47 +41,57 @@ export function HomePage() {
     navigate(`/listas/${list.id}`)
   })
 
-  return (
-    <div className="app">
-      <header className="topbar">
-        <h1>Mis listas</h1>
-        <button type="button" className="link-button" onClick={logout}>
-          Cerrar sesión
-        </button>
-      </header>
-      <main className="content">
-        <p>
-          Hola, <strong>{user?.displayName}</strong>
-        </p>
+  const firstName = user?.displayName.split(' ')[0] ?? ''
 
+  return (
+    <div className="page">
+      <header className="hero">
+        <div className="hero-top">
+          <span className="hero-brand">
+            <img src="/favicon.svg" alt="" width="28" height="28" />
+            Compra
+          </span>
+          <button type="button" className="hero-action" onClick={logout}>
+            Salir
+          </button>
+        </div>
+        <h1>Hola, {firstName} 👋</h1>
+        <p className="hero-subtitle">¿Qué toca comprar hoy?</p>
+      </header>
+
+      <main className="content">
         {loadError && <p className="alert" role="alert">{loadError}</p>}
-        {lists === null && !loadError && <p className="muted">Cargando…</p>}
+        {lists === null && !loadError && <div className="card skeleton" aria-busy="true" aria-label="Cargando tus listas" />}
+
         {lists?.length === 0 && (
-          <section className="card empty">
-            <p className="muted">Todavía no tienes listas. Crea una, o únete a la de otra persona con su QR o su enlace.</p>
+          <section className="card empty-state">
+            <span className="empty-emoji" aria-hidden="true">
+              🧺
+            </span>
+            <h2>Aún no tienes listas</h2>
+            <p className="muted">Crea una abajo o únete a la de otra persona escaneando su QR o con su enlace.</p>
           </section>
         )}
+
         {lists && lists.length > 0 && (
-          <ul className="list-cards">
-            {lists.map((list) => (
-              <li key={list.id}>
-                <Link to={`/listas/${list.id}`} className="card list-card">
-                  <span className="list-card-name">{list.name}</span>
-                  <span className="muted">
-                    {list.memberCount === 1 ? 'Solo tú' : `${list.memberCount} personas`}
-                    {list.myRole === 'OWNER' && ' · propietario'}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <section>
+            <h2 className="section-title">Tus listas</h2>
+            <ul className="list-cards">
+              {lists.map((list, index) => (
+                <li key={list.id}>
+                  <ListCard list={list} color={listColor(index)} />
+                </li>
+              ))}
+            </ul>
+          </section>
         )}
 
         <form className="card" onSubmit={create.onSubmit}>
-          <h2>Nueva lista</h2>
+          <h2>✨ Nueva lista</h2>
           {create.error && <p className="alert" role="alert">{create.fieldErrors.name ?? create.error}</p>}
           <div className="inline-form">
             <input
+              className="input"
               aria-label="Nombre de la lista"
               placeholder="Casa, Piso de la playa…"
               required
@@ -93,35 +105,67 @@ export function HomePage() {
           </div>
         </form>
 
-        <form className="card" onSubmit={join.onSubmit}>
-          <h2>Unirse con un enlace</h2>
-          <p className="muted">¿Te han enviado una invitación? Pega aquí el enlace (o escanea su QR con la cámara).</p>
-          {join.error && <p className="alert" role="alert">{join.fieldErrors.code ?? join.error}</p>}
-          <div className="inline-form">
-            <input
-              type="text"
-              inputMode="url"
-              aria-label="Enlace de invitación"
-              placeholder="https://…/unirse/K7MX4QPA"
-              required
-              autoComplete="off"
-              autoCapitalize="off"
-              spellCheck={false}
-              value={inviteLink}
-              onChange={(e) => setInviteLink(e.target.value)}
-            />
-            <button type="submit" className="button" disabled={join.submitting}>
-              Unirse
-            </button>
-          </div>
-        </form>
+        {/* Plegado por defecto: es algo puntual y así no ocupa sitio */}
+        <details className="card disclosure" open={lists?.length === 0 || undefined}>
+          <summary>
+            <h2>🔗 Unirse con un enlace</h2>
+          </summary>
+          <form className="form" onSubmit={join.onSubmit}>
+            <p className="muted">¿Te han enviado una invitación? Pega aquí el enlace (o escanea su QR con la cámara).</p>
+            {join.error && <p className="alert" role="alert">{join.fieldErrors.code ?? join.error}</p>}
+            <div className="inline-form">
+              <input
+                className="input"
+                type="text"
+                inputMode="url"
+                aria-label="Enlace de invitación"
+                placeholder="https://…/unirse/K7MX4QPA"
+                required
+                autoComplete="off"
+                autoCapitalize="off"
+                spellCheck={false}
+                value={inviteLink}
+                onChange={(e) => setInviteLink(e.target.value)}
+              />
+              <button type="submit" className="button" disabled={join.submitting}>
+                Unirse
+              </button>
+            </div>
+          </form>
+        </details>
 
         <InstallCard />
 
-        <p className="muted small center">
+        <p className="footer-link">
           <Link to="/privacidad">Privacidad</Link>
         </p>
       </main>
     </div>
+  )
+}
+
+function ListCard({ list, color }: { list: ListSummary; color: string }) {
+  const pending = list.itemCount - list.checkedCount
+  const status =
+    list.itemCount === 0 ? 'Vacía' : pending === 0 ? '¡Completada! 🎉' : `${pending} por comprar`
+  const people = list.memberCount === 1 ? 'Solo tú' : `${list.memberCount} personas`
+
+  return (
+    <Link to={`/listas/${list.id}`} className="list-card" style={{ '--tone': color } as CSSProperties}>
+      <span className="list-card-icon" aria-hidden="true">
+        🛒
+      </span>
+      <span className="list-card-body">
+        <span className="list-card-name">{list.name}</span>
+        <span className="list-card-meta">
+          {status} · {people}
+          {list.myRole === 'OWNER' && ' · tuya'}
+        </span>
+        {list.itemCount > 0 && <Progress done={list.checkedCount} total={list.itemCount} />}
+      </span>
+      <span className="chevron" aria-hidden="true">
+        ›
+      </span>
+    </Link>
   )
 }

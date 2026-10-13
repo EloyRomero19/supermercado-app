@@ -75,6 +75,7 @@ class ProductControllerTests {
 	void includesCategory() throws Exception {
 		mvc.perform(get("/api/products").param("q", "salmon").header(HttpHeaders.AUTHORIZATION, bearer))
 			.andExpect(jsonPath("$[0].name").value("Salmón"))
+			.andExpect(jsonPath("$[0].icon").value("🐟"))
 			.andExpect(jsonPath("$[0].categoryName").value("Pescadería"))
 			.andExpect(jsonPath("$[0].categoryId").isNumber());
 	}

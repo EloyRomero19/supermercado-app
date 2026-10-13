@@ -8,7 +8,7 @@ const list: ListDetail = { id: 'l1', name: 'Casa', inviteCode: 'ABCD2345', myRol
 
 function item(id: string, name: string, checked = false): Item {
   return {
-    id, productId: null, name, categoryId: null, categoryName: null, categoryOrder: null, quantity: 1, note: null,
+    id, productId: null, name, icon: null, categoryId: null, categoryName: null, categoryOrder: null, quantity: 1, note: null,
     checked, checkedByName: null, checkedAt: null, addedByName: null, createdAt: '',
   }
 }

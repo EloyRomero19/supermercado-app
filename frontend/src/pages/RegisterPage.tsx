@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router'
 import { useAuth } from '../auth/useAuth'
+import { AuthLayout } from '../components/AuthLayout'
 import { FormField } from '../components/FormField'
 import { GoogleButton } from '../components/GoogleButton'
 import { useSubmit } from '../components/useSubmit'
@@ -14,13 +15,21 @@ export function RegisterPage() {
   const { onSubmit, submitting, error, fieldErrors } = useSubmit(() => register({ displayName, email, password }))
 
   return (
-    <main className="auth-page">
-      <h1 className="brand">Lista de la compra</h1>
-      <form className="card" onSubmit={onSubmit}>
-        <h2>Crear cuenta</h2>
-        {error && <p className="alert" role="alert">{error}</p>}
-        <GoogleButton />
-        <p className="divider">o con tu email</p>
+    <AuthLayout
+      title="Crear cuenta"
+      footer={
+        <>
+          ¿Ya tienes cuenta?{' '}
+          <Link to="/login" state={location.state}>
+            Inicia sesión
+          </Link>
+        </>
+      }
+    >
+      {error && <p className="alert" role="alert">{error}</p>}
+      <GoogleButton />
+      <p className="divider">o con tu email</p>
+      <form className="form" onSubmit={onSubmit}>
         <FormField
           label="Nombre"
           autoComplete="name"
@@ -51,19 +60,10 @@ export function RegisterPage() {
           error={fieldErrors.password}
         />
         <p className="hint">Mínimo 8 caracteres.</p>
-        <button type="submit" className="button" disabled={submitting}>
+        <button type="submit" className="button button-block" disabled={submitting}>
           {submitting ? 'Creando cuenta…' : 'Crear cuenta'}
         </button>
       </form>
-      <p className="muted">
-        ¿Ya tienes cuenta?{' '}
-        <Link to="/login" state={location.state}>
-          Inicia sesión
-        </Link>
-      </p>
-      <p className="muted small">
-        <Link to="/privacidad">Privacidad</Link>
-      </p>
-    </main>
+    </AuthLayout>
   )
 }

@@ -10,10 +10,12 @@ import org.springframework.data.jpa.repository.Query;
 
 interface ListMemberRepository extends JpaRepository<ListMember, ListMemberId> {
 
-	/** Mis listas con su nº de miembros, en una sola consulta (subconsulta en el SELECT). */
+	/** Mis listas con sus contadores, en una sola consulta (subconsultas en el SELECT). */
 	@Query("""
 			select new com.miapp.backend.list.ListSummary(l.id, l.name, me.role,
-				(select count(m) from ListMember m where m.list = l))
+				(select count(m) from ListMember m where m.list = l),
+				(select count(i) from ListItem i where i.list = l),
+				(select count(i) from ListItem i where i.list = l and i.checked = true))
 			from ListMember me join me.list l
 			where me.user.id = :userId
 			order by l.createdAt desc
