@@ -239,7 +239,8 @@ export function ListPage() {
         <section className="card">
           <h2>Invitar</h2>
           <p className="muted">
-            Quien esté contigo puede escanear el QR con la cámara del móvil. A quien no, envíale el enlace.
+            Quien esté contigo puede escanear el QR con la cámara del móvil. A quien no, envíale el enlace:
+            al abrirlo (o pegarlo en «Unirse con un enlace») entrará en la lista.
           </p>
           {/* El QR contiene el enlace de invitación. Fondo blanco siempre (también en modo oscuro):
               muchos lectores no reconocen un QR con los colores invertidos. */}

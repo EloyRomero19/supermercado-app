@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { ApiError } from '../api/client'
-import { createList, getMyLists } from '../api/lists'
+import { createList, getMyLists, joinList } from '../api/lists'
 import type { ListSummary } from '../api/types'
 import { useAuth } from '../auth/useAuth'
 import { useSubmit } from '../components/useSubmit'
+import { extractInviteCode } from '../lists/invite'
 
 export function HomePage() {
   const { user, logout } = useAuth()
@@ -12,6 +13,7 @@ export function HomePage() {
   const [lists, setLists] = useState<ListSummary[] | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [newName, setNewName] = useState('')
+  const [inviteLink, setInviteLink] = useState('')
 
   useEffect(() => {
     // "ignore" evita guardar una respuesta si el componente ya se desmontó (o en el doble efecto de StrictMode)
@@ -26,6 +28,13 @@ export function HomePage() {
 
   const create = useSubmit(async () => {
     const list = await createList(newName)
+    navigate(`/listas/${list.id}`)
+  })
+
+  const join = useSubmit(async () => {
+    const code = extractInviteCode(inviteLink)
+    if (!code) throw new ApiError(400, 'Eso no parece un enlace de invitación. Pega el enlace completo que te enviaron.')
+    const list = await joinList(code)
     navigate(`/listas/${list.id}`)
   })
 
@@ -46,7 +55,7 @@ export function HomePage() {
         {lists === null && !loadError && <p className="muted">Cargando…</p>}
         {lists?.length === 0 && (
           <section className="card empty">
-            <p className="muted">Todavía no tienes listas. Crea una, o escanea el QR de la lista de otra persona para unirte.</p>
+            <p className="muted">Todavía no tienes listas. Crea una, o únete a la de otra persona con su QR o su enlace.</p>
           </section>
         )}
         {lists && lists.length > 0 && (
@@ -79,6 +88,29 @@ export function HomePage() {
             />
             <button type="submit" className="button" disabled={create.submitting}>
               Crear
+            </button>
+          </div>
+        </form>
+
+        <form className="card" onSubmit={join.onSubmit}>
+          <h2>Unirse con un enlace</h2>
+          <p className="muted">¿Te han enviado una invitación? Pega aquí el enlace (o escanea su QR con la cámara).</p>
+          {join.error && <p className="alert" role="alert">{join.fieldErrors.code ?? join.error}</p>}
+          <div className="inline-form">
+            <input
+              type="text"
+              inputMode="url"
+              aria-label="Enlace de invitación"
+              placeholder="https://…/unirse/K7MX4QPA"
+              required
+              autoComplete="off"
+              autoCapitalize="off"
+              spellCheck={false}
+              value={inviteLink}
+              onChange={(e) => setInviteLink(e.target.value)}
+            />
+            <button type="submit" className="button" disabled={join.submitting}>
+              Unirse
             </button>
           </div>
         </form>

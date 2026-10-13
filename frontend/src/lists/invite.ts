@@ -21,3 +21,17 @@ export async function shareInvite(code: string, listName: string): Promise<'shar
   await navigator.clipboard.writeText(url)
   return 'copied'
 }
+
+/**
+ * Saca el código de lo que pegue el usuario: el enlace completo
+ * ("https://…/unirse/K7MX4QPA", venga del dominio que venga) o solo el código ("K7MX4QPA").
+ * Devuelve null si no parece ninguna de las dos cosas.
+ */
+export function extractInviteCode(input: string): string | null {
+  const text = input.trim()
+  const fromUrl = text.match(/\/unirse\/([A-Za-z0-9-]+)\/?(?:[?#].*)?$/)
+  if (fromUrl) return fromUrl[1]
+  // Un código suelto (el backend ya ignora mayúsculas, espacios y guiones)
+  if (/^[A-Za-z0-9][A-Za-z0-9\s-]{3,18}[A-Za-z0-9]$/.test(text)) return text
+  return null
+}
