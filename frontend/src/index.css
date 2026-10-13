@@ -610,3 +610,45 @@ button.search-result:hover {
 .live-status-reconnecting::before {
   background: var(--danger);
 }
+
+/* --- PWA --- */
+
+/* Aviso flotante abajo (versión nueva de la app) */
+.toast {
+  position: fixed;
+  right: 1rem;
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  left: 1rem;
+  z-index: 10;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.5rem;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 0.75rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  box-shadow: 0 6px 24px rgb(0 0 0 / 0.15);
+}
+
+.toast span {
+  flex: 1 1 auto;
+}
+
+.install-card {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.install-card h2,
+.install-card p {
+  margin: 0;
+}
+
+/* Con la app instalada no hay barra del navegador: respetar el notch y la barra de estado */
+.topbar {
+  padding-top: max(1rem, env(safe-area-inset-top));
+}

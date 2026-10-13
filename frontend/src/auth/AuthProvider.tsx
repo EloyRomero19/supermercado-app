@@ -15,15 +15,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Al arrancar intentamos recuperar la sesión con la cookie. En desarrollo, StrictMode
   // ejecuta este efecto dos veces; no pasa nada porque refreshSession() comparte la petición.
+  // "attempt" permite reintentarlo desde la pantalla de "sin conexión".
+  const [attempt, setAttempt] = useState(0)
   useEffect(() => {
     let ignore = false
     authApi.restoreSession().then((restored) => {
-      if (!ignore) setSession(restored)
+      if (ignore) return
+      if (restored === 'offline') setStatus('offline')
+      else setSession(restored)
     })
     return () => {
       ignore = true
     }
-  }, [setSession])
+  }, [setSession, attempt])
 
   useEffect(() => onSessionExpired(() => setSession(null)), [setSession])
 
@@ -39,6 +43,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } finally {
           setSession(null)
         }
+      },
+      retry: () => {
+        setStatus('loading')
+        setAttempt((n) => n + 1)
       },
     }),
     [status, user, setSession],

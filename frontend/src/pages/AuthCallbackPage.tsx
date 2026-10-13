@@ -10,6 +10,6 @@ import { LoadingScreen } from '../components/LoadingScreen'
 export function AuthCallbackPage() {
   const { status } = useAuth()
 
-  if (status === 'loading') return <LoadingScreen />
+  if (status === 'loading' || status === 'offline') return <LoadingScreen />
   return <Navigate to={status === 'authenticated' ? '/' : '/login?error=google'} replace />
 }

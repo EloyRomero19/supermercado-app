@@ -33,6 +33,8 @@ cd frontend && npm run dev        # http://localhost:5173
 cd frontend && npm run build
 cd frontend && npm run lint
 cd frontend && npm test          # Vitest
+cd frontend && npm run build && npm run preview   # build de producción con service worker (http://localhost:4173)
+cd frontend && npm run generate-pwa-assets         # regenerar iconos desde public/favicon.svg
 ```
 
 ## Arquitectura backend
@@ -62,6 +64,8 @@ cd frontend && npm test          # Vitest
 - Endpoints REST bajo `/api`. El frontend llama a la API siempre a través de `frontend/src/api/`.
 - Frontend: `src/api/` (cliente `api()` con token en memoria y refresh automático, uno por vez y con Web Locks entre pestañas),
   `src/auth/` (`AuthProvider`, `useAuth`, `RequireAuth`/`GuestOnly`), `src/pages/`, `src/components/`. React Router 8 en modo declarativo.
+- PWA: el service worker NO debe interceptar `/api`, `/oauth2`, `/login/oauth2` (`navigateFallbackDenylist`) ni cachear la API
+  (datos privados). Solo se cachea el app shell. Nuevas versiones con aviso (`UpdatePrompt`), no automáticas.
 - En desarrollo, Vite hace proxy de `/api`, `/oauth2` y `/login/oauth2` a `http://localhost:8080` (mismo origen, sin CORS).
 
 ## Reglas de seguridad
@@ -88,5 +92,5 @@ Plan completo (esquema de BD, endpoints, seguridad): `~/.claude/plans/estoy-crea
 - [x] 6. Listas, miembros e invitaciones
 - [x] 7. Items de la lista
 - [x] 8. Tiempo real con SSE
-- [ ] 9. PWA (`vite-plugin-pwa`)
+- [x] 9. PWA (`vite-plugin-pwa`)
 - [ ] 10. Endurecimiento (rate limiting) y despliegue (Docker + Caddy)

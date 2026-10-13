@@ -7,6 +7,7 @@ import { JoinPage } from './pages/JoinPage'
 import { ListPage } from './pages/ListPage'
 import { LoginPage } from './pages/LoginPage'
 import { RegisterPage } from './pages/RegisterPage'
+import { UpdatePrompt } from './pwa/UpdatePrompt'
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>
+      <UpdatePrompt />
     </BrowserRouter>
   )
 }

@@ -6,6 +6,7 @@ import type { ListSummary } from '../api/types'
 import { useAuth } from '../auth/useAuth'
 import { useSubmit } from '../components/useSubmit'
 import { extractInviteCode } from '../lists/invite'
+import { InstallCard } from '../pwa/InstallCard'
 
 export function HomePage() {
   const { user, logout } = useAuth()
@@ -114,6 +115,8 @@ export function HomePage() {
             </button>
           </div>
         </form>
+
+        <InstallCard />
       </main>
     </div>
   )
