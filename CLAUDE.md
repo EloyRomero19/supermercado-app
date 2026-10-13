@@ -73,6 +73,8 @@ docker compose -f docker-compose.prod.yml up -d --build   # producción (ver REA
   (datos privados). Solo se cachea el app shell. Nuevas versiones con aviso (`UpdatePrompt`), no automáticas.
 - Productos escritos a mano: icono y sección deducidos al leer (`product.CustomItemIcons` + `IconGuesser`): primero el catálogo,
   luego el diccionario `backend/src/main/resources/custom-item-icons.txt` (palabras en singular, sin tildes). Ampliar ahí.
+- "Utilizados recientemente": tabla `list_recent_item` (V6), se actualiza con un upsert al añadir un producto
+  (`RecentItemRepository`). En el frontend, `applyListEvent` lo actualiza con cada producto nuevo que llega por SSE.
 - Navegación: las páginas con sesión cuelgan de `layout/AppLayout` (barra inferior `TabBar`: Listas, Comprar = última lista, Ajustes).
   Los productos de la lista se muestran como tarjetas (`items/ItemList`); acciones de un producto en un `Sheet`.
 - Diseño: variables CSS en `src/index.css` (modo oscuro = redefinir variables). Color e icono de cada sección en

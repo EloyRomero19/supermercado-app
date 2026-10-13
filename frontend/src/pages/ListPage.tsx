@@ -2,15 +2,16 @@ import { QRCodeSVG } from 'qrcode.react'
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { ApiError } from '../api/client'
-import { addItem, clearCheckedItems, deleteItem, getItems, updateItem, type NewItem } from '../api/items'
+import { addItem, clearCheckedItems, deleteItem, getItems, getRecentItems, updateItem, type NewItem } from '../api/items'
 import { deleteList, getList, regenerateInviteCode, removeMember, renameList } from '../api/lists'
-import type { Item, ListDetail, Member } from '../api/types'
+import type { Item, ListDetail, Member, RecentItem } from '../api/types'
 import { useAuth } from '../auth/useAuth'
 import { LoadingScreen } from '../components/LoadingScreen'
 import { Progress } from '../components/Progress'
 import { ProductSearch } from '../components/ProductSearch'
 import { Sheet } from '../components/Sheet'
 import { ItemList } from '../items/ItemList'
+import { RecentItems } from '../items/RecentItems'
 import { sortItems } from '../items/sortItems'
 import { inviteUrl, shareInvite } from '../lists/invite'
 import { rememberLastList } from '../lists/lastList'
@@ -20,14 +21,15 @@ import { useListEvents, type ConnectionStatus } from '../lists/useListEvents'
 
 type LoadState =
   | { status: 'loading' }
-  | { status: 'ready'; list: ListDetail; items: Item[] }
+  | { status: 'ready'; list: ListDetail; items: Item[]; recent: RecentItem[] }
   | { status: 'error'; message: string }
 
 /** Carga la lista y sus productos a la vez. Se usa al entrar y al reconectar el tiempo real. */
 async function loadList(listId: string): Promise<LoadState> {
   try {
-    const [list, items] = await Promise.all([getList(listId), getItems(listId)])
-    return { status: 'ready', list, items }
+    // Las tres peticiones a la vez, no una detrás de otra
+    const [list, items, recent] = await Promise.all([getList(listId), getItems(listId), getRecentItems(listId)])
+    return { status: 'ready', list, items, recent }
   } catch (error) {
     const message =
       error instanceof ApiError && error.status === 404
@@ -89,7 +91,7 @@ export function ListPage() {
     )
   }
 
-  const { list, items } = state
+  const { list, items, recent } = state
   const isOwner = list.myRole === 'OWNER'
   const others = list.members.filter((member) => member.userId !== user?.id)
 
@@ -112,7 +114,15 @@ export function ListPage() {
     }
   }
 
-  const add = (newItem: NewItem) => run(async () => upsertItem(await addItem(list.id, newItem)))
+  // Igual que si llegara por tiempo real: actualiza la lista y "recientes" a la vez
+  const applySaved = (item: Item) =>
+    setState((prev) => {
+      if (prev.status !== 'ready' || !user) return prev
+      const outcome = applyListEvent(prev, 'item-saved', item, user.id)
+      return 'view' in outcome ? { status: 'ready', ...outcome.view } : prev
+    })
+
+  const add = (newItem: NewItem) => run(async () => applySaved(await addItem(list.id, newItem)))
 
   /**
    * Actualización optimista: se marca en pantalla al instante, sin esperar al servidor (en el
@@ -255,6 +265,8 @@ export function ListPage() {
           onDelete={removeItem}
           onClearChecked={clearCart}
         />
+
+        <RecentItems recent={recent} items={items} onAdd={add} />
 
         <CategoryBrowser items={items} onAdd={(product) => add({ productId: product.id })} />
       </main>

@@ -39,6 +39,7 @@ public class ItemService {
 	private final ListAccessService access;
 	private final ProductRepository products;
 	private final CustomItemIcons customIcons;
+	private final RecentItemRepository recentItems;
 	private final ApplicationEventPublisher events;
 
 	@Transactional(readOnly = true)
@@ -68,6 +69,13 @@ public class ItemService {
 		else {
 			existing = items.findUncheckedCustom(listId, customName);
 		}
+		// Ya validado: queda en "utilizados recientemente" aunque luego se quite de la lista
+		if (product != null) {
+			recentItems.touchProduct(listId, product.getId());
+		}
+		else {
+			recentItems.touchCustom(listId, customName);
+		}
 
 		if (existing.isPresent()) {
 			ListItem item = existing.get();
@@ -79,6 +87,22 @@ public class ItemService {
 		}
 		ListItem item = new ListItem(me.getList(), product, customName, (short) quantity, note, me.getUser());
 		return saved(listId, items.saveAndFlush(item)); // flush: rellena createdAt antes de construir el DTO
+	}
+
+	/** Hasta 30 productos usados en la lista, lo más reciente primero. */
+	@Transactional(readOnly = true)
+	public List<RecentItemDto> recent(UUID listId, UUID userId) {
+		access.requireMember(listId, userId);
+		return recentItems.findRecent(listId, 30).stream().map(row -> {
+			if (row.productId() != null) {
+				return new RecentItemDto(row.productId(), null, row.productName(), row.icon(), row.categoryId(),
+						row.categoryName(), row.categoryOrder(), row.lastUsedAt().toInstant());
+			}
+			var guess = customIcons.guess(row.customName()).orElse(null);
+			return new RecentItemDto(null, row.customName(), row.customName(), guess != null ? guess.icon() : null,
+					guess != null ? guess.categoryId() : null, guess != null ? guess.categoryName() : null,
+					guess != null ? guess.categoryOrder() : null, row.lastUsedAt().toInstant());
+		}).toList();
 	}
 
 	@Transactional

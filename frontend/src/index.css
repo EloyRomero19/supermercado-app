@@ -1556,3 +1556,31 @@ button.search-result:focus-visible {
     transition: none !important;
   }
 }
+
+/* --- Utilizados recientemente --- */
+.tile-recent .tile-main {
+  aspect-ratio: auto;
+  min-height: 96px;
+  background: var(--surface);
+  border-style: dashed;
+}
+
+.tile-recent .tile-icon {
+  font-size: 2rem;
+}
+
+/* "+" en la esquina: tocar la tarjeta la añade */
+.tile-add {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  font-weight: 900;
+  color: #ffffff;
+  background: var(--tone);
+  border-radius: 50%;
+  pointer-events: none;
+}

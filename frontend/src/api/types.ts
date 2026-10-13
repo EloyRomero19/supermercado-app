@@ -79,3 +79,15 @@ export type Item = {
   addedByName: string | null
   createdAt: string
 }
+
+/** Producto usado recientemente en una lista (productId del catálogo, o customName si es texto libre). */
+export type RecentItem = {
+  productId: number | null
+  customName: string | null
+  name: string
+  icon: string | null
+  categoryId: number | null
+  categoryName: string | null
+  categoryOrder: number | null
+  lastUsedAt: string
+}

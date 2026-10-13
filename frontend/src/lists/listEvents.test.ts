@@ -13,7 +13,7 @@ function item(id: string, name: string, checked = false): Item {
   }
 }
 
-const view: ListView = { list, items: [item('1', 'Pilas'), item('2', 'Velas')] }
+const view: ListView = { list, items: [item('1', 'Pilas'), item('2', 'Velas')], recent: [] }
 const viewOf = (outcome: ReturnType<typeof applyListEvent>) => ('view' in outcome ? outcome.view : null)
 
 describe('applyListEvent', () => {
@@ -59,5 +59,16 @@ describe('applyListEvent', () => {
 
   it('ignora eventos desconocidos', () => {
     expect(viewOf(applyListEvent(view, 'algo-nuevo', {}, 'beto'))).toBe(view)
+  })
+
+  it('lo que se añade pasa a "recientes" el primero y sin duplicados; los cambios de estado no', () => {
+    const added = viewOf(applyListEvent(view, 'item-saved', item('3', 'Azúcar'), 'beto'))!
+    expect(added.recent.map((r) => r.name)).toEqual(['Azúcar'])
+
+    const again = viewOf(applyListEvent({ ...added, items: [] }, 'item-saved', item('4', 'azúcar '), 'beto'))!
+    expect(again.recent.map((r) => r.name)).toEqual(['azúcar '])
+
+    const checked = viewOf(applyListEvent(added, 'item-saved', item('3', 'Azúcar', true), 'beto'))!
+    expect(checked.recent).toBe(added.recent)
   })
 })
