@@ -31,6 +31,7 @@ cd backend && ./mvnw test        # necesita Docker (Testcontainers arranca su pr
 cd frontend && npm run dev        # http://localhost:5173
 cd frontend && npm run build
 cd frontend && npm run lint
+cd frontend && npm test          # Vitest
 ```
 
 ## Arquitectura backend
@@ -46,6 +47,8 @@ cd frontend && npm run lint
   Nunca editar una migración ya aplicada: crear una nueva. JPA con `ddl-auto=validate`.
 - IDs `uuid` para entidades expuestas (usuarios, listas, items); `timestamptz` para fechas.
 - Endpoints REST bajo `/api`. El frontend llama a la API siempre a través de `frontend/src/api/`.
+- Frontend: `src/api/` (cliente `api()` con token en memoria y refresh automático, uno por vez y con Web Locks entre pestañas),
+  `src/auth/` (`AuthProvider`, `useAuth`, `RequireAuth`/`GuestOnly`), `src/pages/`, `src/components/`. React Router 8 en modo declarativo.
 - En desarrollo, Vite hace proxy de `/api`, `/oauth2` y `/login/oauth2` a `http://localhost:8080` (mismo origen, sin CORS).
 
 ## Reglas de seguridad
@@ -64,7 +67,7 @@ Plan completo (esquema de BD, endpoints, seguridad): `~/.claude/plans/estoy-crea
 - [x] 0. Infraestructura: docker-compose, `.env.example`, este archivo
 - [x] 1. Base backend: configuración (`.env` importado), Flyway V1 (usuarios y tokens), Testcontainers, proxy Vite
 - [x] 2. Auth email/contraseña + JWT (añadir `spring-boot-starter-security-oauth2-resource-server`), errores `ProblemDetail`
-- [ ] 3. Frontend base: router, `AuthContext`, cliente API, login/registro
+- [x] 3. Frontend base: router, `AuthContext`, cliente API, login/registro
 - [ ] 4. Login con Google
 - [ ] 5. Catálogo y buscador (`pg_trgm` + `unaccent`)
 - [ ] 6. Listas, miembros e invitaciones
