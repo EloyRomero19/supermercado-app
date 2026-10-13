@@ -19,3 +19,14 @@ spring:
       ddl-auto: validate
     # Sin sesión de BD abierta durante toda la petición HTTP: las consultas ocurren en los servicios.
     open-in-view: false
+
+app:
+  auth:
+    jwt-secret: ${JWT_SECRET:}
+    issuer: supermercado-app
+    access-token-ttl: 15m
+    refresh-token-ttl: 30d
+    # En producción siempre true. Los navegadores aceptan cookies Secure en http://localhost.
+    cookie-secure: true
+    # Único origen desde el que se aceptan /api/auth/refresh y /logout
+    frontend-url: ${FRONTEND_URL:http://localhost:5173}

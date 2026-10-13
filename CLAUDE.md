@@ -63,7 +63,7 @@ Plan completo (esquema de BD, endpoints, seguridad): `~/.claude/plans/estoy-crea
 
 - [x] 0. Infraestructura: docker-compose, `.env.example`, este archivo
 - [x] 1. Base backend: configuración (`.env` importado), Flyway V1 (usuarios y tokens), Testcontainers, proxy Vite
-- [ ] 2. Auth email/contraseña + JWT (añadir `spring-boot-starter-security-oauth2-resource-server`), errores `ProblemDetail`
+- [x] 2. Auth email/contraseña + JWT (añadir `spring-boot-starter-security-oauth2-resource-server`), errores `ProblemDetail`
 - [ ] 3. Frontend base: router, `AuthContext`, cliente API, login/registro
 - [ ] 4. Login con Google
 - [ ] 5. Catálogo y buscador (`pg_trgm` + `unaccent`)
