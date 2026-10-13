@@ -36,6 +36,6 @@ interface ListMemberRepository extends JpaRepository<ListMember, ListMemberId> {
 			insert into list_member (list_id, user_id, role) values (:listId, :userId, 'MEMBER')
 			on conflict (list_id, user_id) do nothing
 			""", nativeQuery = true)
-	void insertMemberIfAbsent(UUID listId, UUID userId);
+	int insertMemberIfAbsent(UUID listId, UUID userId); // 1 si se ha unido ahora, 0 si ya era miembro
 
 }

@@ -4,14 +4,17 @@ import java.text.Collator;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.miapp.backend.common.ApiException;
+import com.miapp.backend.common.ListEvent;
 import com.miapp.backend.list.ListAccessService;
 import com.miapp.backend.list.ListMember;
 import com.miapp.backend.product.Product;
@@ -34,6 +37,7 @@ public class ItemService {
 	private final ListItemRepository items;
 	private final ListAccessService access;
 	private final ProductRepository products;
+	private final ApplicationEventPublisher events;
 
 	@Transactional(readOnly = true)
 	public List<ItemDto> list(UUID listId, UUID userId) {
@@ -69,10 +73,10 @@ public class ItemService {
 			if (note != null) {
 				item.setNote(note);
 			}
-			return ItemDto.from(item);
+			return saved(listId, item);
 		}
 		ListItem item = new ListItem(me.getList(), product, customName, (short) quantity, note, me.getUser());
-		return ItemDto.from(items.saveAndFlush(item)); // flush: rellena createdAt antes de construir el DTO
+		return saved(listId, items.saveAndFlush(item)); // flush: rellena createdAt antes de construir el DTO
 	}
 
 	@Transactional
@@ -93,20 +97,33 @@ public class ItemService {
 		if (request.note() != null) {
 			item.setNote(blankToNull(request.note()));
 		}
-		return ItemDto.from(item);
+		return saved(listId, item);
 	}
 
 	@Transactional
 	public void remove(UUID listId, UUID itemId, UUID userId) {
 		access.requireMember(listId, userId);
 		items.delete(findItem(listId, itemId));
+		events.publishEvent(ListEvent.of(listId, ListEvent.ITEMS_DELETED, Map.of("ids", List.of(itemId))));
 	}
 
-	/** "Vaciar el carro": borra los ya cogidos. Devuelve cuántos se borraron. */
+	/**
+	 * "Vaciar el carro": borra los ya cogidos. Se avisa con los ids concretos borrados (no
+	 * "borrad los marcados"): si alguien marcó otro justo después, ese sigue en la lista.
+	 */
 	@Transactional
-	public int clearChecked(UUID listId, UUID userId) {
+	public void clearChecked(UUID listId, UUID userId) {
 		access.requireMember(listId, userId);
-		return items.deleteChecked(listId);
+		List<UUID> deleted = items.deleteCheckedReturningIds(listId);
+		if (!deleted.isEmpty()) {
+			events.publishEvent(ListEvent.of(listId, ListEvent.ITEMS_DELETED, Map.of("ids", deleted)));
+		}
+	}
+
+	private ItemDto saved(UUID listId, ListItem item) {
+		ItemDto dto = ItemDto.from(item);
+		events.publishEvent(ListEvent.of(listId, ListEvent.ITEM_SAVED, dto));
+		return dto;
 	}
 
 	private ListItem findItem(UUID listId, UUID itemId) {

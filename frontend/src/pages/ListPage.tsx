@@ -1,5 +1,5 @@
 import { QRCodeSVG } from 'qrcode.react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { ApiError } from '../api/client'
 import { addItem, clearCheckedItems, deleteItem, getItems, updateItem, type NewItem } from '../api/items'
@@ -11,11 +11,27 @@ import { ProductSearch } from '../components/ProductSearch'
 import { ItemList } from '../items/ItemList'
 import { sortItems } from '../items/sortItems'
 import { inviteUrl, shareInvite } from '../lists/invite'
+import { applyListEvent } from '../lists/listEvents'
+import { useListEvents, type ConnectionStatus } from '../lists/useListEvents'
 
 type LoadState =
   | { status: 'loading' }
   | { status: 'ready'; list: ListDetail; items: Item[] }
   | { status: 'error'; message: string }
+
+/** Carga la lista y sus productos a la vez. Se usa al entrar y al reconectar el tiempo real. */
+async function loadList(listId: string): Promise<LoadState> {
+  try {
+    const [list, items] = await Promise.all([getList(listId), getItems(listId)])
+    return { status: 'ready', list, items }
+  } catch (error) {
+    const message =
+      error instanceof ApiError && error.status === 404
+        ? 'Esta lista no existe o ya no tienes acceso a ella.'
+        : 'No se pudo cargar la lista.'
+    return { status: 'error', message }
+  }
+}
 
 export function ListPage() {
   const { listId = '' } = useParams()
@@ -25,23 +41,31 @@ export function ListPage() {
   const [notice, setNotice] = useState<string | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
 
+  // Mientras salimos o borramos la lista nosotros mismos, ignoramos los eventos: si no, se vería
+  // un instante "ya no eres miembro" antes de volver a "Mis listas"
+  const leavingRef = useRef(false)
+
   useEffect(() => {
     let ignore = false
-    // Las dos peticiones a la vez, no una detrás de otra
-    Promise.all([getList(listId), getItems(listId)])
-      .then(([list, items]) => !ignore && setState({ status: 'ready', list, items }))
-      .catch((error: unknown) => {
-        if (ignore) return
-        const message =
-          error instanceof ApiError && error.status === 404
-            ? 'Esta lista no existe o ya no tienes acceso a ella.'
-            : 'No se pudo cargar la lista.'
-        setState({ status: 'error', message })
-      })
+    loadList(listId).then((loaded) => !ignore && setState(loaded))
     return () => {
       ignore = true
     }
   }, [listId])
+
+  // Tiempo real: cada cambio de otro miembro llega como evento y se aplica sobre el estado actual
+  const connection = useListEvents(listId, state.status === 'ready', {
+    onEvent: (type, data) =>
+      setState((prev) => {
+        if (prev.status !== 'ready' || !user || leavingRef.current) return prev
+        const outcome = applyListEvent(prev, type, data, user.id)
+        return 'gone' in outcome ? { status: 'error', message: outcome.gone } : { status: 'ready', ...outcome.view }
+      }),
+    onReconnected: () => {
+      loadList(listId).then(setState)
+    },
+    onGone: () => setState({ status: 'error', message: 'Esta lista no existe o ya no tienes acceso a ella.' }),
+  })
 
   if (state.status === 'loading') return <LoadingScreen />
   if (state.status === 'error') {
@@ -151,14 +175,26 @@ export function ListPage() {
           ? `¿Salir de la lista? Pasará a ser de ${others[0].displayName}.`
           : 'Eres el único miembro: si sales, la lista se borrará. ¿Continuar?'
       if (!window.confirm(warning) || !user) return
-      await removeMember(list.id, user.id)
+      leavingRef.current = true
+      try {
+        await removeMember(list.id, user.id)
+      } catch (error) {
+        leavingRef.current = false
+        throw error
+      }
       navigate('/', { replace: true })
     })
 
   const remove = () =>
     run(async () => {
       if (!window.confirm(`¿Borrar «${list.name}» para todos sus miembros? No se puede deshacer.`)) return
-      await deleteList(list.id)
+      leavingRef.current = true
+      try {
+        await deleteList(list.id)
+      } catch (error) {
+        leavingRef.current = false
+        throw error
+      }
       navigate('/', { replace: true })
     })
 
@@ -179,6 +215,7 @@ export function ListPage() {
       </header>
 
       <main className="content">
+        <LiveStatus status={connection} />
         {actionError && <p className="alert" role="alert">{actionError}</p>}
         {notice && <p className="notice" role="status">{notice}</p>}
 
@@ -261,6 +298,21 @@ export function ListPage() {
         </div>
       </main>
     </div>
+  )
+}
+
+const LIVE_STATUS_TEXT: Record<ConnectionStatus, string> = {
+  connecting: 'Conectando…',
+  live: 'En directo',
+  reconnecting: 'Sin conexión, reintentando…',
+}
+
+/** Indica si los cambios de los demás están llegando en tiempo real. */
+function LiveStatus({ status }: { status: ConnectionStatus }) {
+  return (
+    <p className={`live-status live-status-${status}`} role="status">
+      {LIVE_STATUS_TEXT[status]}
+    </p>
   )
 }
 

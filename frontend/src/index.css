@@ -579,3 +579,34 @@ button.search-result:hover {
 .search-result-custom {
   color: var(--accent);
 }
+
+/* --- Indicador de tiempo real --- */
+
+.live-status {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.live-status::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  background: var(--muted);
+  border-radius: 50%;
+}
+
+.live-status-live::before {
+  background: var(--accent);
+}
+
+.live-status-reconnecting {
+  color: var(--danger);
+}
+
+.live-status-reconnecting::before {
+  background: var(--danger);
+}

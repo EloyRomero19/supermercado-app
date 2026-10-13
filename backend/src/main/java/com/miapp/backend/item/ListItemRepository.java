@@ -5,7 +5,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 interface ListItemRepository extends JpaRepository<ListItem, UUID> {
@@ -32,8 +31,11 @@ interface ListItemRepository extends JpaRepository<ListItem, UUID> {
 	@Query("select i from ListItem i where i.list.id = :listId and i.checked = false and lower(i.customName) = lower(:name)")
 	Optional<ListItem> findUncheckedCustom(UUID listId, String name);
 
-	@Modifying
-	@Query("delete from ListItem i where i.list.id = :listId and i.checked = true")
-	int deleteChecked(UUID listId);
+	/**
+	 * DELETE ... RETURNING (de Postgres): borra y devuelve los ids borrados en una sola sentencia
+	 * atómica, sin el hueco que habría entre un SELECT y un DELETE separados.
+	 */
+	@Query(value = "delete from list_item where list_id = :listId and checked returning id", nativeQuery = true)
+	List<UUID> deleteCheckedReturningIds(UUID listId);
 
 }

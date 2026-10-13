@@ -64,24 +64,28 @@ function withCrossTabLock<T>(task: () => Promise<T>): Promise<T> {
 
 /**
  * fetch con el access token y renovación automática: si el backend responde 401
- * (token caducado), renueva la sesión una vez y repite la petición.
+ * (token caducado), renueva la sesión una vez y repite la petición. Devuelve la Response
+ * tal cual; la usan api() y el stream de eventos en tiempo real.
  */
-export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
-  let response = await send(path, init)
+export async function authFetch(path: string, init: RequestInit = {}): Promise<Response> {
+  const response = await send(path, init)
 
   // En /api/auth/* un 401 significa "credenciales incorrectas", no "token caducado"
-  if (response.status === 401 && !path.startsWith('/api/auth/')) {
-    try {
-      await refreshSession()
-    } catch {
-      accessToken = null
-      sessionExpiredListeners.forEach((listener) => listener())
-      throw new ApiError(401, 'Tu sesión ha caducado. Vuelve a iniciar sesión')
-    }
-    response = await send(path, init)
-  }
+  if (response.status !== 401 || path.startsWith('/api/auth/')) return response
 
-  return parse<T>(response)
+  try {
+    await refreshSession()
+  } catch {
+    accessToken = null
+    sessionExpiredListeners.forEach((listener) => listener())
+    throw new ApiError(401, 'Tu sesión ha caducado. Vuelve a iniciar sesión')
+  }
+  return send(path, init)
+}
+
+/** authFetch + convertir la respuesta en JSON (o en ApiError si es un error). */
+export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
+  return parse<T>(await authFetch(path, init))
 }
 
 /** Atajo para peticiones con cuerpo JSON */
