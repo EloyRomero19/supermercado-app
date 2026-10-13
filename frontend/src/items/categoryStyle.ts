@@ -21,7 +21,8 @@ const STYLES: Record<string, CategoryStyle> = {
   'Bebé y mascotas': { icon: '🐾', color: '#d6880f' },
 }
 
-const OTHER: CategoryStyle = { icon: '📝', color: '#6b7a72' }
+// Productos escritos a mano que el backend no ha sabido reconocer
+const OTHER: CategoryStyle = { icon: '🛍️', color: '#6b7a72' }
 
 export function categoryStyle(categoryName: string | null): CategoryStyle {
   return (categoryName && STYLES[categoryName]) || OTHER

@@ -66,7 +66,7 @@ export type Item = {
   id: string
   productId: number | null
   name: string
-  /** Emoji del producto; null en los escritos a mano */
+  /** Emoji del producto; en los escritos a mano lo deduce el backend del texto (null si no lo reconoce) */
   icon: string | null
   categoryId: number | null
   categoryName: string | null

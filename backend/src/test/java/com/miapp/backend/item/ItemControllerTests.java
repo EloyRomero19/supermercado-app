@@ -98,10 +98,13 @@ class ItemControllerTests {
 	}
 
 	@Test
-	void customItemsHaveNoCategory() throws Exception {
-		add(ana, "{\"customName\": \"Regalo cumple\"}")
+	void customItemsGetAnIconAndSectionFromTheirText() throws Exception {
+		add(ana, "{\"customName\": \"Tomates cherry\"}")
 			.andExpect(status().isCreated())
 			.andExpect(jsonPath("$.productId").value(nullValue()))
+			.andExpect(jsonPath("$.icon").value("🍅"))
+			.andExpect(jsonPath("$.categoryName").value("Frutas y verduras"));
+		add(ana, "{\"customName\": \"Cosa rara\"}")
 			.andExpect(jsonPath("$.icon").value(nullValue()))
 			.andExpect(jsonPath("$.categoryName").value(nullValue()));
 	}
@@ -166,9 +169,11 @@ class ItemControllerTests {
 		add(ana, "{\"productId\": %d}".formatted(productId("detergente")));
 		add(ana, "{\"productId\": %d}".formatted(productId("tomate")));
 		add(ana, "{\"productId\": %d}".formatted(productId("manzana")));
+		add(ana, "{\"customName\": \"Limones\"}"); // escrito a mano, pero se reconoce como fruta
 
-		// Frutas y verduras (1), Limpieza (11), sin categoría al final; dentro, alfabético
-		as(ana, get(items)).andExpect(jsonPath("$[*].name").value(contains("Manzana", "Tomate", "Detergente", "Pilas")));
+		// Frutas y verduras (1), Limpieza (11), sin sección al final; dentro, alfabético
+		as(ana, get(items))
+			.andExpect(jsonPath("$[*].name").value(contains("Limones", "Manzana", "Tomate", "Detergente", "Pilas")));
 	}
 
 	@Test

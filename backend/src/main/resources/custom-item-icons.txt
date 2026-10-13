@@ -1,0 +1,277 @@
+# Iconos para los productos escritos a mano que no están en el catálogo.
+#
+# Formato: la sección del súper entre corchetes y debajo "palabra = emoji".
+# Las palabras van en singular, en minúsculas y sin tildes ("cereza", no "Cerezas"): al buscar,
+# el texto del usuario se normaliza igual y se prueba también sin la "s" / "es" final.
+# [Sin sección] es para cosas que no son de una sección concreta (regalos, pilas…).
+#
+# Antes que este diccionario se mira el catálogo: "Tomates cherry" ya sale como Tomate 🍅.
+
+[Frutas y verduras]
+cereza = 🍒
+coco = 🥥
+mango = 🥭
+papaya = 🥭
+arandano = 🫐
+mora = 🫐
+frambuesa = 🍓
+lima = 🍋
+pomelo = 🍊
+ciruela = 🍑
+albaricoque = 🍑
+nectarina = 🍑
+paraguaya = 🍑
+granada = 🍎
+higo = 🍇
+castana = 🌰
+avellana = 🌰
+pistacho = 🥜
+cacahuete = 🥜
+maiz = 🌽
+mazorca = 🌽
+apio = 🥬
+rucula = 🥬
+canonigo = 🥬
+col = 🥬
+repollo = 🥬
+kale = 🥬
+acelga = 🥬
+ensalada = 🥗
+cebolleta = 🧅
+chalota = 🧅
+jengibre = 🫚
+seta = 🍄
+boniato = 🍠
+batata = 🍠
+guindilla = 🌶️
+chile = 🌶️
+jalapeno = 🌶️
+alcachofa = 🌿
+esparrago = 🌿
+albahaca = 🌿
+cilantro = 🌿
+menta = 🌿
+hierbabuena = 🌿
+romero = 🌿
+tomillo = 🌿
+edamame = 🫛
+rabano = 🥕
+remolacha = 🥕
+nabo = 🥕
+fruta = 🍎
+verdura = 🥦
+
+[Carnicería]
+carne = 🥩
+ternera = 🥩
+cerdo = 🥩
+buey = 🥩
+entrecot = 🥩
+cordero = 🍖
+conejo = 🍖
+cabrito = 🍖
+pato = 🍗
+codorniz = 🍗
+morcilla = 🌭
+butifarra = 🌭
+panceta = 🥓
+lomo = 🥩
+albondiga = 🍖
+
+[Pescadería]
+pescado = 🐟
+atun = 🐟
+anchoa = 🐟
+trucha = 🐟
+rape = 🐟
+caballa = 🐟
+emperador = 🐟
+rodaballo = 🐟
+lenguado = 🐟
+langostino = 🦐
+cigala = 🦐
+almeja = 🦪
+berberecho = 🦪
+ostra = 🦪
+navaja = 🦪
+sepia = 🦑
+chipiron = 🦑
+cangrejo = 🦀
+surimi = 🦀
+bogavante = 🦞
+langosta = 🦞
+marisco = 🦐
+
+[Charcutería y quesos]
+jamon = 🍖
+pate = 🥫
+sobrasada = 🌭
+mortadela = 🥓
+requeson = 🧀
+
+[Lácteos y huevos]
+leche = 🥛
+yogur = 🥣
+nata = 🥛
+margarina = 🧈
+batido = 🥤
+cuajada = 🥣
+postre = 🍮
+arroz con leche = 🍮
+
+[Panadería y bollería]
+pan = 🍞
+baguette = 🥖
+chapata = 🥖
+panecillo = 🍞
+bollo = 🥐
+napolitana = 🥐
+ensaimada = 🥐
+churro = 🥐
+donut = 🍩
+rosquilla = 🍩
+tarta = 🎂
+pastel = 🍰
+empanada = 🥟
+empanadilla = 🥟
+
+[Despensa]
+aceite = 🫒
+pasta = 🍝
+tallarin = 🍝
+noqui = 🍝
+ravioli = 🍝
+tortellini = 🍝
+salsa = 🥫
+sopa = 🍲
+pure = 🥔
+hummus = 🧆
+lata = 🥫
+conserva = 🥫
+especia = 🧂
+canela = 🧂
+nuez moscada = 🧂
+curry = 🍛
+soja = 🫘
+palomita = 🍿
+muesli = 🥣
+granola = 🥣
+
+[Desayuno y dulces]
+chuche = 🍬
+golosina = 🍬
+caramelo = 🍬
+chicle = 🍬
+gominola = 🍬
+piruleta = 🍭
+bombon = 🍫
+nocilla = 🍫
+cafe = ☕
+
+[Congelados]
+pizza = 🍕
+sushi = 🍣
+gyoza = 🥟
+burrito = 🌯
+taco = 🌮
+nacho = 🌮
+lasana = 🍝
+
+[Bebidas]
+agua = 💧
+bebida = 🥤
+vino = 🍷
+sidra = 🍾
+champan = 🍾
+ron = 🥃
+whisky = 🥃
+licor = 🥃
+ginebra = 🍸
+vodka = 🍸
+kombucha = 🍵
+
+[Limpieza]
+escoba = 🧹
+recogedor = 🧹
+fregona = 🪣
+cubo = 🪣
+guante = 🧤
+servilleta = 🧻
+insecticida = 🦟
+pinza = 🧷
+bolsa = 🛍️
+
+[Higiene y cuidado personal]
+medicina = 💊
+medicamento = 💊
+pastilla = 💊
+ibuprofeno = 💊
+paracetamol = 💊
+vitamina = 💊
+tirita = 🩹
+venda = 🩹
+termometro = 🌡️
+mascarilla = 😷
+perfume = 🧴
+colonia = 🧴
+maquillaje = 💄
+pintalabio = 💄
+esmalte = 💅
+cuchilla = 🪒
+
+[Bebé y mascotas]
+biberon = 🍼
+chupete = 👶
+pienso = 🐶
+perro = 🐶
+gato = 🐱
+alpiste = 🐦
+pajaro = 🐦
+pez = 🐠
+
+[Sin sección]
+vela = 🕯️
+pila = 🔋
+bateria = 🔋
+bombilla = 💡
+cerilla = 🔥
+mechero = 🔥
+carbon = 🔥
+regalo = 🎁
+globo = 🎈
+flor = 💐
+ramo = 💐
+planta = 🪴
+abono = 🪴
+tijera = ✂️
+boli = 🖊️
+boligrafo = 🖊️
+lapiz = ✏️
+cuaderno = 📓
+libreta = 📓
+folio = 📄
+sobre = ✉️
+revista = 📰
+periodico = 📰
+libro = 📚
+cargador = 🔌
+cable = 🔌
+auricular = 🎧
+plato = 🍽️
+vaso = 🥤
+cubierto = 🍴
+tenedor = 🍴
+cuchara = 🥄
+cuchillo = 🔪
+sarten = 🍳
+olla = 🍲
+ropa = 👕
+camiseta = 👕
+calcetin = 🧦
+zapatilla = 👟
+toalla = 🧺
+sabana = 🛏️
+almohada = 🛏️
+juguete = 🧸
+pelota = ⚽
+comida = 🍽️

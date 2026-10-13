@@ -17,6 +17,7 @@ import com.miapp.backend.common.ApiException;
 import com.miapp.backend.common.ListEvent;
 import com.miapp.backend.list.ListAccessService;
 import com.miapp.backend.list.ListMember;
+import com.miapp.backend.product.CustomItemIcons;
 import com.miapp.backend.product.Product;
 import com.miapp.backend.product.ProductRepository;
 
@@ -37,12 +38,13 @@ public class ItemService {
 	private final ListItemRepository items;
 	private final ListAccessService access;
 	private final ProductRepository products;
+	private final CustomItemIcons customIcons;
 	private final ApplicationEventPublisher events;
 
 	@Transactional(readOnly = true)
 	public List<ItemDto> list(UUID listId, UUID userId) {
 		access.requireMember(listId, userId);
-		return items.findAllForList(listId).stream().map(ItemDto::from).sorted(STORE_ORDER).toList();
+		return items.findAllForList(listId).stream().map(item -> ItemDto.from(item, customIcons)).sorted(STORE_ORDER).toList();
 	}
 
 	/** Si ya hay uno igual pendiente de coger, suma la cantidad en vez de duplicarlo. */
@@ -121,7 +123,7 @@ public class ItemService {
 	}
 
 	private ItemDto saved(UUID listId, ListItem item) {
-		ItemDto dto = ItemDto.from(item);
+		ItemDto dto = ItemDto.from(item, customIcons);
 		events.publishEvent(ListEvent.of(listId, ListEvent.ITEM_SAVED, dto));
 		return dto;
 	}
