@@ -1,4 +1,4 @@
-# Supermercado App — lista de la compra compartida (PWA)
+# ¿Qué falta? — lo que falta en casa, a un toque (PWA de listas de la compra compartidas)
 
 PWA para gestionar listas de la compra compartidas entre varios usuarios:
 1. Login con email/contraseña (JWT) y con Google.
@@ -79,7 +79,8 @@ docker compose -f docker-compose.prod.yml up -d --build   # producción (ver REA
 - Navegación: las páginas con sesión cuelgan de `layout/AppLayout` (barra inferior `TabBar`: Listas, Recetas, Cuenta).
   Recetas (`pages/RecipesPage`, `RecipePage`): tablas `recipe`/`recipe_ingredient` (V7, ingredientes = productos del catálogo);
   muestra qué falta en la lista elegida (`recipes/missingIngredients`, por defecto `pickListToShop`) y lo añade con
-  `POST /api/lists/{id}/items/bulk` (una transacción: todo o nada). Nuevas recetas = nueva migración. Lista = tarjetas agrupadas por sección (`items/ItemList`).
+  `POST /api/lists/{id}/items/bulk` (una transacción: todo o nada). Nuevas recetas = nueva migración. Lista = SOLO lo que falta, en tarjetas agrupadas por sección (`items/ItemList`; un toque = al carrito,
+  con confirmación de 450 ms en la tarjeta). Lo cogido vive en `items/Cart` (barra fija + panel: devolver, "Terminar la compra").
 - Diseño: Tailwind 4 + shadcn/ui. Tokens (colores OKLCH con contraste AA comprobado, radios, fuente Inter, animaciones) SOLO en
   `src/index.css`; los componentes usan clases (`bg-primary`, `text-muted-foreground`…), nunca colores sueltos. Modo oscuro automático
   (prefers-color-scheme). Colores de sección = tokens `--cat-N` (`items/categoryStyle.ts`), aplicados con `--tone` + `bg-tone-soft`.

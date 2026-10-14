@@ -21,6 +21,7 @@ import { Input } from '@/components/ui/input'
 import { Progress } from '@/components/ui/progress'
 import { Separator } from '@/components/ui/separator'
 import { addWithUndo, errorMessage } from '@/items/itemFeedback'
+import { Cart } from '@/items/Cart'
 import { ItemList } from '@/items/ItemList'
 import { RecentItems } from '@/items/RecentItems'
 import { sortItems } from '@/items/sortItems'
@@ -184,6 +185,8 @@ export function ListPage() {
       try {
         const saved = await updateItem(list.id, item.id, { checked: !item.checked })
         upsertItem(saved)
+        // Si se devuelve a la lista, el aviso "al carrito · Deshacer" ya no tiene sentido
+        if (!saved.checked) toast.dismiss(`check-${saved.id}`)
         if (offerUndo && saved.checked) {
           toast(`«${saved.name}» al carrito`, {
             id: `check-${saved.id}`,
@@ -223,14 +226,14 @@ export function ListPage() {
   const clearCart = () =>
     run(async () => {
       const ok = await confirm({
-        title: '¿Vaciar el carrito?',
-        description: `Se quitarán de la lista los ${inCart} productos que ya están en el carrito.`,
-        confirmLabel: 'Vaciar',
+        title: '¿Terminar la compra?',
+        description: `Se quitarán de la lista ${inCart === 1 ? 'el producto' : `los ${inCart} productos`} del carrito. Lo que falte se queda para la próxima vez.`,
+        confirmLabel: 'Terminar',
       })
       if (!ok) return
       await clearCheckedItems(list.id)
       setItems((current) => current.filter((i) => !i.checked))
-      toast.success('Carrito vaciado')
+      toast.success('¡Compra terminada!')
     })
 
   const rename = (name: string) =>
@@ -339,7 +342,7 @@ export function ListPage() {
         {items.length > 0 && (
           <div className="mt-3 flex flex-col gap-1.5">
             <div className="flex items-baseline justify-between text-sm">
-              <span className="font-semibold">{pending === 0 ? '¡Todo en el carrito!' : `${pending} pendientes`}</span>
+              <span className="font-semibold">{pending === 0 ? '¡Lo tienes todo!' : pending === 1 ? 'Falta 1 producto' : `Faltan ${pending} productos`}</span>
               <span className="text-muted-foreground tabular-nums">
                 {inCart} de {items.length} en el carrito
               </span>
@@ -357,7 +360,12 @@ export function ListPage() {
         <RecentItems recent={recent} items={items} onAdd={add} />
 
         <CategoryBrowser items={items} onAdd={(product) => add({ productId: product.id })} />
+
+        {/* Hueco para que la barra del carrito no tape lo último de la página */}
+        {inCart > 0 && <div className="h-16" aria-hidden="true" />}
       </main>
+
+      <Cart items={items} onReturn={(item) => toggle(item)} onFinish={clearCart} />
 
       <BottomSheet open={shareOpen} onClose={() => setShareOpen(false)} title="Compartir lista" description="Invita a quien quieras que use esta lista contigo.">
         <div className="flex flex-col items-center gap-3 rounded-2xl border bg-muted/40 p-4">

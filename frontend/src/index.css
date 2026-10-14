@@ -161,6 +161,11 @@
   padding-bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom) + 1.5rem);
 }
 
+/* Elementos flotantes justo encima de la barra inferior (la barra del carrito) */
+@utility bottom-above-tabbar {
+  bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom) + 0.75rem);
+}
+
 /* Fondo tintado con el color de la sección (--tone): bg-tone/15 no funciona con variables
    arbitrarias, así que se define una utilidad propia */
 @utility bg-tone-soft {

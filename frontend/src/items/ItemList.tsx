@@ -1,5 +1,5 @@
-import { Check, MoreHorizontal, ShoppingCart, Trash2, Undo2 } from 'lucide-react'
-import { useState, type CSSProperties, type ReactNode } from 'react'
+import { Check, CheckCheck, Hand, MoreHorizontal, ShoppingCart, Trash2, Undo2 } from 'lucide-react'
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import type { Item } from '@/api/types'
 import { BottomSheet } from '@/components/BottomSheet'
 import { EmptyState } from '@/components/EmptyState'
@@ -20,15 +20,43 @@ type Props = {
   onClearChecked: () => void
 }
 
-/** Los productos de la lista como tarjetas, agrupadas por sección del súper. */
+const HINT_KEY = 'hint-cart-seen'
+
+function hintSeen(): boolean {
+  try {
+    return localStorage.getItem(HINT_KEY) === '1'
+  } catch {
+    return false // sin almacenamiento (modo privado…): se enseña la pista, no pasa nada
+  }
+}
+
+/**
+ * Lo que falta por coger, como tarjetas agrupadas por sección del súper. Lo que ya está en el
+ * carrito no se muestra aquí: está en la barra del carrito (Cart).
+ */
 export function ItemList({ items, onToggle, onQuantity, onNote, onDelete, onClearChecked }: Props) {
   // Se guarda el id (no el objeto): si otro miembro lo cambia en tiempo real, el panel muestra
   // siempre la versión actual, y si lo borra, el panel se cierra solo
   const [editingId, setEditingId] = useState<string | null>(null)
   const editing = items.find((item) => item.id === editingId) ?? null
+  const [showHint, setShowHint] = useState(() => !hintSeen())
 
   const pending = items.filter((item) => !item.checked)
-  const inCart = items.filter((item) => item.checked)
+
+  const hideHint = () => {
+    setShowHint(false)
+    try {
+      localStorage.setItem(HINT_KEY, '1')
+    } catch {
+      // sin almacenamiento: la pista volverá a salir la próxima vez
+    }
+  }
+
+  // Quien ya ha metido algo en el carrito ya sabe cómo va: la pista sobra
+  const toCart = (item: Item) => {
+    if (showHint) hideHint()
+    onToggle(item)
+  }
 
   if (items.length === 0) {
     return (
@@ -43,39 +71,34 @@ export function ItemList({ items, onToggle, onQuantity, onNote, onDelete, onClea
   return (
     <>
       {pending.length === 0 ? (
-        <EmptyState icon="🎉" title="¡Todo en el carrito!" description="Ya tienes todo lo de la lista. Buen trabajo." />
-      ) : (
-        groupByCategory(pending).map((group) => {
-          const style = categoryStyle(group.category)
-          return (
-            <section key={group.category ?? OTHER_CATEGORY} aria-label={group.category ?? OTHER_CATEGORY} style={{ '--tone': style.color } as CSSProperties}>
-              <SectionTitle icon={style.icon} title={group.category ?? OTHER_CATEGORY} count={group.items.length} tone />
-              <TileGrid>
-                {group.items.map((item) => (
-                  <ItemTile key={item.id} item={item} onToggle={onToggle} onMore={() => setEditingId(item.id)} />
-                ))}
-              </TileGrid>
-            </section>
-          )
-        })
-      )}
-
-      {inCart.length > 0 && (
-        <section aria-label="En el carrito" className="rounded-2xl bg-muted/60 p-3">
-          <div className="flex items-center justify-between gap-2">
-            <SectionTitle icon={<ShoppingCart className="size-4" />} title="En el carrito" count={inCart.length} />
-            <Button variant="ghost" size="sm" className="h-9 text-muted-foreground" onClick={onClearChecked}>
-              <Trash2 aria-hidden="true" />
-              Vaciar
+        <EmptyState
+          icon="🎉"
+          title="¡Lo tienes todo!"
+          description="Todo lo de la lista está ya en el carrito."
+          action={
+            <Button size="lg" onClick={onClearChecked}>
+              <CheckCheck aria-hidden="true" />
+              Terminar la compra
             </Button>
-          </div>
-          <p className="mb-2 px-1 text-xs text-muted-foreground">Toca un producto para devolverlo a la lista.</p>
-          <TileGrid>
-            {inCart.map((item) => (
-              <ItemTile key={item.id} item={item} onToggle={onToggle} onMore={() => setEditingId(item.id)} />
-            ))}
-          </TileGrid>
-        </section>
+          }
+        />
+      ) : (
+        <>
+          {showHint && <CartHint onDismiss={hideHint} />}
+          {groupByCategory(pending).map((group) => {
+            const style = categoryStyle(group.category)
+            return (
+              <section key={group.category ?? OTHER_CATEGORY} aria-label={group.category ?? OTHER_CATEGORY} style={{ '--tone': style.color } as CSSProperties}>
+                <SectionTitle icon={style.icon} title={group.category ?? OTHER_CATEGORY} count={group.items.length} tone />
+                <TileGrid>
+                  {group.items.map((item) => (
+                    <ItemTile key={item.id} item={item} onToCart={toCart} onMore={() => setEditingId(item.id)} />
+                  ))}
+                </TileGrid>
+              </section>
+            )
+          })}
+        </>
       )}
 
       {editing && (
@@ -97,6 +120,26 @@ export function ItemList({ items, onToggle, onQuantity, onNote, onDelete, onClea
   )
 }
 
+/** Pista para quien la usa por primera vez: cómo se mete un producto en el carrito. */
+function CartHint({ onDismiss }: { onDismiss: () => void }) {
+  return (
+    <div role="note" className="flex items-start gap-3 rounded-2xl border border-primary/30 bg-secondary p-4 text-secondary-foreground motion-safe:animate-tile-in">
+      <span className="grid size-10 shrink-0 place-items-center rounded-full bg-card text-primary" aria-hidden="true">
+        <Hand className="size-5" />
+      </span>
+      <div className="flex flex-1 flex-col gap-2 text-sm">
+        <p>
+          <strong>Toca un producto cuando lo metas en el carro.</strong> Pasará a tu carrito, abajo. Si te equivocas, lo puedes
+          devolver.
+        </p>
+        <Button size="sm" className="h-9 self-start" onClick={onDismiss}>
+          Entendido
+        </Button>
+      </div>
+    </div>
+  )
+}
+
 function SectionTitle({ icon, title, count, tone = false }: { icon: ReactNode; title: string; count: number; tone?: boolean }) {
   return (
     <h2 className={cn('mb-2 flex items-center gap-2 px-1 text-sm font-semibold', tone ? 'text-(--tone)' : 'text-muted-foreground')}>
@@ -112,46 +155,61 @@ function TileGrid({ children }: { children: ReactNode }) {
   return <ul className="grid grid-cols-[repeat(auto-fill,minmax(6.5rem,1fr))] gap-2.5">{children}</ul>
 }
 
-function ItemTile({ item, onToggle, onMore }: { item: Item; onToggle: (item: Item) => void; onMore: () => void }) {
+function prefersReducedMotion() {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches
+}
+
+/** Cuánto se ve la confirmación "¡Al carrito!" en la tarjeta antes de que se vaya al carrito. */
+const CONFIRM_MS = 450
+
+function ItemTile({ item, onToCart, onMore }: { item: Item; onToCart: (item: Item) => void; onMore: () => void }) {
   const style = categoryStyle(item.categoryName)
   const label = `${item.name}${item.quantity > 1 ? `, ${item.quantity} unidades` : ''}${item.note ? `, ${item.note}` : ''}`
+  // Medio segundo de confirmación en la propia tarjeta: el cliente ve qué ha pasado justo donde
+  // ha tocado, en vez de ver desaparecer el producto sin más
+  const [confirming, setConfirming] = useState(false)
+  const timer = useRef<number | undefined>(undefined)
+  useEffect(() => () => window.clearTimeout(timer.current), [])
+
+  const toCart = () => {
+    if (confirming) return // evita doble toque
+    if (prefersReducedMotion()) return onToCart(item)
+    setConfirming(true)
+    timer.current = window.setTimeout(() => {
+      onToCart(item)
+      setConfirming(false)
+    }, CONFIRM_MS)
+  }
 
   return (
     <li className="relative motion-safe:animate-tile-in" style={{ '--tone': style.color } as CSSProperties}>
-      {/* Toda la tarjeta es el botón: un toque la manda al carrito (aria-pressed = "marcada") */}
+      {/* Toda la tarjeta es el botón: un toque la mete en el carrito */}
       <button
         type="button"
-        aria-pressed={item.checked}
-        aria-label={label}
-        onClick={() => onToggle(item)}
+        aria-label={`Meter en el carrito: ${label}`}
+        onClick={toCart}
         className={cn(
           'flex aspect-[4/5] w-full flex-col items-center justify-center gap-1 rounded-xl border p-2 pt-8 text-center outline-none',
-          'transition-[transform,opacity,background-color] duration-200 focus-visible:ring-[3px] focus-visible:ring-ring/50 active:scale-95',
-          item.checked ? 'border-border bg-card opacity-60' : 'bg-tone-soft border-tone-soft hover:brightness-[0.98]',
+          'bg-tone-soft border-tone-soft transition-transform duration-200 hover:brightness-[0.98] focus-visible:ring-[3px] focus-visible:ring-ring/50 active:scale-95',
+          confirming && 'scale-95',
         )}
       >
-        <span className={cn('text-4xl leading-none transition-[filter]', item.checked && 'grayscale')} aria-hidden="true">
+        <span className="text-4xl leading-none" aria-hidden="true">
           {item.icon ?? style.icon}
         </span>
-        <span className={cn('line-clamp-2 text-sm leading-tight font-semibold', item.checked && 'text-muted-foreground line-through')}>
+        <span className="line-clamp-2 text-sm leading-tight font-semibold">
           {item.name}
           {/* La cantidad junto al nombre (una insignia aparte tapaba el texto en tarjetas estrechas) */}
-          {item.quantity > 1 && <span className={cn('font-bold whitespace-nowrap', !item.checked && 'text-(--tone)')}> ×{item.quantity}</span>}
+          {item.quantity > 1 && <span className="font-bold whitespace-nowrap text-(--tone)"> ×{item.quantity}</span>}
         </span>
         {item.note && <span className="w-full truncate text-xs text-muted-foreground">{item.note}</span>}
       </button>
 
-      {/* Casilla grande (decorativa: el estado lo anuncia aria-pressed del botón) */}
+      {/* Casilla (decorativa: la acción la describe el aria-label del botón) */}
       <span
         aria-hidden="true"
-        className={cn(
-          'pointer-events-none absolute top-2 left-2 grid size-7 place-items-center rounded-full border-2 transition-colors',
-          item.checked ? 'border-primary bg-primary text-primary-foreground motion-safe:animate-pop' : 'border-muted-foreground/40 bg-card',
-        )}
-      >
-        {item.checked && <Check className="size-4" strokeWidth={3} />}
-      </span>
-
+        className="pointer-events-none absolute top-2 left-2 grid size-7 place-items-center rounded-full border-2 border-muted-foreground/40 bg-card"
+      />
 
       <button
         type="button"
@@ -161,6 +219,20 @@ function ItemTile({ item, onToggle, onMore }: { item: Item; onToggle: (item: Ite
       >
         <MoreHorizontal className="size-5" aria-hidden="true" />
       </button>
+
+      {confirming && (
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 grid place-items-center rounded-xl bg-primary text-primary-foreground animate-in fade-in zoom-in-90 duration-150"
+        >
+          <span className="flex flex-col items-center gap-1.5 text-sm font-bold">
+            <span className="grid size-11 place-items-center rounded-full bg-primary-foreground text-primary animate-pop">
+              <Check className="size-6" strokeWidth={3} />
+            </span>
+            ¡Al carrito!
+          </span>
+        </span>
+      )}
     </li>
   )
 }
