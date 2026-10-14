@@ -1,4 +1,4 @@
-import { ArrowLeft, LogOut, QrCode, RefreshCw, Share2, Trash2, UserPlus } from 'lucide-react'
+import { LogOut, QrCode, RefreshCw, Share2, Trash2, UserPlus } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
@@ -28,6 +28,7 @@ import { sortItems } from '@/items/sortItems'
 import { inviteUrl, shareInvite } from '@/lists/invite'
 import { rememberLastList } from '@/lists/lastList'
 import { applyListEvent } from '@/lists/listEvents'
+import { ListSwitcher } from '@/lists/ListSwitcher'
 import { useListEvents, type ConnectionStatus } from '@/lists/useListEvents'
 import { cn } from '@/lib/utils'
 import { CategoryBrowser } from '@/products/CategoryBrowser'
@@ -69,8 +70,16 @@ function createOwnActionClock() {
   }
 }
 
-export function ListPage() {
+/**
+ * key={listId}: al cambiar de lista desde "Mis listas ▾" la página se monta de cero (carga,
+ * tiempo real y paneles de la lista nueva), sin arrastrar nada de la anterior.
+ */
+export function ListRoute() {
   const { listId = '' } = useParams()
+  return <ListPage key={listId} listId={listId} />
+}
+
+function ListPage({ listId }: { listId: string }) {
   const { user } = useAuth()
   const navigate = useNavigate()
   const { confirm, confirmDialog } = useConfirm()
@@ -129,7 +138,7 @@ export function ListPage() {
           description={state.message}
           action={
             <Button asChild size="lg">
-              <Link to="/">Volver a mis listas</Link>
+              <Link to="/">Ir a mis listas</Link>
             </Button>
           }
         />
@@ -313,41 +322,41 @@ export function ListPage() {
   return (
     <>
       <PageHeader
-        title={list.name}
-        leading={
-          <Button variant="ghost" size="icon" className="-ml-2 size-11" aria-label="Volver a mis listas" onClick={() => navigate('/')}>
-            <ArrowLeft className="size-5" aria-hidden="true" />
-          </Button>
-        }
+        title={<ListSwitcher current={list} />}
         actions={
-          <Button variant="secondary" className="h-10" onClick={() => setShareOpen(true)}>
-            <UserPlus aria-hidden="true" />
-            Compartir
-          </Button>
+          // Miembros y compartir en un solo botón: menos elementos sueltos en la cabecera
+          <button
+            type="button"
+            onClick={() => setShareOpen(true)}
+            aria-label={`Compartir la lista (${list.members.length} ${list.members.length === 1 ? 'miembro' : 'miembros'})`}
+            className="flex h-11 items-center gap-2 rounded-full bg-secondary py-1 pr-3.5 pl-1.5 text-secondary-foreground outline-none transition-colors hover:bg-secondary/80 focus-visible:ring-[3px] focus-visible:ring-ring/50 active:scale-95"
+          >
+            <span className="flex -space-x-2" aria-hidden="true">
+              {list.members.slice(0, 3).map((member) => (
+                <UserAvatar key={member.userId} name={member.displayName} avatarUrl={member.avatarUrl} className="size-8 text-xs ring-2 ring-secondary" fallbackClassName="bg-card" />
+              ))}
+              {list.members.length > 3 && (
+                <span className="grid size-8 place-items-center rounded-full bg-card text-xs font-semibold ring-2 ring-secondary">
+                  +{list.members.length - 3}
+                </span>
+              )}
+            </span>
+            <UserPlus className="size-5" aria-hidden="true" />
+          </button>
         }
       >
-        <div className="mt-2 flex items-center gap-3">
-          <button type="button" aria-label="Ver miembros" onClick={() => setShareOpen(true)} className="flex -space-x-2 rounded-full outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
-            {list.members.slice(0, 4).map((member) => (
-              <UserAvatar key={member.userId} name={member.displayName} avatarUrl={member.avatarUrl} className="size-7 text-xs ring-2 ring-background" />
-            ))}
-            {list.members.length > 4 && (
-              <span className="grid size-7 place-items-center rounded-full bg-muted text-xs font-semibold ring-2 ring-background">
-                +{list.members.length - 4}
-              </span>
-            )}
-          </button>
+        <div className="mt-4 flex items-center justify-between gap-3">
+          <span className="text-sm font-semibold">
+            {items.length === 0 ? 'Añade lo que necesitas' : pending === 0 ? '¡Lo tienes todo!' : pending === 1 ? 'Falta 1 producto' : `Faltan ${pending} productos`}
+          </span>
           <LiveStatus status={connection} remoteUpdate={remoteUpdate > 0} />
         </div>
         {items.length > 0 && (
-          <div className="mt-3 flex flex-col gap-1.5">
-            <div className="flex items-baseline justify-between text-sm">
-              <span className="font-semibold">{pending === 0 ? '¡Lo tienes todo!' : pending === 1 ? 'Falta 1 producto' : `Faltan ${pending} productos`}</span>
-              <span className="text-muted-foreground tabular-nums">
-                {inCart} de {items.length} en el carrito
-              </span>
-            </div>
+          <div className="mt-2.5 flex flex-col gap-1.5">
             <Progress value={(inCart / items.length) * 100} className="h-2" aria-label={`${inCart} de ${items.length} en el carrito`} />
+            <span className="text-xs text-muted-foreground tabular-nums">
+              {inCart} de {items.length} en el carrito
+            </span>
           </div>
         )}
       </PageHeader>
@@ -471,7 +480,7 @@ const LIVE_STATUS_TEXT: Record<ConnectionStatus, string> = {
 function LiveStatus({ status, remoteUpdate }: { status: ConnectionStatus; remoteUpdate: boolean }) {
   const live = status === 'live'
   return (
-    <span role="status" className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+    <span role="status" className="flex shrink-0 items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
       {remoteUpdate && live ? (
         <>
           <RefreshCw className="size-3.5 text-primary motion-safe:animate-spin [animation-iteration-count:1]" aria-hidden="true" />

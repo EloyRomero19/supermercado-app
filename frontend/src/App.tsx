@@ -5,7 +5,7 @@ import { GuestOnly, RequireAuth } from './auth/RouteGuards'
 import { AuthCallbackPage } from './pages/AuthCallbackPage'
 import { HomePage } from './pages/HomePage'
 import { JoinPage } from './pages/JoinPage'
-import { ListPage } from './pages/ListPage'
+import { ListRoute } from './pages/ListPage'
 import { LoginPage } from './pages/LoginPage'
 import { PrivacyPage } from './pages/PrivacyPage'
 import { RegisterPage } from './pages/RegisterPage'
@@ -25,7 +25,7 @@ function App() {
             {/* Rutas anidadas: AppLayout pinta la página y debajo la barra de navegación */}
             <Route element={<AppLayout />}>
               <Route index element={<HomePage />} />
-              <Route path="listas/:listId" element={<ListPage />} />
+              <Route path="listas/:listId" element={<ListRoute />} />
               <Route path="recetas" element={<RecipesPage />} />
               <Route path="recetas/:recipeId" element={<RecipePage />} />
               <Route path="cuenta" element={<AccountPage />} />

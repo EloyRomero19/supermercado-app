@@ -52,7 +52,7 @@ docker compose -f docker-compose.prod.yml up -d --build   # producción (ver REA
   Si se añaden orígenes externos (imágenes, scripts…), hay que permitirlos en la CSP. `style-src` admite `'unsafe-inline'`
   porque sonner y Radix insertan `<style>` en tiempo de ejecución (scripts en línea siguen prohibidos).
 - Usuario actual en controladores: `@CurrentUserId UUID userId` (meta-anotación de `@AuthenticationPrincipal`).
-- Invitaciones: QR (qrcode.react) con el enlace `/unirse/:codigo` + botón "Compartir enlace"; en "Mis listas", el botón "Unirse con un enlace" abre un modal (`lists/JoinListDialog`) donde se pega (`extractInviteCode`).
+- Invitaciones: QR (qrcode.react) con el enlace `/unirse/:codigo` + botón "Compartir enlace"; desde "Mis listas ▾" (o la pantalla sin listas), "Unirse con un enlace" abre un modal (`lists/JoinListDialog`) donde se pega (`extractInviteCode`).
 - Autorización de listas SIEMPRE con `ListAccessService.requireMember/requireOwner` (404 a no-miembros, 403 a miembros sin permiso).
 - Entidades con clave asignada por nosotros (p. ej. `ListMember`) implementan `Persistable` para que `save()` haga INSERT y no merge.
 - Items siempre por `(listId, itemId)` (`findByIdAndListId`) para evitar IDOR. `ListItem` usa `@Version` (409 si hay edición concurrente).
@@ -77,6 +77,9 @@ docker compose -f docker-compose.prod.yml up -d --build   # producción (ver REA
 - "Utilizados recientemente": tabla `list_recent_item` (V6), se actualiza con un upsert al añadir un producto
   (`RecentItemRepository`). En el frontend, `applyListEvent` lo actualiza con cada producto nuevo que llega por SSE.
 - Navegación: las páginas con sesión cuelgan de `layout/AppLayout` (barra inferior `TabBar`: Listas, Recetas, Cuenta).
+  Pestaña Listas (`/`, `HomePage`) = redirige a la lista principal (`pickListToShop`: la última abierta o la de más pendientes);
+  solo muestra contenido si no hay listas. Se cambia de lista con `lists/ListSwitcher` (título "Mis listas ▾", DropdownMenu con
+  `modal={false}`), que también abre `NewListDialog`/`JoinListDialog`. `ListRoute` monta `ListPage` con `key={listId}`.
   Recetas (`pages/RecipesPage`, `RecipePage`): tablas `recipe`/`recipe_ingredient` (V7, ingredientes = productos del catálogo);
   muestra qué falta en la lista elegida (`recipes/missingIngredients`, por defecto `pickListToShop`) y lo añade con
   `POST /api/lists/{id}/items/bulk` (una transacción: todo o nada). Nuevas recetas = nueva migración. Lista = SOLO lo que falta, en tarjetas agrupadas por sección (`items/ItemList`; un toque = al carrito,

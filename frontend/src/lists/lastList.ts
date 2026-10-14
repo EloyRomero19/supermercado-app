@@ -1,5 +1,6 @@
 /**
- * Recuerda en este navegador la última lista abierta: las recetas añaden a ella por defecto.
+ * Recuerda en este navegador la última lista abierta: es la que abre la pestaña Listas y a la
+ * que añaden las recetas por defecto.
  * Es solo una comodidad: si el almacenamiento no está disponible (modo privado, bloqueado…)
  * se ignora sin romper nada.
  */
