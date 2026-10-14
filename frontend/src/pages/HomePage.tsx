@@ -2,7 +2,7 @@ import { ChevronRight, Link2, Plus, ShoppingBasket, Users } from 'lucide-react'
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { ApiError } from '@/api/client'
-import { createList, getMyLists, joinList } from '@/api/lists'
+import { createList, getMyLists } from '@/api/lists'
 import type { ListSummary } from '@/api/types'
 import { useAuth } from '@/auth/useAuth'
 import { CardSkeleton } from '@/components/AppSkeleton'
@@ -18,9 +18,8 @@ import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Progress } from '@/components/ui/progress'
 import { listColor } from '@/items/categoryStyle'
-import { extractInviteCode } from '@/lists/invite'
+import { JoinListDialog } from '@/lists/JoinListDialog'
 import { onlyErrors } from '@/lib/validation'
-import { InstallCard } from '@/pwa/InstallCard'
 
 export function HomePage() {
   const { user } = useAuth()
@@ -28,7 +27,7 @@ export function HomePage() {
   const [lists, setLists] = useState<ListSummary[] | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [newName, setNewName] = useState('')
-  const [inviteLink, setInviteLink] = useState('')
+  const [joinOpen, setJoinOpen] = useState(false)
   const newListInput = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -48,14 +47,6 @@ export function HomePage() {
       navigate(`/listas/${list.id}`)
     },
     () => onlyErrors({ name: newName.trim() ? undefined : 'Ponle un nombre a la lista' }),
-  )
-
-  const join = useSubmit(
-    async () => {
-      const list = await joinList(extractInviteCode(inviteLink) ?? '')
-      navigate(`/listas/${list.id}`)
-    },
-    () => onlyErrors({ code: extractInviteCode(inviteLink) ? undefined : 'Eso no parece un enlace de invitación. Pega el enlace completo.' }),
   )
 
   const firstName = user?.displayName.split(' ')[0] ?? ''
@@ -93,10 +84,16 @@ export function HomePage() {
               title="Aún no tienes listas"
               description="Crea tu primera lista o únete a la de otra persona con su QR o su enlace."
               action={
-                <Button size="lg" onClick={() => newListInput.current?.focus()}>
-                  <Plus aria-hidden="true" />
-                  Crear una lista
-                </Button>
+                <div className="flex flex-wrap justify-center gap-2">
+                  <Button size="lg" onClick={() => newListInput.current?.focus()}>
+                    <Plus aria-hidden="true" />
+                    Crear una lista
+                  </Button>
+                  <Button size="lg" variant="outline" onClick={() => setJoinOpen(true)}>
+                    <Link2 aria-hidden="true" />
+                    Unirme con un enlace
+                  </Button>
+                </div>
               }
             />
           )}
@@ -135,43 +132,18 @@ export function HomePage() {
           </form>
         </Card>
 
-        {/* Plegado por defecto: es algo puntual y así no ocupa sitio */}
-        <Card className="gap-0 px-4 py-0">
-          <details className="group" open={lists?.length === 0 || undefined}>
-            <summary className="flex min-h-14 cursor-pointer list-none items-center gap-3 font-semibold [&::-webkit-details-marker]:hidden">
-              <Link2 className="size-5 text-primary" aria-hidden="true" />
-              Unirse con un enlace
-              <ChevronRight className="ml-auto size-5 text-muted-foreground transition-transform group-open:rotate-90" aria-hidden="true" />
-            </summary>
-            <form className="flex flex-col gap-2 pb-4" onSubmit={join.onSubmit} noValidate>
-              <p className="text-sm text-muted-foreground">
-                ¿Te han enviado una invitación? Pega aquí el enlace (o escanea su QR con la cámara).
-              </p>
-              <FormAlert message={join.error && !join.fieldErrors.code ? join.error : null} />
-              <div className="flex gap-2">
-                <Input
-                  className="h-11 flex-1 text-base"
-                  inputMode="url"
-                  aria-label="Enlace de invitación"
-                  aria-invalid={join.fieldErrors.code ? true : undefined}
-                  placeholder="https://…/unirse/K7MX4QPA"
-                  autoComplete="off"
-                  autoCapitalize="off"
-                  spellCheck={false}
-                  value={inviteLink}
-                  onChange={(e) => setInviteLink(e.target.value)}
-                />
-                <SubmitButton submitting={join.submitting} submittingLabel="Uniendo…">
-                  Unirse
-                </SubmitButton>
-              </div>
-              {join.fieldErrors.code && <p className="text-sm font-medium text-destructive">{join.fieldErrors.code}</p>}
-            </form>
-          </details>
-        </Card>
-
-        <InstallCard />
+        <button
+          type="button"
+          onClick={() => setJoinOpen(true)}
+          className="flex min-h-14 items-center gap-3 rounded-2xl border bg-card px-4 text-left font-semibold shadow-xs outline-none transition-all hover:shadow-md focus-visible:ring-[3px] focus-visible:ring-ring/50 active:scale-[0.99]"
+        >
+          <Link2 className="size-5 text-primary" aria-hidden="true" />
+          Unirse con un enlace
+          <ChevronRight className="ml-auto size-5 text-muted-foreground" aria-hidden="true" />
+        </button>
       </main>
+
+      <JoinListDialog open={joinOpen} onOpenChange={setJoinOpen} />
     </>
   )
 }

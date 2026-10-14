@@ -52,7 +52,7 @@ docker compose -f docker-compose.prod.yml up -d --build   # producción (ver REA
   Si se añaden orígenes externos (imágenes, scripts…), hay que permitirlos en la CSP. `style-src` admite `'unsafe-inline'`
   porque sonner y Radix insertan `<style>` en tiempo de ejecución (scripts en línea siguen prohibidos).
 - Usuario actual en controladores: `@CurrentUserId UUID userId` (meta-anotación de `@AuthenticationPrincipal`).
-- Invitaciones: QR (qrcode.react) con el enlace `/unirse/:codigo` + botón "Compartir enlace"; en "Mis listas" se puede pegar el enlace (`extractInviteCode`).
+- Invitaciones: QR (qrcode.react) con el enlace `/unirse/:codigo` + botón "Compartir enlace"; en "Mis listas", el botón "Unirse con un enlace" abre un modal (`lists/JoinListDialog`) donde se pega (`extractInviteCode`).
 - Autorización de listas SIEMPRE con `ListAccessService.requireMember/requireOwner` (404 a no-miembros, 403 a miembros sin permiso).
 - Entidades con clave asignada por nosotros (p. ej. `ListMember`) implementan `Persistable` para que `save()` haga INSERT y no merge.
 - Items siempre por `(listId, itemId)` (`findByIdAndListId`) para evitar IDOR. `ListItem` usa `@Version` (409 si hay edición concurrente).
