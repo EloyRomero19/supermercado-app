@@ -14,7 +14,7 @@ export function AuthLayout({ title, subtitle, children, footer }: Props) {
         <div className="flex flex-col items-center gap-3 text-center">
           <BrandMark className="size-16 rounded-2xl shadow-md" />
           <div>
-            <p className="text-sm font-semibold text-primary">Lista de la compra</p>
+            <p className="text-lg font-extrabold tracking-tight text-primary">¿Qué falta?</p>
             <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
             <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
           </div>

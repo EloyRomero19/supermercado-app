@@ -10,7 +10,7 @@ export async function shareInvite(code: string, listName: string): Promise<'shar
   const url = inviteUrl(code)
   if (navigator.share) {
     try {
-      await navigator.share({ title: listName, text: `Únete a mi lista de la compra «${listName}»`, url })
+      await navigator.share({ title: listName, text: `¿Qué falta? Apúntalo en mi lista «${listName}»`, url })
       return 'shared'
     } catch (error) {
       // El usuario cerró el menú de compartir: no es un error

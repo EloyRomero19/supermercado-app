@@ -26,9 +26,9 @@ export default defineConfig({
       registerType: 'prompt',
       includeManifestIcons: false, // ya entran en la caché por globPatterns (evita duplicados)
       manifest: {
-        name: 'Lista de la compra',
-        short_name: 'Compra',
-        description: 'Listas de la compra compartidas y en tiempo real',
+        name: '¿Qué falta? · Lo que falta en casa, a un toque',
+        short_name: 'Qué falta', // nombre bajo el icono: corto para que no se corte
+        description: '¿Qué falta? Listas de la compra compartidas en tiempo real y recetas que te dicen lo que te falta.',
         lang: 'es',
         start_url: '/',
         scope: '/',

@@ -1,4 +1,4 @@
-# Lista de la compra compartida
+# ¿Qué falta? · Lo que falta en casa, a un toque
 
 PWA para hacer la compra en compañía: listas compartidas por QR o enlace, productos agrupados por
 secciones del supermercado y cambios en tiempo real entre todos los miembros.
