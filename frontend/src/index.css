@@ -2,6 +2,10 @@
 /* Animaciones de entrada/salida que usan los componentes de shadcn/ui (paneles, avisos…) */
 @import 'tw-animate-css';
 
+/* El modo oscuro depende de <html data-theme="dark"> (lo pone public/theme-init.js según lo que
+   elija el usuario en Cuenta, o según el sistema). Las clases dark: de Tailwind/shadcn, también. */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
 /* =========================================================================
    Tokens de diseño. Los componentes NUNCA usan colores sueltos: usan estas variables
    a través de las clases de Tailwind (bg-primary, text-muted-foreground…).
@@ -9,6 +13,8 @@
    Contraste comprobado (WCAG AA ≥ 4,5:1) para texto sobre fondo, tarjeta y botones.
    ========================================================================= */
 :root {
+  /* Controles nativos (select, casillas, barras de desplazamiento) en el mismo tema */
+  color-scheme: light;
   --radius: 0.875rem;
 
   /* Neutros con un toque verde para que todo combine con la marca */
@@ -61,32 +67,31 @@
   --tabbar-height: 4rem;
 }
 
-/* Modo oscuro automático, según el sistema (Tailwind usa la misma media query para "dark:") */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: oklch(0.17 0.01 150);
-    --foreground: oklch(0.96 0.005 150);
-    --card: oklch(0.21 0.012 150);
-    --card-foreground: oklch(0.96 0.005 150);
-    --popover: oklch(0.21 0.012 150);
-    --popover-foreground: oklch(0.96 0.005 150);
-    --muted: oklch(0.25 0.012 150);
-    --muted-foreground: oklch(0.72 0.02 150);
-    --border: oklch(0.3 0.015 150);
-    --input: oklch(0.33 0.015 150);
+/* Modo oscuro: elegido en Cuenta o, en "Automático", según el sistema */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --background: oklch(0.17 0.01 150);
+  --foreground: oklch(0.96 0.005 150);
+  --card: oklch(0.21 0.012 150);
+  --card-foreground: oklch(0.96 0.005 150);
+  --popover: oklch(0.21 0.012 150);
+  --popover-foreground: oklch(0.96 0.005 150);
+  --muted: oklch(0.25 0.012 150);
+  --muted-foreground: oklch(0.72 0.02 150);
+  --border: oklch(0.3 0.015 150);
+  --input: oklch(0.33 0.015 150);
 
-    --primary: oklch(0.74 0.16 150);
-    --primary-foreground: oklch(0.18 0.03 150);
-    --secondary: oklch(0.28 0.04 150);
-    --secondary-foreground: oklch(0.9 0.05 150);
-    --accent: oklch(0.28 0.04 150);
-    --accent-foreground: oklch(0.9 0.05 150);
-    --ring: oklch(0.66 0.14 150);
+  --primary: oklch(0.74 0.16 150);
+  --primary-foreground: oklch(0.18 0.03 150);
+  --secondary: oklch(0.28 0.04 150);
+  --secondary-foreground: oklch(0.9 0.05 150);
+  --accent: oklch(0.28 0.04 150);
+  --accent-foreground: oklch(0.9 0.05 150);
+  --ring: oklch(0.66 0.14 150);
 
-    --success: oklch(0.74 0.16 150);
-    --destructive: oklch(0.7 0.17 25);
-    --destructive-foreground: oklch(0.18 0.03 25);
-  }
+  --success: oklch(0.74 0.16 150);
+  --destructive: oklch(0.7 0.17 25);
+  --destructive-foreground: oklch(0.18 0.03 25);
 }
 
 /* Las variables anteriores, convertidas en clases de Tailwind (bg-card, text-primary, rounded-xl…) */

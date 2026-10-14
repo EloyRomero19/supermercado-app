@@ -6,6 +6,9 @@ import './index.css'
 // Importado lo antes posible: captura el aviso de instalación aunque llegue antes de pintar nada
 import './pwa/installPrompt'
 import App from './App.tsx'
+import { initTheme } from './theme/theme'
+
+initTheme()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

@@ -85,8 +85,9 @@ docker compose -f docker-compose.prod.yml up -d --build   # producción (ver REA
   `POST /api/lists/{id}/items/bulk` (una transacción: todo o nada). Nuevas recetas = nueva migración. Lista = SOLO lo que falta, en tarjetas agrupadas por sección (`items/ItemList`; un toque = al carrito,
   con confirmación de 450 ms en la tarjeta). Lo cogido vive en `items/Cart` (barra fija + panel: devolver, "Terminar la compra").
 - Diseño: Tailwind 4 + shadcn/ui. Tokens (colores OKLCH con contraste AA comprobado, radios, fuente Inter, animaciones) SOLO en
-  `src/index.css`; los componentes usan clases (`bg-primary`, `text-muted-foreground`…), nunca colores sueltos. Modo oscuro automático
-  (prefers-color-scheme). Colores de sección = tokens `--cat-N` (`items/categoryStyle.ts`), aplicados con `--tone` + `bg-tone-soft`.
+  `src/index.css`; los componentes usan clases (`bg-primary`, `text-muted-foreground`…), nunca colores sueltos. Modo oscuro con
+  `<html data-theme>` (Automático/Claro/Oscuro en Cuenta, `src/theme/theme.ts`; `public/theme-init.js` lo aplica antes de pintar,
+  en archivo aparte por la CSP) y `@custom-variant dark` para las clases `dark:`. Colores de sección = tokens `--cat-N` (`items/categoryStyle.ts`), aplicados con `--tone` + `bg-tone-soft`.
   Componentes shadcn en `src/components/ui/` (generados por la CLI; tras `npx shadcn add`, revisar que importen `cn` de `@/lib/utils`
   y no instalen el paquete npm `cn`). Avisos con `toast` de sonner; confirmaciones con `useConfirm`; respetar `prefers-reduced-motion`.
 - En desarrollo, Vite hace proxy de `/api`, `/oauth2` y `/login/oauth2` a `http://localhost:8080` (mismo origen, sin CORS).
