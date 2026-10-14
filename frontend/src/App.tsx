@@ -9,9 +9,12 @@ import { ListPage } from './pages/ListPage'
 import { LoginPage } from './pages/LoginPage'
 import { PrivacyPage } from './pages/PrivacyPage'
 import { RegisterPage } from './pages/RegisterPage'
-import { SettingsPage } from './pages/SettingsPage'
-import { ShopPage } from './pages/ShopPage'
+import { AccountPage } from './pages/AccountPage'
+import { RecipePage } from './pages/RecipePage'
+import { RecipesPage } from './pages/RecipesPage'
 import { UpdatePrompt } from './pwa/UpdatePrompt'
+import { OfflineBanner } from '@/components/OfflineBanner'
+import { Toaster } from '@/components/ui/sonner'
 
 function App() {
   return (
@@ -23,8 +26,13 @@ function App() {
             <Route element={<AppLayout />}>
               <Route index element={<HomePage />} />
               <Route path="listas/:listId" element={<ListPage />} />
-              <Route path="comprar" element={<ShopPage />} />
-              <Route path="ajustes" element={<SettingsPage />} />
+              <Route path="recetas" element={<RecipesPage />} />
+              <Route path="recetas/:recipeId" element={<RecipePage />} />
+              <Route path="cuenta" element={<AccountPage />} />
+              {/* Rutas antiguas: por si alguien las tenía guardadas */}
+              <Route path="ajustes" element={<Navigate to="/cuenta" replace />} />
+              <Route path="comprar" element={<Navigate to="/" replace />} />
+              <Route path="buscar" element={<Navigate to="/recetas" replace />} />
             </Route>
             <Route path="unirse/:code" element={<JoinPage />} />
           </Route>
@@ -38,6 +46,8 @@ function App() {
         </Routes>
       </AuthProvider>
       <UpdatePrompt />
+      <OfflineBanner />
+      <Toaster />
     </BrowserRouter>
   )
 }

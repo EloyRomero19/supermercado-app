@@ -1,6 +1,6 @@
 import { Navigate } from 'react-router'
 import { useAuth } from '../auth/useAuth'
-import { LoadingScreen } from '../components/LoadingScreen'
+import { AppSkeleton } from '../components/AppSkeleton'
 
 /**
  * Aquí vuelve el backend tras el login con Google, con la cookie de refresh ya puesta.
@@ -10,6 +10,6 @@ import { LoadingScreen } from '../components/LoadingScreen'
 export function AuthCallbackPage() {
   const { status } = useAuth()
 
-  if (status === 'loading' || status === 'offline') return <LoadingScreen />
+  if (status === 'loading' || status === 'offline') return <AppSkeleton label="Iniciando sesión con Google" />
   return <Navigate to={status === 'authenticated' ? '/' : '/login?error=google'} replace />
 }

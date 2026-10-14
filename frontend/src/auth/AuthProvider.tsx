@@ -42,7 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
           await authApi.logout()
         } finally {
-          // Si otra persona entra después en este navegador, que "Comprar" no apunte a nuestra lista
+          // Si otra persona entra después en este navegador, que las recetas no añadan a nuestra lista
           forgetLastList()
           setSession(null)
         }

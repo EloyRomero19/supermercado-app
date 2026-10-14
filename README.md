@@ -7,16 +7,18 @@ secciones del supermercado y cambios en tiempo real entre todos los miembros.
 - Buscador de productos tolerante a tildes y erratas, más productos de texto libre
 - Varias listas por usuario, con propietario y miembros
 - Marcar productos como cogidos en tiempo real (Server-Sent Events)
+- Recetario: cada receta muestra qué ingredientes te faltan y los añade a la lista de una vez
 - Instalable en el móvil (PWA)
 
 <p>
-  <img src="docs/capturas/light-1-inicio.webp" width="200" alt="Mis listas">
-  <img src="docs/capturas/light-2-lista.webp" width="200" alt="Productos de la lista en tarjetas">
-  <img src="docs/capturas/light-5-seccion.webp" width="200" alt="Explorar una sección del súper">
-  <img src="docs/capturas/dark-2-lista.webp" width="200" alt="Lista en modo oscuro">
+  <img src="docs/capturas/light-01-login.webp" width="200" alt="Inicio de sesión">
+  <img src="docs/capturas/light-03-mis-listas.webp" width="200" alt="Mis listas">
+  <img src="docs/capturas/light-04-lista.webp" width="200" alt="Lista agrupada por secciones">
+  <img src="docs/capturas/dark-04-lista.webp" width="200" alt="Lista en modo oscuro">
+  <img src="docs/capturas/recetas-2-receta.webp" width="200" alt="Receta con los ingredientes que faltan">
 </p>
 
-**Stack:** Spring Boot 4 · Java 21 · PostgreSQL 18 · React 19 · Vite · TypeScript · Caddy · Docker
+**Stack:** Spring Boot 4 · Java 21 · PostgreSQL 18 · React 19 · Vite · TypeScript · Tailwind CSS · shadcn/ui · Caddy · Docker
 
 ## Desarrollo local
 

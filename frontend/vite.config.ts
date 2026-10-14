@@ -1,3 +1,5 @@
+import { fileURLToPath, URL } from 'node:url'
+import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
@@ -13,8 +15,11 @@ const proxy = {
 
 // https://vite.dev/config/
 export default defineConfig({
+  // "@/components/..." en vez de rutas relativas largas (lo usan también los componentes de shadcn/ui)
+  resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
   plugins: [
     react(),
+    tailwindcss(),
     VitePWA({
       // 'prompt': cuando hay una versión nueva, se pregunta al usuario (UpdatePrompt) en vez de
       // recargar la página por sorpresa mientras está marcando productos
@@ -28,8 +33,9 @@ export default defineConfig({
         start_url: '/',
         scope: '/',
         display: 'standalone', // se abre como una app, sin la barra del navegador
-        background_color: '#f6f7f5',
-        theme_color: '#1a7f4b',
+        // Colores del tema (index.css): fondo de la pantalla de inicio en Android y barra del sistema
+        background_color: '#f8fbf8',
+        theme_color: '#0a7e3a',
         icons: [
           { src: 'pwa-64x64.png', sizes: '64x64', type: 'image/png' },
           { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' },
@@ -40,7 +46,9 @@ export default defineConfig({
       workbox: {
         // Se guardan en caché los archivos de la app (el "app shell"): abre al instante y sin red
         // De la tipografía, solo los alfabetos que usamos (el navegador descarga los demás si hicieran falta)
-        globPatterns: ['**/*.{js,css,html,svg,png,ico}', '**/nunito-latin-*.woff2'],
+        globPatterns: ['**/*.{js,css,html,svg,png,ico}', '**/inter-latin-*.woff2'],
+        // Las pantallas de inicio de iPhone no se precachean: cada dispositivo pide solo la suya
+        globIgnores: ['**/apple-splash-*.png'],
         cleanupOutdatedCaches: true,
         // Al navegar a cualquier ruta (/listas/123…), el service worker sirve index.html y React
         // Router pinta la página. EXCEPTO estas rutas, que deben llegar al backend: si no, el login

@@ -91,3 +91,32 @@ export type RecentItem = {
   categoryOrder: number | null
   lastUsedAt: string
 }
+
+export type Difficulty = 'Fácil' | 'Media' | 'Difícil'
+
+export type RecipeSummary = {
+  id: number
+  name: string
+  emoji: string
+  description: string
+  minutes: number
+  servings: number
+  difficulty: Difficulty
+  ingredientCount: number
+}
+
+/** Ingrediente de una receta: un producto del catálogo más la cantidad ("1 kg", "al gusto"…). */
+export type Ingredient = {
+  productId: number
+  name: string
+  icon: string
+  categoryId: number
+  categoryName: string
+  categoryOrder: number
+  amount: string
+}
+
+export type RecipeDetail = Omit<RecipeSummary, 'ingredientCount'> & {
+  ingredients: Ingredient[]
+  steps: string[]
+}

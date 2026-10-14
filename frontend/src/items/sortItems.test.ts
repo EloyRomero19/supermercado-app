@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Item } from '../api/types'
-import { sortItems } from './sortItems'
+import { groupByCategory, sortItems } from './sortItems'
 
 function item(name: string, categoryName: string | null, categoryOrder: number | null): Item {
   return {
@@ -19,5 +19,13 @@ describe('sortItems', () => {
       item('Ajo', 'Frutas y verduras', 1),
     ])
     expect(sorted.map((i) => i.name)).toEqual(['Ajo', 'Nabo', 'Ñora', 'Detergente', 'Pilas'])
+  })
+
+  it('agrupa por sección conservando el orden; los que no tienen sección van juntos', () => {
+    const groups = groupByCategory(sortItems([item('Pilas', null, null), item('Ajo', 'Frutas y verduras', 1), item('Nabo', 'Frutas y verduras', 1)]))
+    expect(groups.map((g) => [g.category, g.items.map((i) => i.name)])).toEqual([
+      ['Frutas y verduras', ['Ajo', 'Nabo']],
+      [null, ['Pilas']],
+    ])
   })
 })

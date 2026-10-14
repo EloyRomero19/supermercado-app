@@ -89,6 +89,15 @@ public class ItemService {
 		return saved(listId, items.saveAndFlush(item)); // flush: rellena createdAt antes de construir el DTO
 	}
 
+	/**
+	 * Añade varios productos en UNA transacción: si uno falla (p. ej. un producto que no existe),
+	 * no se añade ninguno. Cada uno se comporta como add() (suma cantidad si ya estaba pendiente).
+	 */
+	@Transactional
+	public List<ItemDto> addAll(UUID listId, UUID userId, List<ItemRequests.Add> requests) {
+		return requests.stream().map(request -> add(listId, userId, request)).toList();
+	}
+
 	/** Hasta 30 productos usados en la lista, lo más reciente primero. */
 	@Transactional(readOnly = true)
 	public List<RecentItemDto> recent(UUID listId, UUID userId) {

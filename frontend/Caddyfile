@@ -6,9 +6,12 @@
 	header {
 		# Obliga a usar HTTPS durante un año (el navegador no volverá a probar con http)
 		Strict-Transport-Security "max-age=31536000; includeSubDomains"
-		# CSP: el navegador solo ejecuta scripts y estilos de nuestro dominio. Si alguien lograra
-		# inyectar HTML (XSS), su <script> no se ejecutaría. Las fotos de Google son la excepción.
-		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: https://*.googleusercontent.com; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+		# CSP: el navegador solo ejecuta scripts de nuestro dominio. Si alguien lograra inyectar HTML
+		# (XSS), su <script> no se ejecutaría. Las fotos de Google son la excepción en imágenes.
+		# style-src permite estilos en línea: sonner (avisos) y Radix (paneles de shadcn/ui) insertan
+		# etiquetas <style> en tiempo de ejecución. El riesgo de un estilo inyectado es mucho menor
+		# que el de un script, que sigue prohibido.
+		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.googleusercontent.com; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
 		X-Content-Type-Options "nosniff"
 		Referrer-Policy "strict-origin-when-cross-origin"
 		Permissions-Policy "camera=(), microphone=(), geolocation=()"

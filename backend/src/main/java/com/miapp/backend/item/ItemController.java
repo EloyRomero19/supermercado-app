@@ -39,6 +39,13 @@ class ItemController {
 		return itemService.add(listId, userId, request);
 	}
 
+	@PostMapping("/bulk")
+	@ResponseStatus(HttpStatus.CREATED)
+	List<ItemDto> addAll(@CurrentUserId UUID userId, @PathVariable UUID listId,
+			@Valid @RequestBody ItemRequests.AddMany request) {
+		return itemService.addAll(listId, userId, request.items());
+	}
+
 	@PatchMapping("/{itemId}")
 	ItemDto update(@CurrentUserId UUID userId, @PathVariable UUID listId, @PathVariable UUID itemId,
 			@Valid @RequestBody ItemRequests.Update request) {

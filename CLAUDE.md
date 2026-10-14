@@ -15,7 +15,7 @@ PWA para gestionar listas de la compra compartidas entre varios usuarios:
 
 ## Stack
 - **Backend** (`backend/`): Spring Boot 4.1, Java 21, Maven wrapper. Web MVC, Data JPA, Security, OAuth2 Client, Validation, Flyway, Lombok.
-- **Frontend** (`frontend/`): React 19, Vite 8, TypeScript 6, oxlint.
+- **Frontend** (`frontend/`): React 19, Vite 8, TypeScript 6, Tailwind CSS 4, shadcn/ui (Radix), lucide-react, sonner, oxlint.
 - **BD**: PostgreSQL 18 en Docker (`docker-compose.yml` en la raíz).
 
 ## Comandos
@@ -40,7 +40,7 @@ docker compose -f docker-compose.prod.yml up -d --build   # producción (ver REA
 ```
 
 ## Arquitectura backend
-- Paquetes por funcionalidad bajo `com.miapp.backend`: `auth`, `user`, `product`, `list`, `item`, `realtime`, `common`.
+- Paquetes por funcionalidad bajo `com.miapp.backend`: `auth`, `user`, `product`, `list`, `item`, `recipe`, `realtime`, `common`.
 - Capas: `Controller` → `Service` → `Repository`. La lógica y la autorización viven en el servicio.
 - DTOs de entrada/salida como `record` con Bean Validation. **Nunca** se devuelven entidades JPA.
 - Errores con `ProblemDetail` (RFC 9457) desde un `@RestControllerAdvice` en `common`.
@@ -49,7 +49,8 @@ docker compose -f docker-compose.prod.yml up -d --build   # producción (ver REA
 - Tests: `@SpringBootTest` + `@Import(TestcontainersConfiguration.class)`; `TestUsers.registerAndGetBearer(mvc)` para peticiones autenticadas.
 - Rate limiting en `ratelimit.RateLimitInterceptor` (reglas por ruta, por IP o por usuario); desactivado en tests (`app.rate-limit.enabled`).
 - Producción: Caddy (`frontend/Caddyfile`) sirve la SPA, hace proxy de `/api`, `/oauth2`, `/login/oauth2` y pone HTTPS y la CSP.
-  Si se añaden orígenes externos (imágenes, scripts…), hay que permitirlos en la CSP.
+  Si se añaden orígenes externos (imágenes, scripts…), hay que permitirlos en la CSP. `style-src` admite `'unsafe-inline'`
+  porque sonner y Radix insertan `<style>` en tiempo de ejecución (scripts en línea siguen prohibidos).
 - Usuario actual en controladores: `@CurrentUserId UUID userId` (meta-anotación de `@AuthenticationPrincipal`).
 - Invitaciones: QR (qrcode.react) con el enlace `/unirse/:codigo` + botón "Compartir enlace"; en "Mis listas" se puede pegar el enlace (`extractInviteCode`).
 - Autorización de listas SIEMPRE con `ListAccessService.requireMember/requireOwner` (404 a no-miembros, 403 a miembros sin permiso).
@@ -75,10 +76,15 @@ docker compose -f docker-compose.prod.yml up -d --build   # producción (ver REA
   luego el diccionario `backend/src/main/resources/custom-item-icons.txt` (palabras en singular, sin tildes). Ampliar ahí.
 - "Utilizados recientemente": tabla `list_recent_item` (V6), se actualiza con un upsert al añadir un producto
   (`RecentItemRepository`). En el frontend, `applyListEvent` lo actualiza con cada producto nuevo que llega por SSE.
-- Navegación: las páginas con sesión cuelgan de `layout/AppLayout` (barra inferior `TabBar`: Listas, Comprar = última lista, Ajustes).
-  Los productos de la lista se muestran como tarjetas (`items/ItemList`); acciones de un producto en un `Sheet`.
-- Diseño: variables CSS en `src/index.css` (modo oscuro = redefinir variables). Color e icono de cada sección en
-  `src/items/categoryStyle.ts`; se aplican con la variable `--tone` y `color-mix()`. Iconos de producto = emoji en `product.icon` (V5).
+- Navegación: las páginas con sesión cuelgan de `layout/AppLayout` (barra inferior `TabBar`: Listas, Recetas, Cuenta).
+  Recetas (`pages/RecipesPage`, `RecipePage`): tablas `recipe`/`recipe_ingredient` (V7, ingredientes = productos del catálogo);
+  muestra qué falta en la lista elegida (`recipes/missingIngredients`, por defecto `pickListToShop`) y lo añade con
+  `POST /api/lists/{id}/items/bulk` (una transacción: todo o nada). Nuevas recetas = nueva migración. Lista = tarjetas agrupadas por sección (`items/ItemList`).
+- Diseño: Tailwind 4 + shadcn/ui. Tokens (colores OKLCH con contraste AA comprobado, radios, fuente Inter, animaciones) SOLO en
+  `src/index.css`; los componentes usan clases (`bg-primary`, `text-muted-foreground`…), nunca colores sueltos. Modo oscuro automático
+  (prefers-color-scheme). Colores de sección = tokens `--cat-N` (`items/categoryStyle.ts`), aplicados con `--tone` + `bg-tone-soft`.
+  Componentes shadcn en `src/components/ui/` (generados por la CLI; tras `npx shadcn add`, revisar que importen `cn` de `@/lib/utils`
+  y no instalen el paquete npm `cn`). Avisos con `toast` de sonner; confirmaciones con `useConfirm`; respetar `prefers-reduced-motion`.
 - En desarrollo, Vite hace proxy de `/api`, `/oauth2` y `/login/oauth2` a `http://localhost:8080` (mismo origen, sin CORS).
 
 ## Reglas de seguridad

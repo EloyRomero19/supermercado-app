@@ -1,8 +1,11 @@
+import { Check, LayoutGrid } from 'lucide-react'
 import { useEffect, useState, type CSSProperties } from 'react'
-import { getCategories, getCategoryProducts } from '../api/products'
-import type { Category, Item, Product } from '../api/types'
-import { Sheet } from '../components/Sheet'
-import { categoryStyle } from '../items/categoryStyle'
+import { getCategories, getCategoryProducts } from '@/api/products'
+import type { Category, Item, Product } from '@/api/types'
+import { TilesSkeleton } from '@/components/AppSkeleton'
+import { BottomSheet } from '@/components/BottomSheet'
+import { categoryStyle } from '@/items/categoryStyle'
+import { cn } from '@/lib/utils'
 
 type Props = {
   /** Productos de la lista, para marcar los que ya están pendientes */
@@ -48,61 +51,68 @@ export function CategoryBrowser({ items, onAdd }: Props) {
   if (categories.length === 0) return null
 
   return (
-    <section className="card">
-      <h2>Explorar por secciones</h2>
-      <ul className="category-grid">
+    <section aria-labelledby="browse-title">
+      <h2 id="browse-title" className="mb-2 flex items-center gap-2 px-1 text-sm font-semibold text-muted-foreground">
+        <LayoutGrid className="size-4" aria-hidden="true" />
+        Explorar por secciones
+      </h2>
+      <ul className="grid grid-cols-[repeat(auto-fill,minmax(6.5rem,1fr))] gap-2.5">
         {categories.map((category) => {
           const style = categoryStyle(category.name)
           return (
-            <li key={category.id}>
+            <li key={category.id} style={{ '--tone': style.color } as CSSProperties}>
               <button
                 type="button"
-                className="category-tile"
-                style={{ '--tone': style.color } as CSSProperties}
                 onClick={() => setOpen(category)}
+                className="flex min-h-24 w-full flex-col items-center justify-center gap-1.5 rounded-xl bg-tone-soft p-2 text-center text-xs leading-tight font-semibold text-(--tone) outline-none transition-transform focus-visible:ring-[3px] focus-visible:ring-ring/50 active:scale-95"
               >
-                <span className="category-tile-icon" aria-hidden="true">
+                <span className="text-3xl leading-none" aria-hidden="true">
                   {style.icon}
                 </span>
-                <span>{category.name}</span>
+                {category.name}
               </button>
             </li>
           )
         })}
       </ul>
 
-      <Sheet open={open !== null} onClose={() => setOpen(null)} title={open?.name ?? ''}>
-        <p className="muted">Toca un producto para añadirlo a la lista.</p>
+      <BottomSheet open={open !== null} onClose={() => setOpen(null)} title={open?.name ?? ''} description="Toca un producto para añadirlo a la lista.">
         {products === null ? (
-          <div className="skeleton" aria-busy="true" />
+          <TilesSkeleton count={9} />
         ) : (
-          <ul className="tiles">
+          <ul className="grid grid-cols-[repeat(auto-fill,minmax(6.5rem,1fr))] gap-2.5">
             {products.map((product) => {
               const quantity = pendingQuantity.get(product.id)
               return (
-                <li
-                  key={product.id}
-                  className={quantity ? 'tile tile-added' : 'tile'}
-                  style={{ '--tone': categoryStyle(product.categoryName).color } as CSSProperties}
-                >
+                <li key={product.id} className="relative" style={{ '--tone': categoryStyle(product.categoryName).color } as CSSProperties}>
                   <button
                     type="button"
-                    className="tile-main"
                     aria-label={`Añadir ${product.name}${quantity ? ` (ya hay ${quantity} en la lista)` : ''}`}
                     onClick={() => onAdd(product)}
+                    className={cn(
+                      'flex aspect-square w-full flex-col items-center justify-center gap-1 rounded-xl border-2 bg-tone-soft p-2 text-center outline-none transition-transform focus-visible:ring-[3px] focus-visible:ring-ring/50 active:scale-95',
+                      quantity ? 'border-(--tone)' : 'border-tone-soft',
+                    )}
                   >
-                    <span className="tile-icon" aria-hidden="true">
+                    <span className="text-4xl leading-none" aria-hidden="true">
                       {product.icon}
                     </span>
-                    <span className="tile-name">{product.name}</span>
+                    <span className="line-clamp-2 text-sm leading-tight font-semibold">{product.name}</span>
                   </button>
-                  {quantity && <span className="tile-quantity">{quantity > 1 ? `×${quantity}` : '✓'}</span>}
+                  {quantity && (
+                    <span
+                      aria-hidden="true"
+                      className="pointer-events-none absolute top-2 left-2 grid h-6 min-w-6 place-items-center rounded-full bg-(--tone) px-1.5 text-xs font-bold text-on-tone motion-safe:animate-pop"
+                    >
+                      {quantity > 1 ? `×${quantity}` : <Check className="size-3.5" strokeWidth={3} />}
+                    </span>
+                  )}
                 </li>
               )
             })}
           </ul>
         )}
-      </Sheet>
+      </BottomSheet>
     </section>
   )
 }

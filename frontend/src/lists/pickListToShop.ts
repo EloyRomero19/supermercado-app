@@ -1,7 +1,7 @@
 import type { ListSummary } from '../api/types'
 
 /**
- * Qué lista abre la pestaña "Comprar": la última abierta si sigue siendo nuestra; si no, la que
+ * A qué lista añaden las recetas por defecto: la última abierta si sigue siendo nuestra; si no, la que
  * tenga más productos por comprar. null si no hay ninguna lista.
  */
 export function pickListToShop(lists: ListSummary[], lastListId: string | null): ListSummary | null {

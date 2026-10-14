@@ -1,8 +1,10 @@
+import { LoaderCircle, UserRoundX } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
-import { ApiError } from '../api/client'
-import { joinList } from '../api/lists'
-import { LoadingScreen } from '../components/LoadingScreen'
+import { ApiError } from '@/api/client'
+import { joinList } from '@/api/lists'
+import { EmptyState } from '@/components/EmptyState'
+import { Button } from '@/components/ui/button'
 
 /**
  * Destino del enlace de invitación (/unirse/K7MX4QPA). Es una ruta protegida: si no hay sesión,
@@ -23,13 +25,25 @@ export function JoinPage() {
     }
   }, [code, navigate])
 
-  if (!error) return <LoadingScreen message="Uniéndote a la lista…" />
   return (
-    <main className="center-screen">
-      <div className="card empty-state">
-        <p className="alert" role="alert">{error}</p>
-        <Link to="/">Ir a mis listas</Link>
-      </div>
+    <main className="mx-auto grid min-h-dvh w-full max-w-md place-items-center p-4">
+      {error ? (
+        <EmptyState
+          icon={<UserRoundX className="size-7" />}
+          title="No se pudo unir a la lista"
+          description={error}
+          action={
+            <Button asChild size="lg">
+              <Link to="/">Ir a mis listas</Link>
+            </Button>
+          }
+        />
+      ) : (
+        <div role="status" className="flex flex-col items-center gap-3 text-muted-foreground">
+          <LoaderCircle className="size-8 animate-spin text-primary" aria-hidden="true" />
+          Uniéndote a la lista…
+        </div>
+      )}
     </main>
   )
 }

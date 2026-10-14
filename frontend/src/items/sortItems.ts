@@ -12,3 +12,12 @@ export function sortItems(items: Item[]): Item[] {
       a.name.localeCompare(b.name, 'es'),
   )
 }
+
+/** Agrupa los productos por sección conservando el orden ("Otros" para los que no tienen). */
+export function groupByCategory(items: Item[]): { category: string | null; items: Item[] }[] {
+  const groups = new Map<string | null, Item[]>()
+  for (const item of items) {
+    groups.set(item.categoryName, [...(groups.get(item.categoryName) ?? []), item])
+  }
+  return [...groups].map(([category, items]) => ({ category, items }))
+}

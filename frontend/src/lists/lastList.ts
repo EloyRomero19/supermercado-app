@@ -1,5 +1,5 @@
 /**
- * Recuerda en este navegador la última lista abierta, para la pestaña "Comprar".
+ * Recuerda en este navegador la última lista abierta: las recetas añaden a ella por defecto.
  * Es solo una comodidad: si el almacenamiento no está disponible (modo privado, bloqueado…)
  * se ignora sin romper nada.
  */
@@ -9,7 +9,7 @@ export function rememberLastList(listId: string) {
   try {
     localStorage.setItem(KEY, listId)
   } catch {
-    // sin almacenamiento: la pestaña "Comprar" llevará a "Mis listas"
+    // sin almacenamiento: se elegirá la lista con más pendientes
   }
 }
 
