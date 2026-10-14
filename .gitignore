@@ -5,3 +5,5 @@
 .vscode/
 .DS_Store
 !.env.example
+# Copias de la base de datos de producción: contienen datos de los usuarios
+backups/

@@ -43,6 +43,33 @@ services:
       retries: 12
       start_period: 20s
 
+  # Copias de seguridad automáticas (backup/backup.sh). Misma imagen que la base de datos: ya trae
+  # pg_dump en la versión exacta. Las copias quedan en la carpeta backups/ del servidor.
+  backup:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    entrypoint: ["/bin/sh", "/backup.sh"]
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-supermercado}
+      POSTGRES_USER: ${POSTGRES_USER:-supermercado}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      BACKUP_INTERVAL_HOURS: ${BACKUP_INTERVAL_HOURS:-24}
+      BACKUP_KEEP: ${BACKUP_KEEP:-14}
+    volumes:
+      - ./backup/backup.sh:/backup.sh:ro
+      - ./backups:/backups
+    # Tras el backend: así la primera copia ya tiene las tablas creadas por Flyway
+    depends_on:
+      backend:
+        condition: service_healthy
+    # "unhealthy" en docker compose ps si la última copia tiene más de 26 h (algo va mal)
+    healthcheck:
+      test: ["CMD-SHELL", "find /backups -name 'quefalta-*.dump' -mmin -1560 | grep -q ."]
+      interval: 10m
+      timeout: 10s
+      start_period: 2m
+      start_interval: 10s # mientras arranca, comprueba a menudo (si no, tardaría 10 min en estar "healthy")
+
   web:
     build: ./frontend
     restart: unless-stopped

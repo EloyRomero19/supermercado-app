@@ -51,6 +51,8 @@ docker compose -f docker-compose.prod.yml up -d --build   # producción (ver REA
 - Producción: Caddy (`frontend/Caddyfile`) sirve la SPA, hace proxy de `/api`, `/oauth2`, `/login/oauth2` y pone HTTPS y la CSP.
   Si se añaden orígenes externos (imágenes, scripts…), hay que permitirlos en la CSP. `style-src` admite `'unsafe-inline'`
   porque sonner y Radix insertan `<style>` en tiempo de ejecución (scripts en línea siguen prohibidos).
+- Copias de seguridad: servicio `backup` en `docker-compose.prod.yml` (`backup/backup.sh`: `pg_dump -Fc` al arrancar y cada 24 h,
+  guarda las 14 últimas en `backups/`, ignorada por git). Restaurar con `backup/restore.sh` (lo ejecuta el contenedor `backup`).
 - Usuario actual en controladores: `@CurrentUserId UUID userId` (meta-anotación de `@AuthenticationPrincipal`).
 - Invitaciones: QR (qrcode.react) con el enlace `/unirse/:codigo` + botón "Compartir enlace"; desde "Mis listas ▾" (o la pantalla sin listas), "Unirse con un enlace" abre un modal (`lists/JoinListDialog`) donde se pega (`extractInviteCode`).
 - Autorización de listas SIEMPRE con `ListAccessService.requireMember/requireOwner` (404 a no-miembros, 403 a miembros sin permiso).
