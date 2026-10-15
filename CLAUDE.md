@@ -96,6 +96,10 @@ docker compose -f docker-compose.prod.yml up -d --build   # producción (ver REA
   Componentes shadcn en `src/components/ui/` (generados por la CLI; tras `npx shadcn add`, revisar que importen `cn` de `@/lib/utils`
   y no instalen el paquete npm `cn`). Avisos con `toast` de sonner; confirmaciones con `useConfirm`; respetar `prefers-reduced-motion`.
 - En desarrollo, Vite hace proxy de `/api` a `http://localhost:8080` (mismo origen, sin CORS).
+- Vista previa al compartir (Open Graph): plugin `sharePreview` en `vite.config.ts` rellena `<!-- open-graph -->` de index.html y
+  al compilar crea `dist/unirse.html` (texto "Te han invitado…"), que sirven para `/unirse/*` el rewrite de `vercel.json` y el
+  `@invite` del Caddyfile. Imagen `public/og-image.jpg` (1200×630). og:image necesita URL absoluta: `PUBLIC_URL` (build arg en
+  Docker) o `VERCEL_PROJECT_PRODUCTION_URL` (la pone Vercel). WhatsApp guarda en caché las vistas previas.
 
 ## Reglas de seguridad
 - Secretos solo en variables de entorno (`.env`, ignorado por git). `.env.example` documenta las variables.

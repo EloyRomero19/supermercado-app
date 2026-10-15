@@ -1,12 +1,69 @@
+import { readFileSync, writeFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { fileURLToPath, URL } from 'node:url'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
-import { defineConfig } from 'vite'
+import { defineConfig, type Plugin } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
 // En desarrollo, Vite reenvía al backend las rutas de la API.
 // Así el navegador ve un único origen (localhost:5173): sin CORS y con cookies SameSite=Strict.
 const proxy = { '/api': 'http://localhost:8080' }
+
+/**
+ * Vista previa al compartir un enlace (WhatsApp, Telegram, iMessage…): etiquetas Open Graph.
+ * Esos programas no ejecutan JavaScript, leen el HTML tal cual; por eso van en index.html y no
+ * en React. La imagen necesita una URL absoluta: PUBLIC_URL (Docker, ver docker-compose.prod.yml)
+ * o, en Vercel, su variable con el dominio de producción. Sin ninguna, queda relativa.
+ */
+const publicUrl =
+  process.env.PUBLIC_URL ||
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : '')
+
+const PREVIEWS = {
+  home: {
+    title: '¿Qué falta? · Lo que falta en casa, a un toque',
+    description: 'Listas de la compra compartidas en tiempo real: apunta lo que falta y mira en directo lo que ya está en el carro.',
+  },
+  invite: {
+    title: 'Te han invitado a una lista de la compra',
+    description: 'Únete en ¿Qué falta? para apuntar lo que falta en casa y ver en directo lo que ya está en el carro.',
+  },
+}
+
+function openGraph({ title, description }: { title: string; description: string }): string {
+  return [
+    `<meta property="og:type" content="website" />`,
+    `<meta property="og:site_name" content="¿Qué falta?" />`,
+    `<meta property="og:locale" content="es_ES" />`,
+    `<meta property="og:title" content="${title}" />`,
+    `<meta property="og:description" content="${description}" />`,
+    `<meta property="og:image" content="${publicUrl}/og-image.jpg" />`,
+    `<meta property="og:image:width" content="1200" />`,
+    `<meta property="og:image:height" content="630" />`,
+    `<meta property="og:image:alt" content="¿Qué falta?: lo que falta en casa, a un toque" />`,
+    `<meta name="twitter:card" content="summary_large_image" />`,
+  ].join('\n    ')
+}
+
+/**
+ * Pone las etiquetas en index.html y, al compilar, crea unirse.html: la misma app con la vista
+ * previa de invitación. El servidor la sirve para /unirse/:código (vercel.json y Caddyfile).
+ */
+function sharePreview(): Plugin {
+  let outDir = 'dist'
+  return {
+    name: 'share-preview',
+    configResolved: (config) => {
+      outDir = config.build.outDir
+    },
+    transformIndexHtml: (html) => html.replace('<!-- open-graph -->', openGraph(PREVIEWS.home)),
+    writeBundle() {
+      const index = readFileSync(join(outDir, 'index.html'), 'utf8')
+      writeFileSync(join(outDir, 'unirse.html'), index.replace(openGraph(PREVIEWS.home), openGraph(PREVIEWS.invite)))
+    },
+  }
+}
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -15,6 +72,7 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
+    sharePreview(),
     VitePWA({
       // 'prompt': cuando hay una versión nueva, se pregunta al usuario (UpdatePrompt) en vez de
       // recargar la página por sorpresa mientras está marcando productos

@@ -43,7 +43,7 @@ de inicio como una app (PWA).
   y las listas en las que solo estás tú; las compartidas pasan al miembro más antiguo).
 - **Varias listas** (casa, piso de la playa…), cada una con su propietario y sus miembros. La pestaña
   Listas abre directamente la que estás usando; las demás se cambian desde el título («Mis listas ▾»).
-- **Compartir** con un código QR o un enlace de invitación. El propietario puede renovar el código o
+- **Compartir** con un código QR o un enlace de invitación, que en WhatsApp o Telegram se ve con su tarjeta de vista previa. El propietario puede renovar el código o
   expulsar miembros.
 - **Buscador** de un catálogo de 220 productos en 13 secciones del súper, tolerante a tildes y erratas
   («platano», «yogurt»). Lo que no esté en el catálogo se escribe a mano y la app le deduce un icono y

@@ -2,6 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
     { "source": "/api/:path*", "destination": "https://supermercado-app-backend.vercel.app/api/:path*" },
+    { "source": "/unirse/:code", "destination": "/unirse.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [

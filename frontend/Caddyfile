@@ -33,6 +33,9 @@
 		header @immutable Cache-Control "public, max-age=31536000, immutable"
 		@revalidate not path /assets/*
 		header @revalidate Cache-Control "no-cache"
+		# Los enlaces de invitación: la misma app, con la vista previa "Te han invitado…" (ver vite.config.ts)
+		@invite path /unirse/*
+		rewrite @invite /unirse.html
 		try_files {path} /index.html
 		file_server
 	}

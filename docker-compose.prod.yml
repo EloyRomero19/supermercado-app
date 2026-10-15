@@ -68,7 +68,10 @@ services:
       start_interval: 10s # mientras arranca, comprueba a menudo (si no, tardaría 10 min en estar "healthy")
 
   web:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        PUBLIC_URL: ${PUBLIC_URL}
     restart: unless-stopped
     environment:
       DOMAIN: ${DOMAIN:?Define DOMAIN en .env (p. ej. tudominio.com)}
