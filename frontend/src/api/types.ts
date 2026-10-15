@@ -6,7 +6,7 @@ export type User = {
   displayName: string
 }
 
-/** Respuesta de /api/auth/register, /login, /refresh y /reset-password. El refresh token viaja en una cookie HttpOnly. */
+/** Respuesta de /api/auth/register, /login y /refresh. El refresh token viaja en una cookie HttpOnly. */
 export type AuthResponse = {
   accessToken: string
   expiresIn: number

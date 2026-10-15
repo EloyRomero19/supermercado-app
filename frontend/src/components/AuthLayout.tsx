@@ -5,7 +5,7 @@ import { BrandMark } from './BrandMark'
 
 type Props = { title: string; subtitle: string; children: ReactNode; footer: ReactNode }
 
-/** Diseño común de las pantallas sin sesión (login, registro, contraseña): marca y el formulario en una tarjeta. */
+/** Diseño común de las pantallas sin sesión (login y registro): marca y el formulario en una tarjeta. */
 export function AuthLayout({ title, subtitle, children, footer }: Props) {
   return (
     <div className="flex min-h-dvh flex-col bg-linear-to-b from-secondary to-background px-4 pt-safe pb-safe">

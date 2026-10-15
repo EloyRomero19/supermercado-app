@@ -31,9 +31,6 @@ class RateLimitInterceptor implements HandlerInterceptor {
 			// Crear cuentas en masa
 			new Rule(HttpMethod.POST, "/api/auth/register", 10, Duration.ofHours(1), false),
 			new Rule(HttpMethod.POST, "/api/auth/refresh", 60, Duration.ofMinutes(1), false),
-			// Pedir enlaces de "he olvidado mi contraseña" (cada uno es un email enviado)
-			new Rule(HttpMethod.POST, "/api/auth/forgot-password", 5, Duration.ofHours(1), false),
-			new Rule(HttpMethod.POST, "/api/auth/reset-password", 10, Duration.ofMinutes(1), false),
 			// Adivinar códigos de invitación: 10 intentos por minuto y por usuario
 			new Rule(HttpMethod.POST, "/api/lists/join", 10, Duration.ofMinutes(1), true));
 

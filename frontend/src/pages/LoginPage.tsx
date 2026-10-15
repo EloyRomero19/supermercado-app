@@ -53,13 +53,6 @@ export function LoginPage() {
           onChange={(e) => setPassword(e.target.value)}
           error={fieldErrors.password}
         />
-        <Link
-          to="/recuperar"
-          state={{ email: email.trim() }}
-          className="-mt-2 self-end py-1 text-sm font-medium text-primary underline-offset-4 hover:underline"
-        >
-          ¿Has olvidado tu contraseña?
-        </Link>
         <SubmitButton submitting={submitting} submittingLabel="Entrando…" className="mt-1">
           Entrar
         </SubmitButton>

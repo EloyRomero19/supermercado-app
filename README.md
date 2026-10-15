@@ -39,7 +39,7 @@ de inicio como una app (PWA).
 
 ## Qué se puede hacer
 
-- **Cuenta** con email y contraseña. Si la olvidas, «¿Has olvidado tu contraseña?» te envía un enlace por email.
+- **Cuenta** con email y contraseña.
 - **Varias listas** (casa, piso de la playa…), cada una con su propietario y sus miembros. La pestaña
   Listas abre directamente la que estás usando; las demás se cambian desde el título («Mis listas ▾»).
 - **Compartir** con un código QR o un enlace de invitación. El propietario puede renovar el código o
@@ -87,7 +87,6 @@ en TypeScript), más la configuración para ejecutarlo todo con Docker.
 | **Bean Validation** | Comprueba los datos de entrada (email válido, nombre no vacío, cantidades…) antes de llegar a la lógica. |
 | **Server-Sent Events (SSE)** | El tiempo real. Cada navegador mantiene abierta una conexión con su lista y el servidor le envía cada cambio en cuanto se confirma en la base de datos. |
 | **Flyway** | Versiona el esquema de la base de datos: cada cambio es un archivo `V{n}__descripcion.sql` que se aplica solo al arrancar. |
-| **Spring Mail** | Envía por SMTP (Gmail, Brevo…) el email con el enlace para elegir una contraseña nueva, en segundo plano. |
 | **Spring Boot Actuator** | El *endpoint* `/actuator/health`, que Docker usa para saber si la API está lista. |
 | **Lombok** | Ahorra código repetitivo (constructores, *getters*). |
 | **Maven** | Compila, gestiona las dependencias y ejecuta los tests (`./mvnw`). |
@@ -134,7 +133,6 @@ flowchart LR
   U["📱 Navegador<br/>React + service worker"] -- "HTTPS" --> C["Caddy<br/>web estática · HTTPS · CSP"]
   C -- "/api" --> B["Spring Boot<br/>API REST + SSE"]
   B -- "JPA / SQL" --> D[("PostgreSQL")]
-  B -- "SMTP" --> M["Correo<br/>enlace de contraseña"]
   K["backup<br/>pg_dump diario"] --> D
 ```
 
@@ -153,12 +151,8 @@ flowchart LR
 - *Access token* solo en memoria (nunca en `localStorage`); *refresh token* en cookie
   `HttpOnly; Secure; SameSite=Strict`, guardado en la base de datos como hash SHA-256, con rotación
   y revocación de toda la sesión si se reutiliza uno antiguo (señal de robo).
-- «¿Has olvidado tu contraseña?»: enlace de un solo uso que caduca en 1 hora, guardado como hash; la
-  respuesta es la misma exista o no la cuenta (no revela qué emails están registrados) y al usarlo se
-  cierran las demás sesiones.
 - Autorización por lista en la capa de servicio y productos buscados siempre por `(lista, producto)`.
-- Límite de peticiones en login, registro, renovación de sesión y enlaces de contraseña (por IP), y al
-  unirse a listas (por usuario).
+- Límite de peticiones en login, registro y renovación de sesión (por IP) y al unirse a listas (por usuario).
 - En producción: HTTPS obligatorio, CSP estricta (solo scripts propios), base de datos sin puertos
   expuestos y la API ejecutándose sin permisos de administrador dentro de su contenedor.
 
@@ -168,7 +162,7 @@ flowchart LR
 ├── backend/                Spring Boot (Java)
 │   └── src/main/
 │       ├── java/com/miapp/backend/
-│       │   ├── auth/       registro, login, JWT, refresh token, contraseña olvidada
+│       │   ├── auth/       registro, login, JWT, refresh token
 │       │   ├── user/       usuarios
 │       │   ├── list/       listas, miembros, invitaciones
 │       │   ├── item/       productos de cada lista
@@ -209,9 +203,6 @@ cd backend && ./mvnw spring-boot:run       # API en http://localhost:8080
 cd frontend && npm install && npm run dev  # web en http://localhost:5173
 ```
 
-Sin configurar el correo (`MAIL_*` en el `.env`), «¿Has olvidado tu contraseña?» no envía nada: el
-enlace aparece en el log del backend, y así se puede probar en local.
-
 ### Tests y calidad
 
 ```bash
@@ -243,22 +234,9 @@ DOMAIN=tudominio.com
 PUBLIC_URL=https://tudominio.com
 ```
 
-### 3. Correo
-Para que «¿Has olvidado tu contraseña?» envíe emails, añade al `.env` un servidor SMTP. Con una
-cuenta de Gmail (hasta unos 500 correos al día):
-
-```bash
-MAIL_HOST=smtp.gmail.com
-MAIL_USERNAME=tucuenta@gmail.com
-MAIL_PASSWORD=...              # "contraseña de aplicación" (myaccount.google.com/apppasswords), no la tuya
-```
-
-Con un dominio propio, servicios como Brevo o Resend dan también un SMTP y los correos llegan con
-tu dominio como remitente (`MAIL_FROM`).
-
 Antes de publicar, cambia `CONTACT_EMAIL` en `frontend/src/pages/PrivacyPage.tsx` y revisa el texto.
 
-### 4. Arrancar
+### 3. Arrancar
 
 ```bash
 docker compose -f docker-compose.prod.yml up -d --build
@@ -310,7 +288,7 @@ Marketplace de Vercel):
 
 Variables del proyecto de la API: `PORT=8080`, `POSTGRES_HOST`, `POSTGRES_DB`, `POSTGRES_USER`,
 `POSTGRES_PASSWORD`, `POSTGRES_PARAMS=?sslmode=require` (Neon exige conexión cifrada), `JWT_SECRET`,
-`FRONTEND_URL` (la URL pública de la web) y las `MAIL_*`.
+y `FRONTEND_URL` (la URL pública de la web).
 
 Lo que hay que saber:
 - **Región**: pon la API en la misma región que la base de datos de Neon (*Settings → Functions →

@@ -8,7 +8,7 @@ import java.util.Base64;
 import java.util.HexFormat;
 
 /**
- * Tokens opacos (refresh token y enlace para restablecer la contraseña): 256 bits aleatorios.
+ * Tokens opacos (el refresh token): 256 bits aleatorios.
  * En la base de datos solo se guarda su SHA-256: si alguien la robara, no le servirían de nada.
  * (Un hash rápido basta aquí, a diferencia de las contraseñas: 256 bits aleatorios no se pueden adivinar.)
  */

@@ -4,8 +4,6 @@
 spring:
   datasource:
     password: no-se-usa  # Testcontainers (@ServiceConnection) pone la conexión real
-  mail:
-    host: ""  # aunque tu .env tenga MAIL_HOST, los tests no envían correos de verdad
 
 app:
   rate-limit:

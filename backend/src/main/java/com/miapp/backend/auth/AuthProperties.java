@@ -11,7 +11,6 @@ public record AuthProperties(
 		String issuer,
 		Duration accessTokenTtl,
 		Duration refreshTokenTtl,
-		Duration passwordResetTtl,
 		boolean cookieSecure,
 		String frontendUrl) {
 }

@@ -36,9 +36,6 @@ export function PrivacyPage() {
         <Section title="Cookies">
           <p>Usamos una única cookie técnica para mantener tu sesión iniciada. No usamos cookies de análisis ni de publicidad.</p>
         </Section>
-        <Section title="Correos">
-          <p>Solo te escribimos si lo pides: el enlace para cambiar tu contraseña cuando la has olvidado. Nada de publicidad.</p>
-        </Section>
         <Section title="Tus derechos">
           <p>
             Puedes pedir una copia de tus datos, corregirlos o borrar tu cuenta escribiendo a{' '}

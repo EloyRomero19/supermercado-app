@@ -1,7 +1,7 @@
 # ¿Qué falta? — lo que falta en casa, a un toque (PWA de listas de la compra compartidas)
 
 PWA para gestionar listas de la compra compartidas entre varios usuarios:
-1. Login con email/contraseña (JWT) y «¿Has olvidado tu contraseña?» por email (no hay login con Google: se quitó en V8).
+1. Login con email/contraseña (JWT). Sin login con Google (quitado en V8) ni recuperación de contraseña por email (quitada en V9).
 2. Buscador de productos (catálogo propio + productos de texto libre).
 3. Varias listas por usuario, compartidas mediante código de invitación (roles `OWNER` / `MEMBER`).
 4. Marcar productos como cogidos en tiempo real (SSE).
@@ -14,7 +14,7 @@ PWA para gestionar listas de la compra compartidas entre varios usuarios:
 - Comunicación en español.
 
 ## Stack
-- **Backend** (`backend/`): Spring Boot 4.1, Java 21, Maven wrapper. Web MVC, Data JPA, Security (Resource Server para el JWT), Mail, Validation, Flyway, Lombok.
+- **Backend** (`backend/`): Spring Boot 4.1, Java 21, Maven wrapper. Web MVC, Data JPA, Security (Resource Server para el JWT), Validation, Flyway, Lombok.
 - **Frontend** (`frontend/`): React 19, Vite 8, TypeScript 6, Tailwind CSS 4, shadcn/ui (Radix), lucide-react, sonner, oxlint.
 - **BD**: PostgreSQL 18 en Docker (`docker-compose.yml` en la raíz).
 
@@ -102,11 +102,7 @@ docker compose -f docker-compose.prod.yml up -d --build   # producción (ver REA
 - Contraseñas con BCrypt (8–72 bytes). Login con mensaje genérico de error.
 - Access token JWT (HS256, 15 min) **solo en memoria** en el frontend; nunca en `localStorage`.
 - Refresh token opaco en cookie `HttpOnly; Secure; SameSite=Strict; Path=/api/auth`, guardado en BD como SHA-256, con rotación y revocación de familia si se reutiliza.
-- Contraseña olvidada (`auth/PasswordResetService`): `POST /api/auth/forgot-password` responde 204 siempre (no revela si el email
-  existe), máx. 3 enlaces/hora por cuenta; token opaco (`SecureTokens`, SHA-256 en BD), 1 h, un solo uso, en el fragmento
-  (`/restablecer#token`). El email sale tras el commit y en otro hilo (`PasswordResetMailer`, `@Async`); sin `MAIL_HOST` se escribe
-  en el log. `reset-password` gasta todos los enlaces, revoca los refresh tokens y abre sesión. Cuentas sin contraseña (antiguas
-  de Google, `password_hash` NULL) pueden crearse una así. El health de mail está desactivado (no debe tumbar `/actuator/health`).
+- Cuentas antiguas de Google tienen `password_hash` NULL: no pueden entrar (el login las trata como contraseña incorrecta).
 - En `.env`, una variable vacía (`VAR=`) anula el valor por defecto `${VAR:def}`: comentar las que no se usen.
 - Toda operación sobre una lista comprueba pertenencia en el servicio (`requireMember` / `requireOwner`).
   A un no-miembro se le responde **404**. Los items se buscan siempre por `(listId, itemId)`.
@@ -119,7 +115,7 @@ Plan completo (esquema de BD, endpoints, seguridad): `~/.claude/plans/estoy-crea
 - [x] 1. Base backend: configuración (`.env` importado), Flyway V1 (usuarios y tokens), Testcontainers, proxy Vite
 - [x] 2. Auth email/contraseña + JWT (añadir `spring-boot-starter-security-oauth2-resource-server`), errores `ProblemDetail`
 - [x] 3. Frontend base: router, `AuthContext`, cliente API, login/registro
-- [x] 4. Login con Google (eliminado después: solo email/contraseña + recuperación por email)
+- [x] 4. Login con Google (eliminado después: solo email/contraseña)
 - [x] 5. Catálogo y buscador (`pg_trgm` + `unaccent`)
 - [x] 6. Listas, miembros e invitaciones
 - [x] 7. Items de la lista

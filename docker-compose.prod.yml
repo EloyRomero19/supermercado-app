@@ -29,12 +29,6 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-supermercado}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET en .env}
-      # Correo para "¿Has olvidado tu contraseña?" (opcional: sin MAIL_HOST el enlace sale en el log)
-      MAIL_HOST: ${MAIL_HOST:-}
-      MAIL_PORT: ${MAIL_PORT:-587}
-      MAIL_USERNAME: ${MAIL_USERNAME:-}
-      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
-      MAIL_FROM: ${MAIL_FROM:-}
       FRONTEND_URL: ${PUBLIC_URL:?Define PUBLIC_URL en .env (p. ej. https://tudominio.com)}
     depends_on:
       postgres:

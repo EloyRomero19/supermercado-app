@@ -8,8 +8,6 @@ import { ListRoute } from './pages/ListPage'
 import { LoginPage } from './pages/LoginPage'
 import { PrivacyPage } from './pages/PrivacyPage'
 import { RegisterPage } from './pages/RegisterPage'
-import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
-import { ResetPasswordPage } from './pages/ResetPasswordPage'
 import { AccountPage } from './pages/AccountPage'
 import { RecipePage } from './pages/RecipePage'
 import { RecipesPage } from './pages/RecipesPage'
@@ -40,10 +38,7 @@ function App() {
           <Route element={<GuestOnly />}>
             <Route path="login" element={<LoginPage />} />
             <Route path="registro" element={<RegisterPage />} />
-            <Route path="recuperar" element={<ForgotPasswordPage />} />
           </Route>
-          {/* Fuera de GuestOnly: el enlace del email debe funcionar aunque haya una sesión abierta */}
-          <Route path="restablecer" element={<ResetPasswordPage />} />
           <Route path="privacidad" element={<PrivacyPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

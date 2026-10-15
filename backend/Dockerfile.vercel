@@ -2,8 +2,7 @@
 # a arrancar con la siguiente, en 1 CPU: lo que importa aquí es ARRANCAR RÁPIDO.
 # Medido con 1 CPU: el Dockerfile normal tarda ~40 s en arrancar; esta imagen, ~8 s.
 #
-# Variables en Vercel (Settings → Environment Variables): PORT=8080, POSTGRES_*, JWT_SECRET,
-# FRONTEND_URL y, para los correos de "¿Has olvidado tu contraseña?", MAIL_* (ver .env.example).
+# Variables en Vercel (Settings → Environment Variables): PORT=8080, POSTGRES_*, JWT_SECRET y FRONTEND_URL.
 
 # --- Etapa 1: compilar con el JDK y Maven (igual que el Dockerfile normal) ---
 FROM eclipse-temurin:21-jdk-alpine AS build

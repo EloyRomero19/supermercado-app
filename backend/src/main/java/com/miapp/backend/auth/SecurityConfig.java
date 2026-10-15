@@ -38,8 +38,7 @@ class SecurityConfig {
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.authorizeHttpRequests(auth -> auth
 				.requestMatchers(HttpMethod.POST, "/api/auth/register", "/api/auth/login",
-						"/api/auth/refresh", "/api/auth/logout",
-						"/api/auth/forgot-password", "/api/auth/reset-password").permitAll()
+						"/api/auth/refresh", "/api/auth/logout").permitAll()
 				.requestMatchers("/error").permitAll()
 				// Para el healthcheck de Docker; solo dice {"status":"UP"}, sin detalles internos
 				.requestMatchers(HttpMethod.GET, "/actuator/health").permitAll()

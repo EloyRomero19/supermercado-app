@@ -9,8 +9,6 @@ export type AuthContextValue = {
   user: User | null
   login: (email: string, password: string) => Promise<void>
   register: (data: RegisterData) => Promise<void>
-  /** Contraseña nueva con el enlace del email (entra directamente). */
-  resetPassword: (token: string, password: string) => Promise<void>
   logout: () => Promise<void>
   /** Vuelve a intentar recuperar la sesión (tras 'offline'). */
   retry: () => void
