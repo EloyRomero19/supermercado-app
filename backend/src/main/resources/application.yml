@@ -20,7 +20,7 @@ spring:
 
   datasource:
     # En Docker (producción) el host es el nombre del servicio: POSTGRES_HOST=postgres
-    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:supermercado}
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:supermercado}${POSTGRES_PARAMS:}
     username: ${POSTGRES_USER:supermercado}
     password: ${POSTGRES_PASSWORD}
 
