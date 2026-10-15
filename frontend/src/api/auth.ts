@@ -24,6 +24,12 @@ export async function restoreSession(): Promise<User | null | 'offline'> {
   }
 }
 
+/** Borra la cuenta (pide la contraseña). El backend borra también la cookie de sesión. */
+export async function deleteAccount(password: string): Promise<void> {
+  await api<void>('/api/me', jsonBody('DELETE', { password }))
+  setAccessToken(null)
+}
+
 export async function logout(): Promise<void> {
   try {
     await api<void>('/api/auth/logout', { method: 'POST' })

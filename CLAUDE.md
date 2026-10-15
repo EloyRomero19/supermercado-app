@@ -103,6 +103,10 @@ docker compose -f docker-compose.prod.yml up -d --build   # producción (ver REA
 - Access token JWT (HS256, 15 min) **solo en memoria** en el frontend; nunca en `localStorage`.
 - Refresh token opaco en cookie `HttpOnly; Secure; SameSite=Strict; Path=/api/auth`, guardado en BD como SHA-256, con rotación y revocación de familia si se reutiliza.
 - Cuentas antiguas de Google tienen `password_hash` NULL: no pueden entrar (el login las trata como contraseña incorrecta).
+- Borrar cuenta: `DELETE /api/me` con `{password}` (`auth/AccountService`; 403 si no coincide, nunca 401, que el frontend toma por
+  sesión caducada). Sale de todas sus listas con `ListService.leaveAll` (mismas reglas que salir: hereda el miembro más antiguo, sin
+  nadie se borra, eventos SSE incluidos) y borra el usuario con SQL directo (`deleteUserById`); la BD hace el resto (CASCADE / SET NULL).
+  Si se añade una tabla que cuelgue de `app_user`, decidir su `ON DELETE`.
 - En `.env`, una variable vacía (`VAR=`) anula el valor por defecto `${VAR:def}`: comentar las que no se usen.
 - Toda operación sobre una lista comprueba pertenencia en el servicio (`requireMember` / `requireOwner`).
   A un no-miembro se le responde **404**. Los items se buscan siempre por `(listId, itemId)`.

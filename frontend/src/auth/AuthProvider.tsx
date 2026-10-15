@@ -47,6 +47,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setSession(null)
         }
       },
+      deleteAccount: async (password) => {
+        await authApi.deleteAccount(password)
+        forgetLastList()
+        setSession(null)
+      },
       retry: () => {
         setStatus('loading')
         setAttempt((n) => n + 1)

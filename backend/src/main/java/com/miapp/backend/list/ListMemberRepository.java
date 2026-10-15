@@ -26,6 +26,8 @@ interface ListMemberRepository extends JpaRepository<ListMember, ListMemberId> {
 	@Query("select m from ListMember m join fetch m.user where m.list.id = :listId order by m.joinedAt, m.user.displayName")
 	List<ListMember> findByListIdWithUser(UUID listId);
 
+	List<ListMember> findByIdUserId(UUID userId);
+
 	/** Candidato a heredar la lista: el miembro más antiguo que no sea quien se va. */
 	Optional<ListMember> findFirstByIdListIdAndIdUserIdNotOrderByJoinedAt(UUID listId, UUID userId);
 

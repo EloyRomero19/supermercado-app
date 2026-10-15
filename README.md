@@ -39,7 +39,8 @@ de inicio como una app (PWA).
 
 ## Qué se puede hacer
 
-- **Cuenta** con email y contraseña.
+- **Cuenta** con email y contraseña, que puedes borrar cuando quieras desde la propia app (con tus datos
+  y las listas en las que solo estás tú; las compartidas pasan al miembro más antiguo).
 - **Varias listas** (casa, piso de la playa…), cada una con su propietario y sus miembros. La pestaña
   Listas abre directamente la que estás usando; las demás se cambian desde el título («Mis listas ▾»).
 - **Compartir** con un código QR o un enlace de invitación. El propietario puede renovar el código o
@@ -152,7 +153,9 @@ flowchart LR
   `HttpOnly; Secure; SameSite=Strict`, guardado en la base de datos como hash SHA-256, con rotación
   y revocación de toda la sesión si se reutiliza uno antiguo (señal de robo).
 - Autorización por lista en la capa de servicio y productos buscados siempre por `(lista, producto)`.
-- Límite de peticiones en login, registro y renovación de sesión (por IP) y al unirse a listas (por usuario).
+- Borrar la cuenta pide la contraseña, aunque haya sesión iniciada.
+- Límite de peticiones en login, registro y renovación de sesión (por IP), y al unirse a listas y al
+  borrar la cuenta (por usuario).
 - En producción: HTTPS obligatorio, CSP estricta (solo scripts propios), base de datos sin puertos
   expuestos y la API ejecutándose sin permisos de administrador dentro de su contenedor.
 

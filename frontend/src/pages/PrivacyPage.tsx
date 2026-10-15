@@ -38,7 +38,8 @@ export function PrivacyPage() {
         </Section>
         <Section title="Tus derechos">
           <p>
-            Puedes pedir una copia de tus datos, corregirlos o borrar tu cuenta escribiendo a{' '}
+            Puedes borrar tu cuenta cuando quieras desde <strong>Cuenta → Borrar mi cuenta</strong>: se borran tus datos y
+            las listas en las que solo estabas tú. Para pedir una copia de tus datos o corregirlos, escribe a{' '}
             <a href={`mailto:${CONTACT_EMAIL}`} className="font-medium text-primary underline-offset-4 hover:underline">
               {CONTACT_EMAIL}
             </a>

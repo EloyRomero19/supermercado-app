@@ -98,6 +98,16 @@ public class ListService {
 		publishMembersChanged(listId, Set.of(targetUserId));
 	}
 
+	/**
+	 * Al borrar una cuenta: sale de todas sus listas con las mismas reglas que "Salir de la lista"
+	 * (las hereda el miembro más antiguo; las que se quedan sin nadie se borran). Cada lista
+	 * avisa en tiempo real a los miembros que quedan.
+	 */
+	@Transactional
+	public void leaveAll(UUID userId) {
+		members.findByIdUserId(userId).forEach(this::leave);
+	}
+
 	/** Si se va el propietario, hereda la lista el miembro más antiguo; si no queda nadie, se borra. */
 	private void leave(ListMember me) {
 		UUID listId = me.getId().getListId();
