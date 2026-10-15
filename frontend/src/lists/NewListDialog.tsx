@@ -67,7 +67,7 @@ function NewListForm() {
           </p>
         )}
       </div>
-      <DialogFooter className="flex-col-reverse gap-2 sm:flex-row">
+      <DialogFooter className="grid grid-cols-2 gap-2 sm:flex">
         <DialogClose asChild>
           <Button type="button" variant="outline" className="h-11">
             Cancelar

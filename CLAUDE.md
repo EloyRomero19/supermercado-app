@@ -113,7 +113,8 @@ docker compose -f docker-compose.prod.yml up -d --build   # producción (ver REA
   Si se añade una tabla que cuelgue de `app_user`, decidir su `ON DELETE`.
   Frontend: pantalla propia `/cuenta/borrar` (`pages/DeleteAccountPage`, fuera de AppLayout), no un modal: en el móvil el teclado
   dejaba el modal sin poder desplazarse. Muestra qué pasa con cada lista (`account/deletionImpact`, mismas reglas que el backend).
-  Los `DialogContent` tienen `max-h` + `overflow-y-auto`: si no caben (teclado abierto), se desplazan por dentro.
+  Los `DialogContent` (cambio sobre shadcn) van arriba en el móvil y centrados desde `sm`, para que el teclado no los corte;
+  con `max-h` + `overflow-y-auto` se desplazan por dentro si aun así no caben. Botones del pie en `grid grid-cols-2` en el móvil.
 - En `.env`, una variable vacía (`VAR=`) anula el valor por defecto `${VAR:def}`: comentar las que no se usen.
 - Toda operación sobre una lista comprueba pertenencia en el servicio (`requireMember` / `requireOwner`).
   A un no-miembro se le responde **404**. Los items se buscan siempre por `(listId, itemId)`.
