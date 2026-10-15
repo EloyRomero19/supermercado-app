@@ -1,171 +1,169 @@
-# ¿Qué falta? · Lo que falta en casa, a un toque
+<div align="center">
 
-[![CI](https://github.com/EloyRomero19/supermercado-app/actions/workflows/ci.yml/badge.svg)](https://github.com/EloyRomero19/supermercado-app/actions/workflows/ci.yml)
+<img src="frontend/public/og-image.jpg" alt="¿Qué falta? · Lo que falta en casa, a un toque" width="760">
 
-Web para hacer la compra en compañía. Creas una lista, la compartes con tu familia o tus compañeros
-de piso con un QR o un enlace, y cada uno añade lo que falta en casa. En el súper, al meter algo en
-el carro se marca al instante en el móvil de todos, en **tiempo real**. Además trae un recetario que
-te dice qué ingredientes te faltan y los añade a la lista de una vez.
+# ¿Qué falta?
 
-Funciona en cualquier navegador, está pensada primero para el móvil y se puede añadir a la pantalla
-de inicio como una app (PWA).
+**La lista de la compra que compartes con tu casa, en tiempo real.**
+
+[![Probar la web](https://img.shields.io/badge/Probar_la_web-supermercado--app--seven.vercel.app-0a7e3a?style=for-the-badge&logo=vercel&logoColor=white)](https://supermercado-app-seven.vercel.app)
+
+[![CI](https://github.com/EloyRomero19/supermercado-app/actions/workflows/ci.yml/badge.svg)](https://github.com/EloyRomero19/supermercado-app/actions/workflows/ci.yml) ![Java 21](https://img.shields.io/badge/Java-21-ED8B00?logo=openjdk&logoColor=white) ![Spring Boot 4.1](https://img.shields.io/badge/Spring_Boot-4.1-6DB33F?logo=springboot&logoColor=white) ![React 19](https://img.shields.io/badge/React-19-149ECA?logo=react&logoColor=white) ![TypeScript](https://img.shields.io/badge/TypeScript-6-3178C6?logo=typescript&logoColor=white) ![PostgreSQL 18](https://img.shields.io/badge/PostgreSQL-18-4169E1?logo=postgresql&logoColor=white) ![PWA](https://img.shields.io/badge/PWA-instalable-5A0FC8?logo=pwa&logoColor=white)
+
+[Capturas](#capturas) · [Qué se puede hacer](#qué-se-puede-hacer) · [Lo más interesante](#lo-más-interesante-por-dentro) · [Tecnologías](#tecnologías) · [Ejecutarlo en local](#ejecutarlo-en-local) · [Despliegue](#despliegue)
+
+</div>
+
+---
+
+Creas una lista, la compartes con tu familia o tus compañeros de piso con un **QR o un enlace**, y cada
+uno apunta lo que falta en casa. En el súper, al meter algo en el carro **se marca al instante en el
+móvil de todos**. Y si no sabes qué cocinar, el recetario te dice qué ingredientes te faltan y los añade
+a la lista de una vez.
+
+Funciona en cualquier navegador, está pensada primero para el móvil y se instala en la pantalla de
+inicio como una app.
+
+## Capturas
 
 <table>
   <tr>
-    <td><img src="docs/capturas/1-login.webp" width="190" alt="Inicio de sesión con email y contraseña"></td>
-    <td><img src="docs/capturas/2-lista.webp" width="190" alt="Lista agrupada por secciones del súper"></td>
-    <td><img src="docs/capturas/3-mis-listas.webp" width="190" alt="Selector de listas"></td>
-    <td><img src="docs/capturas/4-carrito.webp" width="190" alt="Carrito con lo ya cogido"></td>
+    <td align="center"><img src="docs/capturas/2-lista.webp" width="200" alt="Lista agrupada por secciones del súper"><br><sub><b>Lo que falta, por secciones</b></sub></td>
+    <td align="center"><img src="docs/capturas/4-carrito.webp" width="200" alt="Carrito con lo ya cogido"><br><sub><b>El carrito: quién cogió qué</b></sub></td>
+    <td align="center"><img src="docs/capturas/3-mis-listas.webp" width="200" alt="Selector de listas"><br><sub><b>Varias listas</b></sub></td>
+    <td align="center"><img src="docs/capturas/5-compartir.webp" width="200" alt="Compartir la lista con QR o enlace"><br><sub><b>Compartir con QR o enlace</b></sub></td>
   </tr>
   <tr>
-    <td align="center"><sub>Inicio de sesión</sub></td>
-    <td align="center"><sub>Lo que falta, por secciones</sub></td>
-    <td align="center"><sub>Cambiar de lista</sub></td>
-    <td align="center"><sub>El carrito</sub></td>
-  </tr>
-  <tr>
-    <td><img src="docs/capturas/5-receta.webp" width="190" alt="Receta con los ingredientes que faltan"></td>
-    <td><img src="docs/capturas/6-lista-oscuro.webp" width="190" alt="Lista en modo oscuro"></td>
-    <td><img src="docs/capturas/7-cuenta-oscuro.webp" width="190" alt="Cuenta: apariencia clara u oscura"></td>
-    <td></td>
-  </tr>
-  <tr>
-    <td align="center"><sub>Recetas: qué te falta</sub></td>
-    <td align="center"><sub>Modo oscuro</sub></td>
-    <td align="center"><sub>Claro, oscuro o automático</sub></td>
-    <td></td>
+    <td align="center"><img src="docs/capturas/6-recetas.webp" width="200" alt="Recetario"><br><sub><b>Recetario</b></sub></td>
+    <td align="center"><img src="docs/capturas/7-receta.webp" width="200" alt="Receta con los ingredientes que faltan"><br><sub><b>Qué te falta para cocinarla</b></sub></td>
+    <td align="center"><img src="docs/capturas/8-lista-oscuro.webp" width="200" alt="Lista en modo oscuro"><br><sub><b>Modo oscuro</b></sub></td>
+    <td align="center"><img src="docs/capturas/1-login.webp" width="200" alt="Inicio de sesión"><br><sub><b>Inicio de sesión</b></sub></td>
   </tr>
 </table>
 
 ## Qué se puede hacer
 
-- **Cuenta** con email y contraseña, que puedes borrar cuando quieras desde la propia app (con tus datos
-  y las listas en las que solo estás tú; las compartidas pasan al miembro más antiguo).
-- **Varias listas** (casa, piso de la playa…), cada una con su propietario y sus miembros. La pestaña
-  Listas abre directamente la que estás usando; las demás se cambian desde el título («Mis listas ▾»).
-- **Compartir** con un código QR o un enlace de invitación, que en WhatsApp o Telegram se ve con su tarjeta de vista previa. El propietario puede renovar el código o
-  expulsar miembros.
-- **Buscador** de un catálogo de 220 productos en 13 secciones del súper, tolerante a tildes y erratas
-  («platano», «yogurt»). Lo que no esté en el catálogo se escribe a mano y la app le deduce un icono y
-  una sección.
-- **Lista agrupada por secciones**, en el orden de los pasillos, con cantidad y nota por producto.
-  «Utilizados recientemente» permite volver a añadir algo con un toque.
-- **Tiempo real**: lo que añade, cambia o marca cualquier miembro aparece al momento en los demás.
-- **Carrito**: un toque mete un producto en el carro, con su confirmación y «Deshacer». Al terminar,
-  «Terminar la compra» deja la lista con lo que falte para la próxima vez.
-- **Recetas**: 15 platos típicos; cada uno dice qué ingredientes te faltan en tu lista y los añade
-  todos de una vez, con la cantidad en la nota.
-- **Modo claro, oscuro o automático**, avisos de falta de conexión e indicador «En directo».
-- **Se puede añadir a la pantalla de inicio** y carga rápido gracias a la caché del *service worker*.
-
-## Tecnologías y lenguajes
-
-Es un *monorepo* con dos aplicaciones: el **backend** (la API, en Java) y el **frontend** (la web,
-en TypeScript), más la configuración para ejecutarlo todo con Docker.
-
-### Lenguajes
-
-| Lenguaje | Dónde se usa | Para qué |
-|---|---|---|
-| **Java 21** | `backend/` (~4 900 líneas) | La API: reglas de negocio, seguridad, acceso a datos y tiempo real. Usa `record` para los datos de entrada y salida. |
-| **TypeScript** | `frontend/src/` (~4 400 líneas) | Toda la web. Es JavaScript con tipos: el compilador avisa de errores antes de ejecutar (p. ej. un campo mal escrito en una respuesta de la API). |
-| **SQL** (PostgreSQL) | `backend/src/main/resources/db/migration/` | El esquema de la base de datos, el catálogo y las recetas (migraciones de Flyway) y las búsquedas de productos. |
-| **CSS** (Tailwind) | `frontend/src/index.css` y clases en los componentes | El diseño: colores, modo oscuro, animaciones. |
-| **HTML / JSX** | `frontend/index.html` y los componentes `.tsx` | La estructura de las pantallas. |
-| **Shell** | `backup/` | Las copias de seguridad automáticas y su restauración. |
-| **YAML** | `docker-compose*.yml`, `.github/workflows/`, `application.yml` | Configuración de Docker, de la integración continua y de Spring. |
-
-### Backend: la API
-
-| Tecnología | Qué hace en el proyecto |
+| Función | Cómo es |
 |---|---|
-| **Spring Boot 4.1** | El *framework* de la API. Arranca el servidor web, conecta las piezas (inyección de dependencias) y da la configuración por defecto. Código organizado por funcionalidad (`auth`, `list`, `item`, `recipe`…) y en capas: *Controller* → *Service* → *Repository*. |
-| **Spring Web MVC** | Los *endpoints* REST bajo `/api` (JSON). Los errores se devuelven en el formato estándar *Problem Details* (RFC 9457). |
-| **Spring Security** | Protege la API. Valida en cada petición el *token* JWT (*OAuth2 Resource Server*). Contraseñas cifradas con **BCrypt**. |
-| **JWT** (HS256) | El *access token*: dura 15 minutos y el navegador lo guarda **solo en memoria**. Para renovarlo hay un *refresh token* en una cookie `HttpOnly` que rota en cada uso. |
-| **Spring Data JPA / Hibernate** | Guardar y leer entidades (usuarios, listas, productos de la lista) sin escribir SQL a mano. Bloqueo optimista (`@Version`) para que dos ediciones simultáneas no se pisen. |
-| **JdbcClient** | SQL directo donde conviene: la búsqueda de productos y las recetas. |
-| **Bean Validation** | Comprueba los datos de entrada (email válido, nombre no vacío, cantidades…) antes de llegar a la lógica. |
-| **Server-Sent Events (SSE)** | El tiempo real. Cada navegador mantiene abierta una conexión con su lista y el servidor le envía cada cambio en cuanto se confirma en la base de datos. |
-| **Flyway** | Versiona el esquema de la base de datos: cada cambio es un archivo `V{n}__descripcion.sql` que se aplica solo al arrancar. |
-| **Spring Boot Actuator** | El *endpoint* `/actuator/health`, que Docker usa para saber si la API está lista. |
-| **Lombok** | Ahorra código repetitivo (constructores, *getters*). |
-| **Maven** | Compila, gestiona las dependencias y ejecuta los tests (`./mvnw`). |
+| 🛒 **Listas compartidas** | Varias listas (casa, piso de la playa, un cumpleaños…) con su propietario y sus miembros. La app abre directamente la que estás usando; las demás, desde «Mis listas ▾». |
+| ⚡ **Tiempo real** | Lo que alguien añade, cambia o mete en el carro aparece al momento en los móviles de los demás. |
+| 🔗 **Invitar** | Con un QR o un enlace, que en WhatsApp o Telegram llega con su tarjeta de vista previa. El propietario puede renovar el código o expulsar a alguien. |
+| 🔎 **Buscador** | 220 productos en 13 secciones del súper. Entiende tildes y erratas («platano», «yogurt»). Lo que no esté se escribe a mano y la app le pone icono y sección. |
+| 🧺 **Por secciones** | La lista se ordena por pasillos (fruta, carnicería, lácteos…), con cantidad y nota en cada producto, y «Utilizados recientemente» para repetir con un toque. |
+| ✅ **Carrito** | Un toque mete el producto en el carro (con «Deshacer»). Se ve quién cogió cada cosa, y «Terminar la compra» deja la lista preparada para la próxima vez. |
+| 🍳 **Recetas** | 15 platos de siempre. Cada uno marca qué ingredientes te faltan y los añade todos a la lista de una vez. |
+| 🌗 **A tu gusto** | Modo claro, oscuro o automático. Aviso sin conexión e indicador «En directo». |
+| 📱 **Instalable** | Se añade a la pantalla de inicio y abre al momento gracias a la caché del *service worker*. |
+| 🔐 **Tu cuenta, tus datos** | Email y contraseña. Puedes borrar la cuenta desde la app: antes te enseña qué pasará con cada una de tus listas. |
 
-### Base de datos
+## Lo más interesante por dentro
 
-| Tecnología | Qué hace |
-|---|---|
-| **PostgreSQL 18** | Guarda usuarios, listas, miembros, productos, recetas y *tokens*. Identificadores `uuid` y fechas `timestamptz`. |
-| **`pg_trgm` + `unaccent`** | Extensiones de PostgreSQL para el buscador: ignorar tildes y encontrar productos aunque tengan erratas (similitud por trigramas). |
+- **Tiempo real con Server-Sent Events.** Cada cambio publica un evento que solo se envía cuando la
+  transacción de la base de datos se ha confirmado: nadie recibe un cambio que al final no se guardó.
+  Si la conexión se corta, el cliente se reconecta solo y recarga lo que se perdió.
+- **Sesión segura sin `localStorage`.** El *access token* (JWT, 15 min) vive solo en memoria. Se renueva
+  con un *refresh token* en una cookie `HttpOnly` que cambia en cada uso; si alguien reutiliza uno
+  viejo (señal de robo), se cierra toda esa sesión. La renovación se coordina entre pestañas.
+- **Búsqueda tolerante a errores** en PostgreSQL con `pg_trgm` y `unaccent`: primero por inicio de
+  palabra y, si no hay suerte, por parecido entre trigramas.
+- **Autorización en cada operación.** A quien no es miembro de una lista se le responde *404*, para no
+  revelar ni que existe. Límite de peticiones en el login, el registro y las invitaciones.
+- **Arranque en frío de 40 s a 8 s.** En Vercel la API se apaga sin uso y arranca con 1 CPU. La imagen
+  de producción usa la caché AOT de Java 25, que se «entrena» al construirla, y una configuración de la
+  JVM pensada para una sola CPU.
+- **Vista previa al compartir.** Etiquetas Open Graph generadas al compilar, con una variante propia para
+  los enlaces de invitación («Te han invitado a una lista de la compra»).
+- **Probado de verdad:** 105 tests de integración del backend contra un PostgreSQL real (Testcontainers)
+  y 29 del frontend, que GitHub Actions ejecuta en cada *push*.
 
-### Frontend: la web
+## Tecnologías
 
-| Tecnología | Qué hace en el proyecto |
-|---|---|
-| **React 19** | La interfaz por componentes: cada pieza (tarjeta de producto, carrito, selector de listas…) es una función que pinta su parte según los datos. |
-| **Vite 8** | Servidor de desarrollo instantáneo y *build* de producción optimizado. En desarrollo hace de *proxy* de `/api` hacia el backend. |
-| **React Router 8** | La navegación entre pantallas (`/listas/:id`, `/recetas`, `/cuenta`…) sin recargar la página. |
-| **Tailwind CSS 4** | Estilos con clases de utilidad. Los colores y medidas están en *tokens* (variables CSS en OKLCH, con contraste AA comprobado) y el modo oscuro solo cambia esas variables. |
-| **shadcn/ui + Radix UI** | Componentes accesibles (paneles inferiores, modales, menús, diálogos de confirmación). Radix se encarga del foco, del teclado y de los lectores de pantalla. |
-| **lucide-react** | Los iconos. Los productos usan emojis. |
-| **sonner** | Los avisos (*toasts*) con «Deshacer». |
-| **Inter** | La tipografía, incluida en la app (no se descarga de Google). |
-| **@microsoft/fetch-event-source** | Cliente de SSE que permite enviar el *token* en la cabecera `Authorization` y se reconecta solo. |
-| **qrcode.react** | Genera el QR de invitación. |
-| **vite-plugin-pwa (Workbox)** | El manifiesto, los iconos, las pantallas de inicio de iPhone y el *service worker*, que guarda en caché la web (nunca los datos de la API) y avisa cuando hay versión nueva. |
-
-### Infraestructura y calidad
-
-| Tecnología | Qué hace |
-|---|---|
-| **Docker y Docker Compose** | En desarrollo, PostgreSQL. En producción, todo: base de datos, API, copias de seguridad y servidor web, cada uno en su contenedor. |
-| **Vercel** (opcional) | Otra forma de publicarla sin servidor propio: la web como sitio estático y la API como contenedor (`backend/Dockerfile.vercel`), con la base de datos en Neon. |
-| **Caddy** | Servidor web de producción. Sirve la web, reenvía `/api` al backend, obtiene y renueva solo el certificado HTTPS (Let's Encrypt) y añade las cabeceras de seguridad (CSP, HSTS…). |
-| **JUnit 5 + Testcontainers** | Más de 100 tests de integración del backend contra un PostgreSQL real que se crea y se destruye en cada ejecución. |
-| **Vitest** | Tests de la lógica del frontend (orden de los productos, ingredientes que faltan, eventos en tiempo real…). |
-| **oxlint** | Revisa el código TypeScript en busca de errores y malas prácticas. |
-| **GitHub Actions** | Integración continua: en cada *push* ejecuta los tests de backend y frontend, el *lint* y el *build*. |
-
-## Cómo funciona por dentro
+Un *monorepo* con dos aplicaciones: el **backend** (la API, en Java) y el **frontend** (la web, en
+TypeScript), más lo necesario para desplegarlas.
 
 ```mermaid
 flowchart LR
-  U["📱 Navegador<br/>React + service worker"] -- "HTTPS" --> C["Caddy<br/>web estática · HTTPS · CSP"]
-  C -- "/api" --> B["Spring Boot<br/>API REST + SSE"]
-  B -- "JPA / SQL" --> D[("PostgreSQL")]
-  K["backup<br/>pg_dump diario"] --> D
+  U["📱 Navegador<br/>React + service worker"] -- "HTTPS" --> W["Web estática<br/>Vercel · o Caddy"]
+  W -- "/api" --> B["Spring Boot<br/>API REST + SSE"]
+  B -- "JPA / SQL" --> D[("PostgreSQL<br/>Neon")]
+  B -.->|"eventos en tiempo real"| U
 ```
 
-1. Caddy sirve la web (archivos estáticos) y todo lo que empieza por `/api` lo reenvía al backend.
-   Web y API comparten dominio, así que no hace falta CORS y la cookie puede ser `SameSite=Strict`.
-2. La web llama a la API con el *token* JWT en la cabecera `Authorization`. Si caduca, lo renueva sola
-   con la cookie (una sola renovación a la vez, también entre pestañas).
-3. Cuando alguien cambia una lista, el servicio guarda el cambio y publica un evento. **Solo cuando la
-   transacción se confirma**, el evento se envía por SSE a los demás miembros conectados.
-4. El servicio comprueba en cada operación que el usuario es miembro de la lista; a quien no lo es se
-   le responde 404, para no revelar ni siquiera que la lista existe.
+La web y la API comparten dominio (la web reenvía `/api`), así que no hace falta CORS y la cookie de
+sesión puede ser `SameSite=Strict`.
 
-## Seguridad
+| Capa | Tecnologías |
+|---|---|
+| **Lenguajes** | Java 21 (~3 100 líneas + 1 800 de tests) · TypeScript (~5 900) · SQL · CSS (Tailwind) |
+| **Backend** | Spring Boot 4.1 · Spring Web MVC · Spring Security (JWT, BCrypt) · Spring Data JPA / Hibernate · JdbcClient · Bean Validation · Flyway · SSE · Lombok · Maven |
+| **Base de datos** | PostgreSQL 18 · `pg_trgm` + `unaccent` · Neon en producción |
+| **Frontend** | React 19 · Vite 8 · React Router 8 · Tailwind CSS 4 · shadcn/ui + Radix UI · lucide-react · sonner · fetch-event-source · qrcode.react · vite-plugin-pwa (Workbox) |
+| **Infraestructura** | Vercel (web + API en contenedor) · Docker y Docker Compose · Caddy (HTTPS automático) · GitHub Actions |
+| **Calidad** | JUnit 5 + Testcontainers · Vitest · oxlint · TypeScript estricto |
 
-- Contraseñas con BCrypt; mensaje de error genérico al iniciar sesión.
-- *Access token* solo en memoria (nunca en `localStorage`); *refresh token* en cookie
-  `HttpOnly; Secure; SameSite=Strict`, guardado en la base de datos como hash SHA-256, con rotación
-  y revocación de toda la sesión si se reutiliza uno antiguo (señal de robo).
-- Autorización por lista en la capa de servicio y productos buscados siempre por `(lista, producto)`.
-- Borrar la cuenta pide la contraseña, aunque haya sesión iniciada.
+<details>
+<summary><b>Qué hace cada tecnología en el proyecto</b></summary>
+
+### Backend
+
+| Tecnología | Para qué |
+|---|---|
+| **Spring Boot 4.1** | El *framework* de la API. Código organizado por funcionalidad (`auth`, `list`, `item`, `recipe`…) y en capas: *Controller* → *Service* → *Repository*. |
+| **Spring Web MVC** | Los *endpoints* REST bajo `/api` (JSON). Los errores siguen el estándar *Problem Details* (RFC 9457). |
+| **Spring Security** | Valida el JWT en cada petición (*OAuth2 Resource Server*). Contraseñas cifradas con **BCrypt**. |
+| **Spring Data JPA / Hibernate** | Guardar y leer usuarios, listas y productos sin SQL a mano. Bloqueo optimista (`@Version`) para que dos ediciones a la vez no se pisen. |
+| **JdbcClient** | SQL directo donde conviene: el buscador y las recetas. |
+| **Bean Validation** | Comprueba los datos de entrada antes de llegar a la lógica. |
+| **Server-Sent Events** | El tiempo real: el servidor envía cada cambio por una conexión que el navegador mantiene abierta. |
+| **Flyway** | Versiona el esquema: cada cambio es un `V{n}__descripcion.sql` que se aplica solo al arrancar. |
+| **Spring Boot Actuator** | `/actuator/health`, para saber si la API está lista. |
+
+### Frontend
+
+| Tecnología | Para qué |
+|---|---|
+| **React 19** | La interfaz por componentes. |
+| **Vite 8** | Desarrollo instantáneo y *build* optimizado. En desarrollo reenvía `/api` al backend. |
+| **React Router 8** | Navegación entre pantallas sin recargar. |
+| **Tailwind CSS 4** | Estilos con clases. Colores en variables OKLCH con contraste AA comprobado; el modo oscuro solo cambia esas variables. |
+| **shadcn/ui + Radix UI** | Componentes accesibles (paneles, modales, menús) con foco, teclado y lector de pantalla resueltos. |
+| **fetch-event-source** | Cliente SSE que envía el *token* en la cabecera y se reconecta solo. |
+| **vite-plugin-pwa** | Manifiesto, iconos, pantallas de inicio de iPhone y *service worker* (cachea la web, nunca los datos de la API). |
+
+### Infraestructura
+
+| Tecnología | Para qué |
+|---|---|
+| **Vercel** | Producción: la web como sitio estático y la API como contenedor (`backend/Dockerfile.vercel`). |
+| **Neon** | PostgreSQL gestionado en Frankfurt, junto a la API. |
+| **Docker Compose + Caddy** | Alternativa en un servidor propio: base de datos, API, copias de seguridad diarias y servidor web con HTTPS automático. |
+| **GitHub Actions** | En cada *push*: tests, *lint* y *build* del backend y del frontend. |
+
+</details>
+
+<details>
+<summary><b>Seguridad</b></summary>
+
+- Contraseñas con BCrypt (8–72 bytes); mensaje de error genérico al iniciar sesión, con el mismo
+  tiempo de respuesta exista o no la cuenta.
+- *Access token* solo en memoria; *refresh token* en cookie `HttpOnly; Secure; SameSite=Strict`,
+  guardado como hash SHA-256, con rotación y revocación de la sesión entera si se reutiliza.
+- Autorización por lista en la capa de servicio; productos buscados siempre por `(lista, producto)`.
+- Borrar la cuenta pide la contraseña aunque haya sesión iniciada.
 - Límite de peticiones en login, registro y renovación de sesión (por IP), y al unirse a listas y al
   borrar la cuenta (por usuario).
-- En producción: HTTPS obligatorio, CSP estricta (solo scripts propios), base de datos sin puertos
-  expuestos y la API ejecutándose sin permisos de administrador dentro de su contenedor.
+- Cabeceras de seguridad en producción: CSP estricta (solo scripts propios), HSTS, `nosniff`…
 
-## Estructura del proyecto
+</details>
+
+<details>
+<summary><b>Estructura del proyecto</b></summary>
 
 ```
 ├── backend/                Spring Boot (Java)
 │   └── src/main/
 │       ├── java/com/miapp/backend/
-│       │   ├── auth/       registro, login, JWT, refresh token
+│       │   ├── auth/       registro, login, JWT, refresh token, borrar cuenta
 │       │   ├── user/       usuarios
 │       │   ├── list/       listas, miembros, invitaciones
 │       │   ├── item/       productos de cada lista
@@ -173,30 +171,31 @@ flowchart LR
 │       │   ├── recipe/     recetario
 │       │   ├── realtime/   tiempo real (SSE)
 │       │   ├── ratelimit/  límite de peticiones
-│       │   └── common/     errores, eventos, utilidades
+│       │   └── common/     errores y eventos
 │       └── resources/db/migration/   esquema, catálogo y recetas (Flyway)
 ├── frontend/               React + TypeScript
 │   └── src/
 │       ├── api/            cliente de la API (token, renovación)
 │       ├── auth/           sesión y rutas protegidas
 │       ├── pages/          pantallas
-│       ├── layout/         estructura común y barra inferior
 │       ├── components/     componentes reutilizables (y ui/ de shadcn)
 │       ├── items/          lista, carrito, recientes
 │       ├── lists/          selector de listas, invitaciones, tiempo real
 │       ├── products/       buscador y secciones del catálogo
 │       ├── recipes/        lógica de recetas
+│       ├── account/        borrar la cuenta
 │       ├── theme/          modo claro/oscuro
-│       ├── lib/            utilidades y validación de formularios
 │       └── pwa/            instalación y actualizaciones
-├── backup/                 copias de seguridad (backup.sh, restore.sh)
+├── backup/                 copias de seguridad (servidor propio)
 ├── docker-compose.yml      PostgreSQL para desarrollo
-└── docker-compose.prod.yml producción completa
+└── docker-compose.prod.yml producción en un servidor propio
 ```
 
-## Desarrollo local
+</details>
 
-Requisitos: Docker, Java 21 y Node 24.
+## Ejecutarlo en local
+
+Necesitas Docker, Java 21 y Node 24.
 
 ```bash
 cp .env.example .env          # rellena POSTGRES_PASSWORD y JWT_SECRET (openssl rand -base64 48)
@@ -206,7 +205,7 @@ cd backend && ./mvnw spring-boot:run       # API en http://localhost:8080
 cd frontend && npm install && npm run dev  # web en http://localhost:5173
 ```
 
-### Tests y calidad
+Tests y calidad:
 
 ```bash
 cd backend && ./mvnw test      # tests de integración (necesita Docker: Testcontainers)
@@ -215,93 +214,82 @@ cd frontend && npm run lint    # oxlint
 cd frontend && npm run build   # comprueba los tipos y genera la web de producción
 ```
 
-Más detalles de arquitectura y convenciones en [CLAUDE.md](CLAUDE.md).
+Las convenciones y decisiones de arquitectura están en [CLAUDE.md](CLAUDE.md).
 
-## Despliegue en producción
+## Despliegue
 
-Todo se ejecuta con Docker Compose: PostgreSQL, el backend, las copias de seguridad y Caddy, que
-sirve la web, hace de proxy hacia la API y obtiene y renueva solo el certificado HTTPS (Let's Encrypt).
+La versión publicada está en **Vercel** con la base de datos en **Neon**. También está preparada para un
+servidor propio con Docker Compose.
 
-### 1. Servidor y dominio
-- Un servidor con Docker (por ejemplo un VPS con Ubuntu y **al menos 2 GB de RAM**: Java y PostgreSQL juntos no caben bien en 1 GB).
-- En tu proveedor de dominio, un registro DNS **A** de `tudominio.com` → IP del servidor.
-- Los puertos **80** y **443** abiertos en el firewall.
+<details>
+<summary><b>En Vercel + Neon (la versión publicada)</b></summary>
 
-### 2. Configuración
-En el servidor, clona el repositorio y crea el `.env` a partir de `.env.example`:
+Dos proyectos de Vercel conectados a este repositorio y una base de datos PostgreSQL de Neon:
 
-```bash
-POSTGRES_PASSWORD=...          # nueva, distinta de la de desarrollo
-JWT_SECRET=...                 # nuevo: openssl rand -base64 48
-DOMAIN=tudominio.com
-PUBLIC_URL=https://tudominio.com
-```
+| Proyecto | *Root Directory* | Qué despliega |
+|---|---|---|
+| Web | `frontend` | La web estática. `frontend/vercel.json` reenvía `/api` a la API, sirve la vista previa de las invitaciones y pone las cabeceras de seguridad. |
+| API | `backend` | El contenedor de `backend/Dockerfile.vercel`. |
 
-Antes de publicar, cambia `CONTACT_EMAIL` en `frontend/src/pages/PrivacyPage.tsx` y revisa el texto.
+Variables del proyecto de la API: `PORT=8080`, `POSTGRES_HOST`, `POSTGRES_DB`, `POSTGRES_USER`,
+`POSTGRES_PASSWORD`, `POSTGRES_PARAMS=?sslmode=require` (Neon exige conexión cifrada), `JWT_SECRET` y
+`FRONTEND_URL` (la URL pública de la web).
 
-### 3. Arrancar
+- **Región**: la API en la misma región que la base de datos (*Settings → Functions → Function
+  Region*); aquí, Frankfurt (`fra1`).
+- **Arranque en frío**: Vercel apaga la API tras 5 minutos sin uso; la siguiente petición espera unos
+  8–10 s y la web avisa con «Despertando el servidor…».
+- **Tiempo real**: Vercel corta las peticiones a los 5 minutos, así que la conexión SSE se renueva sola
+  cada 4.
+- **Copias de seguridad**: las hace Neon (con límites en el plan gratuito).
 
-```bash
-docker compose -f docker-compose.prod.yml up -d --build
-docker compose -f docker-compose.prod.yml ps        # los cuatro servicios en "running"/"healthy"
-```
+</details>
 
-Para actualizar tras cambios: `git pull` y el mismo comando `up -d --build`.
+<details>
+<summary><b>En un servidor propio con Docker Compose</b></summary>
 
-### Copias de seguridad
+PostgreSQL, la API, las copias de seguridad y Caddy, que sirve la web, hace de proxy hacia la API y
+obtiene y renueva solo el certificado HTTPS (Let's Encrypt).
 
-Son **automáticas**: el servicio `backup` hace una copia de la base de datos al arrancar y luego
-cada 24 h, y guarda las 14 más recientes en la carpeta `backups/` del servidor (fuera de los
-volúmenes de Docker: `down -v` no las borra). Se ajusta con `BACKUP_INTERVAL_HOURS` y `BACKUP_KEEP`
-en el `.env`. Los nombres llevan la fecha y hora en UTC: `quefalta-20261014-040000.dump`.
+1. **Servidor y dominio**: un VPS con Docker y **al menos 2 GB de RAM**, un registro DNS **A** hacia su
+   IP y los puertos **80** y **443** abiertos.
+2. **Configuración**: clona el repositorio y crea el `.env` a partir de `.env.example`:
 
-```bash
-docker compose -f docker-compose.prod.yml logs backup   # "copia hecha: …" o "ERROR"
-docker compose -f docker-compose.prod.yml ps backup     # "unhealthy" si la última copia tiene más de 26 h
-sudo ls -lh backups/
-```
+   ```bash
+   POSTGRES_PASSWORD=...          # nueva, distinta de la de desarrollo
+   JWT_SECRET=...                 # nuevo: openssl rand -base64 48
+   DOMAIN=tudominio.com
+   PUBLIC_URL=https://tudominio.com
+   ```
 
-**Guarda también copias fuera del servidor**: si pierdes el servidor, pierdes las copias que hay
-en él. Lo más sencillo, desde tu ordenador de vez en cuando (las copias solo las puede leer root):
+3. **Arrancar**:
+
+   ```bash
+   docker compose -f docker-compose.prod.yml up -d --build
+   docker compose -f docker-compose.prod.yml ps        # los cuatro servicios en "running"/"healthy"
+   ```
+
+   Para actualizar: `git pull` y el mismo `up -d --build`.
+
+**Copias de seguridad automáticas.** El servicio `backup` copia la base de datos al arrancar y cada
+24 h, y guarda las 14 más recientes en `backups/` (se ajusta con `BACKUP_INTERVAL_HOURS` y
+`BACKUP_KEEP`). Para tener también copias fuera del servidor:
 
 ```bash
 ssh root@tudominio.com 'cat "$(ls -1 /ruta/al/proyecto/backups/*.dump | sort | tail -1)"' > quefalta-$(date +%F).dump
 ```
 
-Además, muchos proveedores de VPS ofrecen copias automáticas del servidor completo por poco más.
-
-**Restaurar una copia** (sustituye todos los datos actuales; pide confirmación, para el backend
-mientras tanto y lo hace en una sola transacción: si falla, todo queda como estaba):
+**Restaurar** una copia (pide confirmación y lo hace en una sola transacción: si falla, todo queda
+como estaba):
 
 ```bash
 sudo ./backup/restore.sh backups/quefalta-20261014-040000.dump
 ```
 
-Para restaurar una copia que tienes en tu ordenador, súbela antes a `backups/` del servidor (con `scp`).
+</details>
 
-## Despliegue en Vercel (alternativa sin servidor propio)
+---
 
-Dos proyectos de Vercel conectados a este repositorio y una base de datos PostgreSQL de Neon (del
-Marketplace de Vercel):
-
-| Proyecto | *Root Directory* | Qué despliega |
-|---|---|---|
-| Web | `frontend` | La web estática de Vite. `frontend/vercel.json` reenvía `/api` a la API (así comparten dominio, como con Caddy) y pone las cabeceras de seguridad. |
-| API | `backend` | El contenedor de `backend/Dockerfile.vercel`. |
-
-Variables del proyecto de la API: `PORT=8080`, `POSTGRES_HOST`, `POSTGRES_DB`, `POSTGRES_USER`,
-`POSTGRES_PASSWORD`, `POSTGRES_PARAMS=?sslmode=require` (Neon exige conexión cifrada), `JWT_SECRET`,
-y `FRONTEND_URL` (la URL pública de la web).
-
-Lo que hay que saber:
-- **Región**: pon la API en la misma región que la base de datos de Neon (*Settings → Functions →
-  Function Region*). Si no, cada consulta cruza medio mundo; por defecto Vercel usa Washington (`iad1`).
-- **Arranque en frío**: Vercel apaga la API tras 5 minutos sin uso y la siguiente petición espera a que
-  arranque (unos 8–10 s con `Dockerfile.vercel`; la web avisa con «Despertando el servidor…»).
-- **Tiempo real**: Vercel corta las peticiones a los 5 minutos, así que la conexión SSE se renueva
-  sola cada 4. Mientras una lista está abierta en pantalla, la API está "en uso" y consume del plan
-  gratuito (360 GB-hora de memoria al mes); con la pantalla bloqueada o en otra pestaña, no.
-- Si Vercel arrancara varias copias de la API a la vez, el tiempo real solo llegaría a quien esté
-  conectado a la misma copia (ver `ListSubscriptions`). Con poco tráfico lo normal es una sola.
-- Copias de seguridad: las hace Neon (con límites en el plan gratuito); el servicio `backup` es solo
-  para el despliegue con Docker Compose.
+<div align="center">
+<sub>Hecho por <a href="https://github.com/EloyRomero19">Eloy Romero</a> · Java, Spring Boot, React y PostgreSQL</sub>
+</div>
