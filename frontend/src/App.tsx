@@ -9,6 +9,7 @@ import { LoginPage } from './pages/LoginPage'
 import { PrivacyPage } from './pages/PrivacyPage'
 import { RegisterPage } from './pages/RegisterPage'
 import { AccountPage } from './pages/AccountPage'
+import { DeleteAccountPage } from './pages/DeleteAccountPage'
 import { RecipePage } from './pages/RecipePage'
 import { RecipesPage } from './pages/RecipesPage'
 import { UpdatePrompt } from './pwa/UpdatePrompt'
@@ -34,6 +35,8 @@ function App() {
               <Route path="buscar" element={<Navigate to="/recetas" replace />} />
             </Route>
             <Route path="unirse/:code" element={<JoinPage />} />
+            {/* Sin la barra de pestañas: pantalla de un solo propósito (y nada fijo abajo que tape el teclado) */}
+            <Route path="cuenta/borrar" element={<DeleteAccountPage />} />
           </Route>
           <Route element={<GuestOnly />}>
             <Route path="login" element={<LoginPage />} />

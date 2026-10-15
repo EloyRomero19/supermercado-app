@@ -107,6 +107,9 @@ docker compose -f docker-compose.prod.yml up -d --build   # producción (ver REA
   sesión caducada). Sale de todas sus listas con `ListService.leaveAll` (mismas reglas que salir: hereda el miembro más antiguo, sin
   nadie se borra, eventos SSE incluidos) y borra el usuario con SQL directo (`deleteUserById`); la BD hace el resto (CASCADE / SET NULL).
   Si se añade una tabla que cuelgue de `app_user`, decidir su `ON DELETE`.
+  Frontend: pantalla propia `/cuenta/borrar` (`pages/DeleteAccountPage`, fuera de AppLayout), no un modal: en el móvil el teclado
+  dejaba el modal sin poder desplazarse. Muestra qué pasa con cada lista (`account/deletionImpact`, mismas reglas que el backend).
+  Los `DialogContent` tienen `max-h` + `overflow-y-auto`: si no caben (teclado abierto), se desplazan por dentro.
 - En `.env`, una variable vacía (`VAR=`) anula el valor por defecto `${VAR:def}`: comentar las que no se usen.
 - Toda operación sobre una lista comprueba pertenencia en el servicio (`requireMember` / `requireOwner`).
   A un no-miembro se le responde **404**. Los items se buscan siempre por `(listId, itemId)`.

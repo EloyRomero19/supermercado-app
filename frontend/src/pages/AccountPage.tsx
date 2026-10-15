@@ -1,7 +1,5 @@
 import { ChevronRight, LogOut, Monitor, Moon, ShieldCheck, Sun, Trash2 } from 'lucide-react'
-import { useState } from 'react'
 import { Link } from 'react-router'
-import { DeleteAccountDialog } from '@/account/DeleteAccountDialog'
 import { useAuth } from '@/auth/useAuth'
 import { PageHeader } from '@/components/PageHeader'
 import { useConfirm } from '@/components/useConfirm'
@@ -21,7 +19,6 @@ const THEME_OPTIONS: { value: ThemePreference; label: string; Icon: typeof Sun }
 export function AccountPage() {
   const { user, logout } = useAuth()
   const { confirm, confirmDialog } = useConfirm()
-  const [deleting, setDeleting] = useState(false)
   if (!user) return null
 
   const signOut = async () => {
@@ -62,13 +59,14 @@ export function AccountPage() {
           Cerrar sesión
         </Button>
 
-        <Button variant="ghost" className="h-11 self-center text-muted-foreground hover:text-destructive" onClick={() => setDeleting(true)}>
-          <Trash2 aria-hidden="true" />
-          Borrar mi cuenta
+        <Button asChild variant="ghost" className="h-11 self-center text-muted-foreground hover:text-destructive">
+          <Link to="/cuenta/borrar">
+            <Trash2 aria-hidden="true" />
+            Borrar mi cuenta
+          </Link>
         </Button>
       </main>
       {confirmDialog}
-      <DeleteAccountDialog open={deleting} onOpenChange={setDeleting} />
     </>
   )
 }
