@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 
 /** Esqueleto de una tarjeta de lista o de un bloque de contenido mientras carga. */
@@ -34,9 +35,29 @@ export function AppSkeleton({ label = 'Cargando' }: { label?: string }) {
         <Skeleton className="h-2 w-full" />
       </div>
       <div className="flex flex-col gap-3 p-4">
+        <SlowHint />
         <Skeleton className="h-12 w-full rounded-xl" />
         <TilesSkeleton />
       </div>
     </div>
+  )
+}
+
+/**
+ * Si el servidor llevaba un rato sin uso, se apaga (Vercel lo hace a los 5 min) y la primera
+ * petición espera a que vuelva a arrancar. Tras unos segundos lo explicamos, para que no parezca colgada.
+ */
+function SlowHint() {
+  const [visible, setVisible] = useState(false)
+  useEffect(() => {
+    const timer = setTimeout(() => setVisible(true), 3000)
+    return () => clearTimeout(timer)
+  }, [])
+
+  if (!visible) return null
+  return (
+    <p className="rounded-xl bg-secondary px-4 py-3 text-center text-sm text-secondary-foreground">
+      Despertando el servidor… La primera vez tras un rato sin uso tarda unos segundos.
+    </p>
   )
 }

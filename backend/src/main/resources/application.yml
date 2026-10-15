@@ -24,21 +24,21 @@ spring:
     username: ${POSTGRES_USER:supermercado}
     password: ${POSTGRES_PASSWORD}
 
-  security:
-    oauth2:
-      client:
-        registration:
-          # Google es un proveedor conocido por Spring: ya sabe sus URLs de autorización,
-          # token y claves. Solo hay que darle nuestras credenciales y los permisos (scope).
-          # El valor por defecto deja arrancar la app aunque aún no hayas creado las credenciales.
-          google:
-            client-id: ${GOOGLE_CLIENT_ID:sin-configurar}
-            client-secret: ${GOOGLE_CLIENT_SECRET:sin-configurar}
-            scope: openid, email, profile
-            # URL a la que Google devuelve al usuario. Debe coincidir EXACTAMENTE con la registrada
-            # en Google Cloud. Por defecto Spring la deduce de la cabecera Host, pero el proxy de
-            # Vite la cambia a localhost:8080; así siempre sale del dominio público del frontend.
-            redirect-uri: ${app.auth.frontend-url}/login/oauth2/code/google
+  # Correo saliente por SMTP (para "¿Has olvidado tu contraseña?"). Variables MAIL_* en .env.example.
+  # Sin MAIL_HOST no se envía nada: el enlace sale en el log (útil en desarrollo).
+  mail:
+    host: ${MAIL_HOST:}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      # Puerto 587: la conexión empieza en claro y pasa a cifrada (STARTTLS); exigido, no opcional
+      mail.smtp.starttls.enable: ${MAIL_STARTTLS:true}
+      mail.smtp.starttls.required: ${MAIL_STARTTLS:true}
+      # Que un SMTP lento no deje el hilo colgado para siempre (milisegundos)
+      mail.smtp.connectiontimeout: 10000
+      mail.smtp.timeout: 10000
+      mail.smtp.writetimeout: 10000
 
   jpa:
     # El esquema lo gestiona Flyway; Hibernate solo comprueba que las entidades encajan.
@@ -53,10 +53,16 @@ app:
     issuer: supermercado-app
     access-token-ttl: 15m
     refresh-token-ttl: 30d
+    # El texto del email dice "caduca en 1 hora": cambiarlo también allí (PasswordResetMailer)
+    password-reset-ttl: 1h
     # En producción siempre true. Los navegadores aceptan cookies Secure en http://localhost.
     cookie-secure: true
     # Único origen desde el que se aceptan /api/auth/refresh y /logout
     frontend-url: ${FRONTEND_URL:http://localhost:5173}
+
+  mail:
+    # Remitente de los correos. Vacío = MAIL_USERNAME (con Gmail tiene que ser esa misma cuenta)
+    from: ${MAIL_FROM:}
 
   rate-limit:
     enabled: true
@@ -66,3 +72,8 @@ management:
     web:
       exposure:
         include: health
+  health:
+    # Si el SMTP fallara o no estuviera configurado, /actuator/health daría 503 y Docker
+    # reiniciaría el backend. Sin correo la app funciona igual: no cuenta para la salud.
+    mail:
+      enabled: false

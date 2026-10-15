@@ -37,10 +37,6 @@ public class AppUser {
 
 	private String passwordHash;
 
-	private String googleSub;
-
-	private String avatarUrl;
-
 	@CreationTimestamp
 	private Instant createdAt;
 
@@ -48,13 +44,6 @@ public class AppUser {
 		this.email = email;
 		this.displayName = displayName;
 		this.passwordHash = passwordHash;
-	}
-
-	public static AppUser fromGoogle(String email, String displayName, String googleSub, String avatarUrl) {
-		AppUser user = new AppUser(email, displayName, null);
-		user.googleSub = googleSub;
-		user.avatarUrl = avatarUrl;
-		return user;
 	}
 
 }

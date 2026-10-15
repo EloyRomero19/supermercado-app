@@ -38,6 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user,
       login: async (email, password) => setSession(await authApi.login(email, password)),
       register: async (data) => setSession(await authApi.register(data)),
+      resetPassword: async (token, password) => setSession(await authApi.resetPassword(token, password)),
       logout: async () => {
         try {
           await authApi.logout()

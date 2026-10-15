@@ -12,13 +12,13 @@ de inicio como una app (PWA).
 
 <table>
   <tr>
-    <td><img src="docs/capturas/1-login.webp" width="190" alt="Inicio de sesión con email o Google"></td>
+    <td><img src="docs/capturas/1-login.webp" width="190" alt="Inicio de sesión con email y contraseña"></td>
     <td><img src="docs/capturas/2-lista.webp" width="190" alt="Lista agrupada por secciones del súper"></td>
     <td><img src="docs/capturas/3-mis-listas.webp" width="190" alt="Selector de listas"></td>
     <td><img src="docs/capturas/4-carrito.webp" width="190" alt="Carrito con lo ya cogido"></td>
   </tr>
   <tr>
-    <td align="center"><sub>Login con email o Google</sub></td>
+    <td align="center"><sub>Inicio de sesión</sub></td>
     <td align="center"><sub>Lo que falta, por secciones</sub></td>
     <td align="center"><sub>Cambiar de lista</sub></td>
     <td align="center"><sub>El carrito</sub></td>
@@ -39,7 +39,7 @@ de inicio como una app (PWA).
 
 ## Qué se puede hacer
 
-- **Cuenta** con email y contraseña o con Google.
+- **Cuenta** con email y contraseña. Si la olvidas, «¿Has olvidado tu contraseña?» te envía un enlace por email.
 - **Varias listas** (casa, piso de la playa…), cada una con su propietario y sus miembros. La pestaña
   Listas abre directamente la que estás usando; las demás se cambian desde el título («Mis listas ▾»).
 - **Compartir** con un código QR o un enlace de invitación. El propietario puede renovar el código o
@@ -80,13 +80,14 @@ en TypeScript), más la configuración para ejecutarlo todo con Docker.
 |---|---|
 | **Spring Boot 4.1** | El *framework* de la API. Arranca el servidor web, conecta las piezas (inyección de dependencias) y da la configuración por defecto. Código organizado por funcionalidad (`auth`, `list`, `item`, `recipe`…) y en capas: *Controller* → *Service* → *Repository*. |
 | **Spring Web MVC** | Los *endpoints* REST bajo `/api` (JSON). Los errores se devuelven en el formato estándar *Problem Details* (RFC 9457). |
-| **Spring Security** | Protege la API. Valida en cada petición el *token* JWT (*OAuth2 Resource Server*) y hace el login con Google (*OAuth2 Client*). Contraseñas cifradas con **BCrypt**. |
+| **Spring Security** | Protege la API. Valida en cada petición el *token* JWT (*OAuth2 Resource Server*). Contraseñas cifradas con **BCrypt**. |
 | **JWT** (HS256) | El *access token*: dura 15 minutos y el navegador lo guarda **solo en memoria**. Para renovarlo hay un *refresh token* en una cookie `HttpOnly` que rota en cada uso. |
 | **Spring Data JPA / Hibernate** | Guardar y leer entidades (usuarios, listas, productos de la lista) sin escribir SQL a mano. Bloqueo optimista (`@Version`) para que dos ediciones simultáneas no se pisen. |
 | **JdbcClient** | SQL directo donde conviene: la búsqueda de productos y las recetas. |
 | **Bean Validation** | Comprueba los datos de entrada (email válido, nombre no vacío, cantidades…) antes de llegar a la lógica. |
 | **Server-Sent Events (SSE)** | El tiempo real. Cada navegador mantiene abierta una conexión con su lista y el servidor le envía cada cambio en cuanto se confirma en la base de datos. |
 | **Flyway** | Versiona el esquema de la base de datos: cada cambio es un archivo `V{n}__descripcion.sql` que se aplica solo al arrancar. |
+| **Spring Mail** | Envía por SMTP (Gmail, Brevo…) el email con el enlace para elegir una contraseña nueva, en segundo plano. |
 | **Spring Boot Actuator** | El *endpoint* `/actuator/health`, que Docker usa para saber si la API está lista. |
 | **Lombok** | Ahorra código repetitivo (constructores, *getters*). |
 | **Maven** | Compila, gestiona las dependencias y ejecuta los tests (`./mvnw`). |
@@ -119,6 +120,7 @@ en TypeScript), más la configuración para ejecutarlo todo con Docker.
 | Tecnología | Qué hace |
 |---|---|
 | **Docker y Docker Compose** | En desarrollo, PostgreSQL. En producción, todo: base de datos, API, copias de seguridad y servidor web, cada uno en su contenedor. |
+| **Vercel** (opcional) | Otra forma de publicarla sin servidor propio: la web como sitio estático y la API como contenedor (`backend/Dockerfile.vercel`), con la base de datos en Neon. |
 | **Caddy** | Servidor web de producción. Sirve la web, reenvía `/api` al backend, obtiene y renueva solo el certificado HTTPS (Let's Encrypt) y añade las cabeceras de seguridad (CSP, HSTS…). |
 | **JUnit 5 + Testcontainers** | Más de 100 tests de integración del backend contra un PostgreSQL real que se crea y se destruye en cada ejecución. |
 | **Vitest** | Tests de la lógica del frontend (orden de los productos, ingredientes que faltan, eventos en tiempo real…). |
@@ -130,9 +132,9 @@ en TypeScript), más la configuración para ejecutarlo todo con Docker.
 ```mermaid
 flowchart LR
   U["📱 Navegador<br/>React + service worker"] -- "HTTPS" --> C["Caddy<br/>web estática · HTTPS · CSP"]
-  C -- "/api · /oauth2" --> B["Spring Boot<br/>API REST + SSE"]
+  C -- "/api" --> B["Spring Boot<br/>API REST + SSE"]
   B -- "JPA / SQL" --> D[("PostgreSQL")]
-  B -- "login" --> G["Google OAuth2"]
+  B -- "SMTP" --> M["Correo<br/>enlace de contraseña"]
   K["backup<br/>pg_dump diario"] --> D
 ```
 
@@ -151,9 +153,12 @@ flowchart LR
 - *Access token* solo en memoria (nunca en `localStorage`); *refresh token* en cookie
   `HttpOnly; Secure; SameSite=Strict`, guardado en la base de datos como hash SHA-256, con rotación
   y revocación de toda la sesión si se reutiliza uno antiguo (señal de robo).
-- El login con Google se hace en el servidor; el *token* nunca viaja en la URL.
+- «¿Has olvidado tu contraseña?»: enlace de un solo uso que caduca en 1 hora, guardado como hash; la
+  respuesta es la misma exista o no la cuenta (no revela qué emails están registrados) y al usarlo se
+  cierran las demás sesiones.
 - Autorización por lista en la capa de servicio y productos buscados siempre por `(lista, producto)`.
-- Límite de peticiones en login, registro y renovación de sesión (por IP) y al unirse a listas (por usuario).
+- Límite de peticiones en login, registro, renovación de sesión y enlaces de contraseña (por IP), y al
+  unirse a listas (por usuario).
 - En producción: HTTPS obligatorio, CSP estricta (solo scripts propios), base de datos sin puertos
   expuestos y la API ejecutándose sin permisos de administrador dentro de su contenedor.
 
@@ -163,7 +168,7 @@ flowchart LR
 ├── backend/                Spring Boot (Java)
 │   └── src/main/
 │       ├── java/com/miapp/backend/
-│       │   ├── auth/       registro, login, JWT, refresh token, Google
+│       │   ├── auth/       registro, login, JWT, refresh token, contraseña olvidada
 │       │   ├── user/       usuarios
 │       │   ├── list/       listas, miembros, invitaciones
 │       │   ├── item/       productos de cada lista
@@ -204,8 +209,8 @@ cd backend && ./mvnw spring-boot:run       # API en http://localhost:8080
 cd frontend && npm install && npm run dev  # web en http://localhost:5173
 ```
 
-El login con Google necesita además `GOOGLE_CLIENT_ID` y `GOOGLE_CLIENT_SECRET` en el `.env`; sin
-ellos funciona todo lo demás.
+Sin configurar el correo (`MAIL_*` en el `.env`), «¿Has olvidado tu contraseña?» no envía nada: el
+enlace aparece en el log del backend, y así se puede probar en local.
 
 ### Tests y calidad
 
@@ -234,20 +239,24 @@ En el servidor, clona el repositorio y crea el `.env` a partir de `.env.example`
 ```bash
 POSTGRES_PASSWORD=...          # nueva, distinta de la de desarrollo
 JWT_SECRET=...                 # nuevo: openssl rand -base64 48
-GOOGLE_CLIENT_ID=...
-GOOGLE_CLIENT_SECRET=...
 DOMAIN=tudominio.com
 PUBLIC_URL=https://tudominio.com
 ```
 
-### 3. Google
-En Google Cloud Console → Google Auth Platform:
-- **Clientes** → añade la URI de redireccionamiento `https://tudominio.com/login/oauth2/code/google`.
-- **Información de la marca** → dominio autorizado `tudominio.com`, página principal y política de
-  privacidad `https://tudominio.com/privacidad`.
-- **Público** → *Publicar app* para que pueda entrar cualquiera.
+### 3. Correo
+Para que «¿Has olvidado tu contraseña?» envíe emails, añade al `.env` un servidor SMTP. Con una
+cuenta de Gmail (hasta unos 500 correos al día):
 
-Antes, cambia `CONTACT_EMAIL` en `frontend/src/pages/PrivacyPage.tsx` y revisa el texto.
+```bash
+MAIL_HOST=smtp.gmail.com
+MAIL_USERNAME=tucuenta@gmail.com
+MAIL_PASSWORD=...              # "contraseña de aplicación" (myaccount.google.com/apppasswords), no la tuya
+```
+
+Con un dominio propio, servicios como Brevo o Resend dan también un SMTP y los correos llegan con
+tu dominio como remitente (`MAIL_FROM`).
+
+Antes de publicar, cambia `CONTACT_EMAIL` en `frontend/src/pages/PrivacyPage.tsx` y revisa el texto.
 
 ### 4. Arrancar
 
@@ -288,3 +297,30 @@ sudo ./backup/restore.sh backups/quefalta-20261014-040000.dump
 ```
 
 Para restaurar una copia que tienes en tu ordenador, súbela antes a `backups/` del servidor (con `scp`).
+
+## Despliegue en Vercel (alternativa sin servidor propio)
+
+Dos proyectos de Vercel conectados a este repositorio y una base de datos PostgreSQL de Neon (del
+Marketplace de Vercel):
+
+| Proyecto | *Root Directory* | Qué despliega |
+|---|---|---|
+| Web | `frontend` | La web estática de Vite. `frontend/vercel.json` reenvía `/api` a la API (así comparten dominio, como con Caddy) y pone las cabeceras de seguridad. |
+| API | `backend` | El contenedor de `backend/Dockerfile.vercel`. |
+
+Variables del proyecto de la API: `PORT=8080`, `POSTGRES_HOST`, `POSTGRES_DB`, `POSTGRES_USER`,
+`POSTGRES_PASSWORD`, `POSTGRES_PARAMS=?sslmode=require` (Neon exige conexión cifrada), `JWT_SECRET`,
+`FRONTEND_URL` (la URL pública de la web) y las `MAIL_*`.
+
+Lo que hay que saber:
+- **Región**: pon la API en la misma región que la base de datos de Neon (*Settings → Functions →
+  Function Region*). Si no, cada consulta cruza medio mundo; por defecto Vercel usa Washington (`iad1`).
+- **Arranque en frío**: Vercel apaga la API tras 5 minutos sin uso y la siguiente petición espera a que
+  arranque (unos 8–10 s con `Dockerfile.vercel`; la web avisa con «Despertando el servidor…»).
+- **Tiempo real**: Vercel corta las peticiones a los 5 minutos, así que la conexión SSE se renueva
+  sola cada 4. Mientras una lista está abierta en pantalla, la API está "en uso" y consume del plan
+  gratuito (360 GB-hora de memoria al mes); con la pantalla bloqueada o en otra pestaña, no.
+- Si Vercel arrancara varias copias de la API a la vez, el tiempo real solo llegaría a quien esté
+  conectado a la misma copia (ver `ListSubscriptions`). Con poco tráfico lo normal es una sola.
+- Copias de seguridad: las hace Neon (con límites en el plan gratuito); el servicio `backup` es solo
+  para el despliegue con Docker Compose.

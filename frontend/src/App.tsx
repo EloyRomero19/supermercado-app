@@ -2,13 +2,14 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router'
 import { AuthProvider } from './auth/AuthProvider'
 import { AppLayout } from './layout/AppLayout'
 import { GuestOnly, RequireAuth } from './auth/RouteGuards'
-import { AuthCallbackPage } from './pages/AuthCallbackPage'
 import { HomePage } from './pages/HomePage'
 import { JoinPage } from './pages/JoinPage'
 import { ListRoute } from './pages/ListPage'
 import { LoginPage } from './pages/LoginPage'
 import { PrivacyPage } from './pages/PrivacyPage'
 import { RegisterPage } from './pages/RegisterPage'
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
+import { ResetPasswordPage } from './pages/ResetPasswordPage'
 import { AccountPage } from './pages/AccountPage'
 import { RecipePage } from './pages/RecipePage'
 import { RecipesPage } from './pages/RecipesPage'
@@ -39,8 +40,10 @@ function App() {
           <Route element={<GuestOnly />}>
             <Route path="login" element={<LoginPage />} />
             <Route path="registro" element={<RegisterPage />} />
+            <Route path="recuperar" element={<ForgotPasswordPage />} />
           </Route>
-          <Route path="auth/callback" element={<AuthCallbackPage />} />
+          {/* Fuera de GuestOnly: el enlace del email debe funcionar aunque haya una sesión abierta */}
+          <Route path="restablecer" element={<ResetPasswordPage />} />
           <Route path="privacidad" element={<PrivacyPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

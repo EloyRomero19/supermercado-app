@@ -32,7 +32,7 @@ export function AccountPage() {
       <PageHeader title="Cuenta" />
       <main className="flex flex-col gap-4 p-4">
         <Card className="flex-row items-center gap-4 px-4 py-5">
-          <UserAvatar name={user.displayName} avatarUrl={user.avatarUrl} className="size-16 text-xl" />
+          <UserAvatar name={user.displayName} className="size-16 text-xl" />
           <div className="min-w-0">
             <h2 className="truncate text-lg font-semibold">{user.displayName}</h2>
             <p className="truncate text-sm text-muted-foreground">{user.email}</p>

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useLocation, useSearchParams } from 'react-router'
+import { Link, useLocation } from 'react-router'
 import { useAuth } from '@/auth/useAuth'
 import { AuthLayout } from '@/components/AuthLayout'
 import { FormAlert } from '@/components/FormAlert'
@@ -9,17 +9,9 @@ import { SubmitButton } from '@/components/SubmitButton'
 import { useSubmit } from '@/components/useSubmit'
 import { emailError, onlyErrors } from '@/lib/validation'
 
-// Errores con los que el backend nos devuelve aquí tras el login con Google (?error=...)
-const GOOGLE_ERRORS: Record<string, string> = {
-  google: 'No se pudo iniciar sesión con Google. Inténtalo de nuevo.',
-  'cuenta-existente': 'Ya existe una cuenta con ese email. Entra con tu contraseña.',
-}
-
 export function LoginPage() {
   const { login } = useAuth()
   const location = useLocation()
-  const [searchParams] = useSearchParams()
-  const googleError = GOOGLE_ERRORS[searchParams.get('error') ?? '']
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   // Al tener éxito no navegamos aquí: GuestOnly ve la sesión nueva y redirige solo
@@ -43,7 +35,7 @@ export function LoginPage() {
     >
       {/* noValidate: los errores los mostramos nosotros, en español y bajo cada campo */}
       <form className="flex flex-col gap-4" onSubmit={onSubmit} noValidate>
-        <FormAlert message={error ?? googleError} />
+        <FormAlert message={error} />
         <FormField
           label="Email"
           type="email"
@@ -61,6 +53,13 @@ export function LoginPage() {
           onChange={(e) => setPassword(e.target.value)}
           error={fieldErrors.password}
         />
+        <Link
+          to="/recuperar"
+          state={{ email: email.trim() }}
+          className="-mt-2 self-end py-1 text-sm font-medium text-primary underline-offset-4 hover:underline"
+        >
+          ¿Has olvidado tu contraseña?
+        </Link>
         <SubmitButton submitting={submitting} submittingLabel="Entrando…" className="mt-1">
           Entrar
         </SubmitButton>

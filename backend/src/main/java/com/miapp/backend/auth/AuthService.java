@@ -1,6 +1,7 @@
 package com.miapp.backend.auth;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -28,28 +29,28 @@ class AuthService {
 	private final PasswordEncoder passwordEncoder;
 	private final AccessTokenService accessTokens;
 	private final RefreshTokenService refreshTokens;
-	private final GoogleAccountService googleAccounts;
+	private final RefreshTokenRepository refreshTokenRepository;
+	private final PasswordResetService passwordResets;
 
 	/** Hash de una contraseña cualquiera, para comparar contra algo cuando el email no existe. */
 	private final String dummyPasswordHash;
 
 	AuthService(UserRepository users, PasswordEncoder passwordEncoder, AccessTokenService accessTokens,
-			RefreshTokenService refreshTokens, GoogleAccountService googleAccounts) {
+			RefreshTokenService refreshTokens, RefreshTokenRepository refreshTokenRepository,
+			PasswordResetService passwordResets) {
 		this.users = users;
 		this.passwordEncoder = passwordEncoder;
 		this.accessTokens = accessTokens;
 		this.refreshTokens = refreshTokens;
-		this.googleAccounts = googleAccounts;
+		this.refreshTokenRepository = refreshTokenRepository;
+		this.passwordResets = passwordResets;
 		this.dummyPasswordHash = passwordEncoder.encode(UUID.randomUUID().toString());
 	}
 
 	@Transactional
 	AuthResult register(RegisterRequest request) {
 		String email = normalizeEmail(request.email());
-		// @Size cuenta caracteres, pero BCrypt cuenta bytes: "ñ" ocupa 2 en UTF-8
-		if (byteLength(request.password()) > BCRYPT_MAX_BYTES) {
-			throw new ApiException(HttpStatus.BAD_REQUEST, "La contraseña es demasiado larga");
-		}
+		requireBcryptLength(request.password());
 		if (users.findByEmailIgnoreCase(email).isPresent()) {
 			throw emailAlreadyUsed();
 		}
@@ -82,9 +83,18 @@ class AuthService {
 		return startSession(user, UUID.randomUUID());
 	}
 
+	/**
+	 * Contraseña nueva con un enlace del email. Se cierran todas las sesiones abiertas (si alguien
+	 * te la había robado, deja de tener acceso) y se abre una nueva en este dispositivo.
+	 * Sirve también para quien entraba con Google y no tenía contraseña.
+	 */
 	@Transactional
-	AuthResult loginWithGoogle(GoogleProfile profile) {
-		return startSession(googleAccounts.findOrCreate(profile), UUID.randomUUID());
+	AuthResult resetPassword(ResetPasswordRequest request) {
+		requireBcryptLength(request.password());
+		AppUser user = passwordResets.consume(request.token());
+		user.setPasswordHash(passwordEncoder.encode(request.password()));
+		refreshTokenRepository.revokeAllForUser(user.getId(), Instant.now());
+		return startSession(user, UUID.randomUUID());
 	}
 
 	/**
@@ -109,6 +119,13 @@ class AuthService {
 
 	private static String normalizeEmail(String email) {
 		return email.trim().toLowerCase(Locale.ROOT);
+	}
+
+	/** @Size cuenta caracteres, pero BCrypt cuenta bytes: "ñ" ocupa 2 en UTF-8. */
+	private static void requireBcryptLength(String password) {
+		if (byteLength(password) > BCRYPT_MAX_BYTES) {
+			throw new ApiException(HttpStatus.BAD_REQUEST, "La contraseña es demasiado larga");
+		}
 	}
 
 	private static int byteLength(String password) {

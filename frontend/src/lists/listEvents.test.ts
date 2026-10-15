@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest'
 import type { Item, ListDetail, Member } from '../api/types'
 import { applyListEvent, type ListView } from './listEvents'
 
-const ana: Member = { userId: 'ana', displayName: 'Ana', avatarUrl: null, role: 'OWNER' }
-const beto: Member = { userId: 'beto', displayName: 'Beto', avatarUrl: null, role: 'MEMBER' }
+const ana: Member = { userId: 'ana', displayName: 'Ana', role: 'OWNER' }
+const beto: Member = { userId: 'beto', displayName: 'Beto', role: 'MEMBER' }
 const list: ListDetail = { id: 'l1', name: 'Casa', inviteCode: 'ABCD2345', myRole: 'MEMBER', members: [ana, beto] }
 
 function item(id: string, name: string, checked = false): Item {

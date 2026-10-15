@@ -14,6 +14,8 @@ type Handlers = {
 
 /** Error que NO debe reintentarse (en fetchEventSource, lanzar desde onerror detiene los reintentos). */
 class FatalStreamError extends Error {}
+/** El servidor cerró la conexión a propósito (cada pocos minutos): se reabre ya, sin avisar. */
+class ServerClosedError extends Error {}
 
 /**
  * Se suscribe a los eventos en tiempo real de una lista (GET /api/lists/{id}/events).
@@ -59,13 +61,15 @@ export function useListEvents(listId: string, enabled: boolean, handlers: Handle
         onEvent(message.event, message.data ? JSON.parse(message.data) : null)
       },
 
-      // El servidor cerró la conexión (cada 15 min, o al expulsarnos): lanzar = reintentar
+      // El servidor cerró la conexión (cada 4 min, o al expulsarnos): lanzar = reintentar
       onclose() {
-        throw new Error('closed')
+        throw new ServerClosedError('closed')
       },
 
       onerror(error) {
         if (error instanceof FatalStreamError || error instanceof ApiError) throw error
+        // Cierre normal: reconectar al momento y sin mostrar "Reconectando" (no es un fallo)
+        if (error instanceof ServerClosedError) return 0
         setStatus('reconnecting')
         // Espera creciente entre reintentos (1 s, 2 s, 4 s… hasta 30 s): si el servidor está
         // caído, no lo saturamos con reconexiones de todos los clientes a la vez

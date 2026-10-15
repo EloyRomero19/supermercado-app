@@ -333,7 +333,7 @@ function ListPage({ listId }: { listId: string }) {
           >
             <span className="flex -space-x-2" aria-hidden="true">
               {list.members.slice(0, 3).map((member) => (
-                <UserAvatar key={member.userId} name={member.displayName} avatarUrl={member.avatarUrl} className="size-8 text-xs ring-2 ring-secondary" fallbackClassName="bg-card" />
+                <UserAvatar key={member.userId} name={member.displayName} className="size-8 text-xs ring-2 ring-secondary" fallbackClassName="bg-card" />
               ))}
               {list.members.length > 3 && (
                 <span className="grid size-8 place-items-center rounded-full bg-card text-xs font-semibold ring-2 ring-secondary">
@@ -407,7 +407,7 @@ function ListPage({ listId }: { listId: string }) {
           <ul className="flex flex-col">
             {list.members.map((member) => (
               <li key={member.userId} className="flex min-h-12 items-center gap-3">
-                <UserAvatar name={member.displayName} avatarUrl={member.avatarUrl} />
+                <UserAvatar name={member.displayName} />
                 <span className="min-w-0 flex-1 truncate font-medium">
                   {member.displayName}
                   {member.userId === user?.id && <span className="font-normal text-muted-foreground"> (tú)</span>}

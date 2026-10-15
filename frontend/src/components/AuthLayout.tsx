@@ -2,11 +2,10 @@ import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 import { Card } from '@/components/ui/card'
 import { BrandMark } from './BrandMark'
-import { GoogleButton } from './GoogleButton'
 
 type Props = { title: string; subtitle: string; children: ReactNode; footer: ReactNode }
 
-/** Diseño común de login y registro: marca, botón de Google y el formulario en una tarjeta. */
+/** Diseño común de las pantallas sin sesión (login, registro, contraseña): marca y el formulario en una tarjeta. */
 export function AuthLayout({ title, subtitle, children, footer }: Props) {
   return (
     <div className="flex min-h-dvh flex-col bg-linear-to-b from-secondary to-background px-4 pt-safe pb-safe">
@@ -21,10 +20,6 @@ export function AuthLayout({ title, subtitle, children, footer }: Props) {
         </div>
 
         <Card className="gap-5 px-6 py-6 shadow-lg">
-          <GoogleButton />
-          <div className="flex items-center gap-3 text-xs text-muted-foreground" aria-hidden="true">
-            <span className="h-px flex-1 bg-border" />o con tu email<span className="h-px flex-1 bg-border" />
-          </div>
           {children}
         </Card>
 

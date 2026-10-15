@@ -29,10 +29,11 @@ import lombok.extern.slf4j.Slf4j;
 class ListSubscriptions {
 
 	/**
-	 * Cada conexión se cierra a los 15 min y el cliente reconecta solo. Así se vuelve a comprobar
-	 * que sigue siendo miembro con un token vigente (el access token también dura 15 min).
+	 * Cada conexión se cierra a los 4 min y el cliente reconecta solo. Así se vuelve a comprobar
+	 * que sigue siendo miembro con un token vigente. Y en Vercel una petición no puede durar más
+	 * de 5 min: si no la cerramos antes nosotros, la corta Vercel con un error 504.
 	 */
-	static final Duration TIMEOUT = Duration.ofMinutes(15);
+	static final Duration TIMEOUT = Duration.ofMinutes(4);
 
 	private record Subscription(UUID userId, SseEmitter emitter) {
 	}

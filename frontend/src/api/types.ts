@@ -4,10 +4,9 @@ export type User = {
   id: string
   email: string
   displayName: string
-  avatarUrl: string | null
 }
 
-/** Respuesta de /api/auth/register, /login y /refresh. El refresh token viaja en una cookie HttpOnly. */
+/** Respuesta de /api/auth/register, /login, /refresh y /reset-password. El refresh token viaja en una cookie HttpOnly. */
 export type AuthResponse = {
   accessToken: string
   expiresIn: number
@@ -50,7 +49,6 @@ export type ListSummary = {
 export type Member = {
   userId: string
   displayName: string
-  avatarUrl: string | null
   role: ListRole
 }
 

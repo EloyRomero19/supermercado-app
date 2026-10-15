@@ -23,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 class AuthController {
 
 	private final AuthService authService;
+	private final PasswordResetService passwordResets;
 	private final RefreshTokenCookie refreshCookie;
 	private final AuthProperties props;
 
@@ -34,6 +35,19 @@ class AuthController {
 	@PostMapping("/login")
 	ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
 		return sessionResponse(HttpStatus.OK, authService.login(request));
+	}
+
+	/** Siempre 204, exista o no la cuenta (ver PasswordResetService.requestLink). */
+	@PostMapping("/forgot-password")
+	ResponseEntity<Void> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+		passwordResets.requestLink(request.email());
+		return ResponseEntity.noContent().build();
+	}
+
+	/** Cambia la contraseña y deja la sesión iniciada, como el login. */
+	@PostMapping("/reset-password")
+	ResponseEntity<AuthResponse> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+		return sessionResponse(HttpStatus.OK, authService.resetPassword(request));
 	}
 
 	@PostMapping("/refresh")

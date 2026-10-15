@@ -8,7 +8,7 @@ import { Card } from '@/components/ui/card'
 // PENDIENTE: pon aquí el email al que la gente puede escribir para ejercer sus derechos
 const CONTACT_EMAIL = 'contacto@tudominio.com'
 
-/** Política de privacidad. Google la exige para publicar el login con Google. Revísala antes de publicar. */
+/** Política de privacidad. Revísala antes de publicar. */
 export function PrivacyPage() {
   const navigate = useNavigate()
   return (
@@ -25,17 +25,19 @@ export function PrivacyPage() {
         <Section title="Qué datos guardamos">
           <ul className="list-disc space-y-1 pl-5">
             <li>Tu email y tu nombre, para identificarte y mostrarte a los miembros de tus listas.</li>
-            <li>Si entras con Google: tu identificador de Google y tu foto de perfil. No accedemos a nada más de tu cuenta.</li>
-            <li>Si entras con contraseña: la contraseña cifrada (nunca la guardamos tal cual).</li>
+            <li>Tu contraseña cifrada (nunca la guardamos tal cual).</li>
             <li>Tus listas, sus productos y quién los añadió o los cogió.</li>
           </ul>
         </Section>
         <Section title="Para qué los usamos">
           <p>Solo para que la aplicación funcione. No los vendemos, no los cedemos a terceros y no hay publicidad.</p>
-          <p>Los miembros de una lista ven tu nombre, tu foto y los productos que añades o marcas en esa lista.</p>
+          <p>Los miembros de una lista ven tu nombre y los productos que añades o marcas en esa lista.</p>
         </Section>
         <Section title="Cookies">
           <p>Usamos una única cookie técnica para mantener tu sesión iniciada. No usamos cookies de análisis ni de publicidad.</p>
+        </Section>
+        <Section title="Correos">
+          <p>Solo te escribimos si lo pides: el enlace para cambiar tu contraseña cuando la has olvidado. Nada de publicidad.</p>
         </Section>
         <Section title="Tus derechos">
           <p>

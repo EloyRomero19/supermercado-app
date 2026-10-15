@@ -4,14 +4,9 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
-// En desarrollo, Vite reenvía al backend las rutas de la API y del login con Google.
+// En desarrollo, Vite reenvía al backend las rutas de la API.
 // Así el navegador ve un único origen (localhost:5173): sin CORS y con cookies SameSite=Strict.
-const backend = 'http://localhost:8080'
-const proxy = {
-  '/api': backend,
-  '/oauth2': backend,
-  '/login/oauth2': backend,
-}
+const proxy = { '/api': 'http://localhost:8080' }
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -51,10 +46,9 @@ export default defineConfig({
         globIgnores: ['**/apple-splash-*.png'],
         cleanupOutdatedCaches: true,
         // Al navegar a cualquier ruta (/listas/123…), el service worker sirve index.html y React
-        // Router pinta la página. EXCEPTO estas rutas, que deben llegar al backend: si no, el login
-        // con Google (que es una navegación a /oauth2/... y vuelta a /login/oauth2/...) se rompería.
+        // Router pinta la página. EXCEPTO /api, que siempre debe llegar al backend.
         navigateFallback: '/index.html',
-        navigateFallbackDenylist: [/^\/api\//, /^\/oauth2\//, /^\/login\/oauth2\//],
+        navigateFallbackDenylist: [/^\/api\//],
         // La API NO se guarda en caché a propósito: son datos privados (en un móvil compartido
         // otro usuario podría verlos) y deben estar al día. Sin red, la app abre y avisa.
       },

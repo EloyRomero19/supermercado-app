@@ -24,14 +24,6 @@ class MigrationsTests {
 	JdbcTemplate jdbc;
 
 	@Test
-	void userWithoutPasswordNorGoogleIsRejected() {
-		assertThatThrownBy(() -> jdbc.update(
-				"insert into app_user (email, display_name) values ('ana@mail.com', 'Ana')"))
-			.isInstanceOf(DataIntegrityViolationException.class)
-			.hasMessageContaining("app_user_has_credentials");
-	}
-
-	@Test
 	void emailIsUniqueIgnoringCase() {
 		jdbc.update("insert into app_user (email, display_name, password_hash) values ('ana@mail.com', 'Ana', 'x')");
 

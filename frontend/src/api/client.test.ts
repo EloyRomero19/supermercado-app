@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { api, ApiError, onSessionExpired, setAccessToken } from './client'
 
-const user = { id: '1', email: 'ana@test.com', displayName: 'Ana', avatarUrl: null }
+const user = { id: '1', email: 'ana@test.com', displayName: 'Ana' }
 
 function json(status: number, body: unknown): Response {
   return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })
