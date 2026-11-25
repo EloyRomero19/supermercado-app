@@ -2,16 +2,16 @@ import { createAppleSplashScreens, defineConfig, minimal2023Preset } from '@vite
 
 // Genera los iconos y las pantallas de inicio de la PWA a partir de public/favicon.svg:
 //   npm run generate-pwa-assets
-// Los colores son los del tema (index.css): verde de marca y fondos claro/oscuro.
-const BRAND = '#0a7e3a'
-const BACKGROUND_LIGHT = '#f8fbf8'
-const BACKGROUND_DARK = '#0c110d'
+// Los colores son los del tema (index.css): la pizarra (de marca y de fondo, en claro y en oscuro).
+const BRAND = '#26302c'
+const BACKGROUND_LIGHT = '#26302c'
+const BACKGROUND_DARK = '#26302c'
 
 export default defineConfig({
   headLinkOptions: { preset: '2023' },
   preset: {
     ...minimal2023Preset,
-    // Fondo verde (no blanco) en los iconos que llevan margen: el "maskable" de Android, que el
+    // Fondo pizarra (no blanco) en los iconos que llevan margen: el "maskable" de Android, que el
     // sistema recorta en círculo o cuadrado, y el de iOS
     maskable: { ...minimal2023Preset.maskable, resizeOptions: { background: BRAND } },
     apple: { ...minimal2023Preset.apple, resizeOptions: { background: BRAND } },

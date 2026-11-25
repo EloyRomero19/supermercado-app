@@ -1,6 +1,5 @@
 package com.miapp.backend.item;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.nullValue;

@@ -110,7 +110,7 @@ final class IconGuesser {
 			List<CatalogEntry> shortestFirst = entries.stream()
 				.sorted(Comparator.comparingInt(e -> e.searchName().length()))
 				.toList();
-			boolean sameIcon = shortestFirst.stream().map(CatalogEntry::icon).distinct().count() == 1;
+			boolean sameIcon = shortestFirst.stream().map(e -> e.icon()).distinct().count() == 1;
 			List<CatalogEntry> singleWord = shortestFirst.stream().filter(e -> !e.searchName().contains(" ")).toList();
 			if (sameIcon) {
 				heads.put(head, shortestFirst.get(0));

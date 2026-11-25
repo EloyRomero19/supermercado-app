@@ -1,9 +1,8 @@
 <!doctype html>
-<html lang="es">
+<!-- data-theme="dark" fijo: la app es una pizarra (index.css) -->
+<html lang="es" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
-    <!-- Tema claro/oscuro antes de pintar (ver el propio archivo) -->
-    <script src="/theme-init.js"></script>
     <link rel="icon" href="/favicon.ico" sizes="48x48" />
     <link rel="icon" href="/favicon.svg" sizes="any" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png" />
@@ -12,12 +11,11 @@
     <!-- Vista previa al compartir un enlace: la rellena el plugin sharePreview de vite.config.ts -->
     <!-- open-graph -->
     <!-- Color de la barra del navegador/sistema: el fondo de la app, para que la cabecera se funda con él -->
-    <meta name="theme-color" content="#f8fbf8" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#0c110d" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#26302c" />
     <!-- iPhone: abrir a pantalla completa desde el icono, con la barra de estado sobre la app -->
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <!-- Nombre bajo el icono en iPhone (si no, usa el <title> y se corta) -->
     <meta name="apple-mobile-web-app-title" content="Qué falta" />
     <!-- Pantallas de inicio en iPhone (generadas con npm run generate-pwa-assets) -->
@@ -69,6 +67,17 @@
     <title>¿Qué falta? · Lo que falta en casa, a un toque</title>
   </head>
   <body>
+    <!-- Filtro "tiza" para iconos, rayas y subrayados (clase .chalk de index.css): deforma un poco el
+         trazo y le quita puntitos, como la tiza sobre la pizarra. Va aquí para definirlo una sola vez. -->
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true" focusable="false">
+      <filter id="chalk" x="-15%" y="-15%" width="130%" height="130%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" seed="4" result="wobble" />
+        <feDisplacementMap in="SourceGraphic" in2="wobble" scale="1.6" xChannelSelector="R" yChannelSelector="G" result="rough" />
+        <feTurbulence type="fractalNoise" baseFrequency="2.2" numOctaves="1" seed="11" result="grain" />
+        <feColorMatrix in="grain" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  -2 0 0 0 1.75" result="mask" />
+        <feComposite in="rough" in2="mask" operator="in" />
+      </filter>
+    </svg>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

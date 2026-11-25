@@ -64,14 +64,17 @@ class AuthService {
 	@Transactional
 	AuthResult login(LoginRequest request) {
 		AppUser user = users.findByEmailIgnoreCase(normalizeEmail(request.email())).orElse(null);
-		boolean hasPassword = user != null && user.getPasswordHash() != null;
+		// Cuentas antiguas de Google: sin contraseña (null), no pueden entrar
+		String passwordHash = user != null ? user.getPasswordHash() : null;
 
 		// Siempre ejecutamos BCrypt (unos 100 ms), exista el usuario o no. Si solo lo hiciéramos
 		// cuando existe, midiendo el tiempo de respuesta se podría averiguar qué emails están registrados.
 		boolean passwordMatches = byteLength(request.password()) <= BCRYPT_MAX_BYTES
-				&& passwordEncoder.matches(request.password(), hasPassword ? user.getPasswordHash() : dummyPasswordHash);
+				&& passwordEncoder.matches(request.password(), passwordHash != null ? passwordHash : dummyPasswordHash);
 
-		if (!hasPassword || !passwordMatches) {
+		// user == null va explícito (aunque passwordHash ya lo implica) para que el compilador sepa
+		// que, a partir de aquí, user no es null
+		if (user == null || passwordHash == null || !passwordMatches) {
 			throw new ApiException(HttpStatus.UNAUTHORIZED, "Email o contraseña incorrectos");
 		}
 		return startSession(user, UUID.randomUUID());

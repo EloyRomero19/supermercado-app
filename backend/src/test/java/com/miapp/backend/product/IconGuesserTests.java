@@ -30,7 +30,7 @@ class IconGuesserTests {
 	IconGuesser guesser = new IconGuesser(CATALOG, DICTIONARY);
 
 	String icon(String text) {
-		return guesser.guess(text).map(IconGuess::icon).orElse(null);
+		return guesser.guess(text).map(guess -> guess.icon()).orElse(null);
 	}
 
 	@Test
@@ -63,9 +63,9 @@ class IconGuesserTests {
 	@Test
 	void keepsTheSectionWhenKnown() {
 		assertThat(guesser.guess("Tomates cherry")).get()
-			.extracting(IconGuess::categoryName, IconGuess::categoryOrder)
+			.extracting(guess -> guess.categoryName(), guess -> guess.categoryOrder())
 			.containsExactly("Frutas y verduras", (short) 1);
-		assertThat(guesser.guess("Velas")).get().extracting(IconGuess::categoryName).isNull();
+		assertThat(guesser.guess("Velas")).get().extracting(guess -> guess.categoryName()).isNull();
 	}
 
 	@Test

@@ -1,20 +1,18 @@
-import { Check, LayoutGrid } from 'lucide-react'
-import { useEffect, useState, type CSSProperties } from 'react'
+import { useEffect, useState } from 'react'
 import { getCategories, getCategoryProducts } from '@/api/products'
-import type { Category, Item, Product } from '@/api/types'
-import { TilesSkeleton } from '@/components/AppSkeleton'
+import type { Category, Product } from '@/api/types'
 import { BottomSheet } from '@/components/BottomSheet'
-import { categoryStyle } from '@/items/categoryStyle'
-import { cn } from '@/lib/utils'
+import { Skeleton } from '@/components/ui/skeleton'
+import { categoryDrawingUrl } from './drawings'
+import { ProductRow, type CatalogActions } from './ProductRow'
 
-type Props = {
-  /** Productos de la lista, para marcar los que ya están pendientes */
-  items: Item[]
-  onAdd: (product: Product) => void
-}
+type Props = { catalog: CatalogActions }
 
-/** "Explorar por secciones": las secciones del súper y, al tocar una, sus productos en tarjetas. */
-export function CategoryBrowser({ items, onAdd }: Props) {
+/**
+ * Secciones del súper como fichas con su dibujo: carrusel horizontal en el móvil (se desliza con el dedo)
+ * y una rejilla en escritorio. Al tocar una, sus productos en líneas con Añadir / − 1 +.
+ */
+export function CategoryBrowser({ catalog }: Props) {
   const [categories, setCategories] = useState<Category[]>([])
   const [open, setOpen] = useState<Category | null>(null)
   const [loaded, setLoaded] = useState<{ categoryId: number; products: Product[] } | null>(null)
@@ -42,77 +40,56 @@ export function CategoryBrowser({ items, onAdd }: Props) {
     }
   }, [open])
 
-  // Cantidad pendiente de cada producto del catálogo que ya está en la lista
-  const pendingQuantity = new Map(
-    items.filter((item) => !item.checked && item.productId !== null).map((item) => [item.productId, item.quantity]),
-  )
   const products = open && loaded?.categoryId === open.id ? loaded.products : null
 
   if (categories.length === 0) return null
 
   return (
-    <section aria-labelledby="browse-title">
-      <h2 id="browse-title" className="mb-2 flex items-center gap-2 px-1 text-sm font-semibold text-muted-foreground">
-        <LayoutGrid className="size-4" aria-hidden="true" />
-        Explorar por secciones
+    <nav aria-labelledby="browse-title">
+      <h2 id="browse-title" className="section-title mb-3 text-sm">
+        Secciones
       </h2>
-      <ul className="grid grid-cols-[repeat(auto-fill,minmax(6.5rem,1fr))] gap-2.5">
+      {/* Carrusel: se sale por la derecha a propósito, para que se note que hay más */}
+      <ul className="-mx-4 flex snap-x scroll-px-4 gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none] lg:mx-0 lg:grid lg:grid-cols-7 lg:gap-x-3 lg:gap-y-4 lg:overflow-visible lg:px-0">
         {categories.map((category) => {
-          const style = categoryStyle(category.name)
           return (
-            <li key={category.id} style={{ '--tone': style.color } as CSSProperties}>
+            <li key={category.id} className="w-[5.25rem] shrink-0 snap-start lg:w-auto">
               <button
                 type="button"
                 onClick={() => setOpen(category)}
-                className="flex min-h-24 w-full flex-col items-center justify-center gap-1.5 rounded-xl bg-tone-soft p-2 text-center text-xs leading-tight font-semibold text-(--tone) outline-none transition-transform focus-visible:ring-[3px] focus-visible:ring-ring/50 active:scale-95"
+                className="group flex w-full flex-col items-center gap-1.5 rounded-lg p-0.5 text-center outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               >
-                <span className="text-3xl leading-none" aria-hidden="true">
-                  {style.icon}
+                <span className="grid aspect-square w-full place-items-center rounded-lg border-2 border-border p-2.5 transition-colors duration-150 group-hover:border-primary" aria-hidden="true">
+                  <img src={categoryDrawingUrl(category.name)} alt="" decoding="async" draggable={false} className="size-full transition-transform duration-200 group-hover:-rotate-6" />
                 </span>
-                {category.name}
+                <span className="line-clamp-2 text-xs leading-tight font-semibold">{category.name}</span>
               </button>
             </li>
           )
         })}
       </ul>
 
-      <BottomSheet open={open !== null} onClose={() => setOpen(null)} title={open?.name ?? ''} description="Toca un producto para añadirlo a la lista.">
+      <BottomSheet open={open !== null} onClose={() => setOpen(null)} title={open?.name ?? ''} description={products ? `${products.length} productos` : 'Cargando productos'}>
         {products === null ? (
-          <TilesSkeleton count={9} />
+          <div className="flex flex-col divide-y" aria-hidden="true">
+            {[0, 1, 2, 3, 4].map((i) => (
+              <div key={i} className="flex h-[4.5rem] items-center gap-3">
+                <Skeleton className="size-14 rounded-lg" />
+                <Skeleton className="h-4 flex-1" />
+                <Skeleton className="h-11 w-[7.5rem] rounded-full" />
+              </div>
+            ))}
+          </div>
+        ) : products.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No hay productos que mostrar en esta sección.</p>
         ) : (
-          <ul className="grid grid-cols-[repeat(auto-fill,minmax(6.5rem,1fr))] gap-2.5">
-            {products.map((product) => {
-              const quantity = pendingQuantity.get(product.id)
-              return (
-                <li key={product.id} className="relative" style={{ '--tone': categoryStyle(product.categoryName).color } as CSSProperties}>
-                  <button
-                    type="button"
-                    aria-label={`Añadir ${product.name}${quantity ? ` (ya hay ${quantity} en la lista)` : ''}`}
-                    onClick={() => onAdd(product)}
-                    className={cn(
-                      'flex aspect-square w-full flex-col items-center justify-center gap-1 rounded-xl border-2 bg-tone-soft p-2 text-center outline-none transition-transform focus-visible:ring-[3px] focus-visible:ring-ring/50 active:scale-95',
-                      quantity ? 'border-(--tone)' : 'border-tone-soft',
-                    )}
-                  >
-                    <span className="text-4xl leading-none" aria-hidden="true">
-                      {product.icon}
-                    </span>
-                    <span className="line-clamp-2 text-sm leading-tight font-semibold">{product.name}</span>
-                  </button>
-                  {quantity && (
-                    <span
-                      aria-hidden="true"
-                      className="pointer-events-none absolute top-2 left-2 grid h-6 min-w-6 place-items-center rounded-full bg-(--tone) px-1.5 text-xs font-bold text-on-tone motion-safe:animate-pop"
-                    >
-                      {quantity > 1 ? `×${quantity}` : <Check className="size-3.5" strokeWidth={3} />}
-                    </span>
-                  )}
-                </li>
-              )
-            })}
+          <ul className="-mt-2 flex flex-col divide-y">
+            {products.map((product) => (
+              <ProductRow key={product.id} product={product} catalog={catalog} showCategory={false} />
+            ))}
           </ul>
         )}
       </BottomSheet>
-    </section>
+    </nav>
   )
 }

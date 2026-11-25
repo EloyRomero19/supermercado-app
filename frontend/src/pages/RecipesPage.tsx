@@ -3,10 +3,11 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import { getRecipes } from '@/api/recipes'
 import type { RecipeSummary } from '@/api/types'
-import { CardSkeleton } from '@/components/AppSkeleton'
+import { RowSkeleton } from '@/components/AppSkeleton'
 import { FormAlert } from '@/components/FormAlert'
 import { PageHeader } from '@/components/PageHeader'
 import { errorMessage } from '@/items/itemFeedback'
+import { RecipeArt } from '@/recipes/RecipeArt'
 import { RecipeMeta } from '@/recipes/RecipeMeta'
 
 /** Pestaña "Recetas": platos típicos; al abrir uno se ve qué ingredientes faltan en tu lista. */
@@ -26,35 +27,35 @@ export function RecipesPage() {
 
   return (
     <>
-      <PageHeader title="Recetas">
-        <p className="text-sm text-muted-foreground">Elige un plato y añade a tu lista lo que te falte.</p>
-      </PageHeader>
-      <main className="flex flex-col gap-3 p-4">
+      <PageHeader title="Recetas" />
+      <main className="mx-auto flex w-full max-w-3xl flex-col gap-4 px-4 pt-5 lg:mx-0 lg:px-8">
+        <p className="text-muted-foreground">Elige un plato y te decimos qué ingredientes faltan en tu lista. Los añades con un toque.</p>
         <FormAlert message={error} />
         {recipes === null && !error && (
-          <div className="flex flex-col gap-3" aria-busy="true" aria-label="Cargando recetas">
-            <CardSkeleton />
-            <CardSkeleton />
-            <CardSkeleton />
+          <div className="divide-y" aria-busy="true" aria-label="Cargando recetas">
+            <RowSkeleton />
+            <RowSkeleton />
+            <RowSkeleton />
           </div>
         )}
         {recipes && (
-          <ul className="grid gap-3 sm:grid-cols-2">
+          <ul className="divide-y">
             {recipes.map((recipe) => (
-              <li key={recipe.id} className="motion-safe:animate-tile-in">
+              <li key={recipe.id}>
                 <Link
                   to={`/recetas/${recipe.id}`}
-                  className="group flex h-full items-center gap-4 rounded-2xl border bg-card p-4 shadow-xs outline-none transition-all hover:shadow-md focus-visible:ring-[3px] focus-visible:ring-ring/50 active:scale-[0.99]"
+                  className="group -mx-2 flex items-center gap-4 rounded-lg px-2 py-3 outline-none transition-colors duration-150 hover:bg-muted/70 focus-visible:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring/40 focus-visible:ring-inset"
                 >
-                  <span className="grid size-16 shrink-0 place-items-center rounded-2xl bg-secondary text-4xl leading-none" aria-hidden="true">
-                    {recipe.emoji}
-                  </span>
+                  <RecipeArt name={recipe.name} className="size-24 shrink-0 sm:size-28" />
                   <span className="flex min-w-0 flex-1 flex-col gap-1">
-                    <span className="font-semibold">{recipe.name}</span>
+                    <span className="text-lg leading-tight font-bold">{recipe.name}</span>
                     <span className="line-clamp-2 text-sm text-muted-foreground">{recipe.description}</span>
-                    <RecipeMeta recipe={recipe} />
+                    <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                      <RecipeMeta recipe={recipe} />
+                      <span className="text-xs text-muted-foreground">{recipe.ingredientCount} ingredientes</span>
+                    </span>
                   </span>
-                  <ChevronRight className="size-5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+                  <ChevronRight className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
                 </Link>
               </li>
             ))}
@@ -64,3 +65,4 @@ export function RecipesPage() {
     </>
   )
 }
+

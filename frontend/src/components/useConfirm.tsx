@@ -37,7 +37,7 @@ export function useConfirm() {
 
   const confirmDialog: ReactNode = (
     <AlertDialog open={options !== null} onOpenChange={(open) => !open && close(false)}>
-      <AlertDialogContent className="max-w-sm rounded-2xl">
+      <AlertDialogContent className="max-w-sm">
         <AlertDialogHeader>
           <AlertDialogTitle>{options?.title}</AlertDialogTitle>
           {options?.description && <AlertDialogDescription>{options.description}</AlertDialogDescription>}

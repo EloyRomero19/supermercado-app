@@ -1,6 +1,5 @@
 import { Share, SquarePlus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
 import { needsIosInstallHint, useInstallPrompt } from './installPrompt'
 
 /**
@@ -12,12 +11,10 @@ export function InstallCard() {
   if (!install && !needsIosInstallHint()) return null
 
   return (
-    <Card className="flex-row items-center gap-4 px-4 py-4">
-      <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-secondary text-secondary-foreground">
-        <SquarePlus className="size-5" aria-hidden="true" />
-      </span>
+    <div className="flex items-center gap-3 rounded-lg border bg-card px-4 py-3">
+      <SquarePlus className="size-5 shrink-0 text-muted-foreground" strokeWidth={1.75} aria-hidden="true" />
       <div className="min-w-0 flex-1">
-        <h2 className="font-semibold">Acceso directo</h2>
+        <h2 className="section-title">Acceso directo</h2>
         {install ? (
           <p className="text-sm text-muted-foreground">Añádela a la pantalla de inicio y ábrela con un toque.</p>
         ) : (
@@ -28,10 +25,10 @@ export function InstallCard() {
         )}
       </div>
       {install && (
-        <Button onClick={install} className="h-11">
+        <Button variant="outline" onClick={install} className="h-11">
           Añadir
         </Button>
       )}
-    </Card>
+    </div>
   )
 }

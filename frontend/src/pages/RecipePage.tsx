@@ -1,4 +1,4 @@
-import { ArrowLeft, Check, ListPlus, ShoppingCart } from 'lucide-react'
+import { ArrowLeft, Check, ChefHat, ListPlus } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { toast } from 'sonner'
@@ -10,17 +10,17 @@ import { AppSkeleton } from '@/components/AppSkeleton'
 import { EmptyState } from '@/components/EmptyState'
 import { ListPicker } from '@/components/ListPicker'
 import { PageHeader } from '@/components/PageHeader'
-import { ProductIcon } from '@/components/ProductIcon'
+import { ProductDrawing } from '@/components/ProductDrawing'
 import { SubmitButton } from '@/components/SubmitButton'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { errorMessage } from '@/items/itemFeedback'
 import { lastListId, rememberLastList } from '@/lists/lastList'
 import { pickListToShop } from '@/lists/pickListToShop'
 import { cn } from '@/lib/utils'
 import { ingredientNote, splitIngredients } from '@/recipes/missingIngredients'
+import { RecipeArt } from '@/recipes/RecipeArt'
 import { RecipeMeta } from '@/recipes/RecipeMeta'
 
 type Loaded = { recipe: RecipeDetail; lists: ListSummary[] }
@@ -65,13 +65,13 @@ export function RecipePage() {
 
   if (error) {
     return (
-      <main className="grid flex-1 place-items-center p-4">
+      <main className="mx-auto w-full max-w-3xl p-4">
         <EmptyState
-          icon="🍳"
+          icon={<ChefHat />}
           title="Receta no disponible"
           description={error}
           action={
-            <Button asChild size="lg">
+            <Button asChild>
               <Link to="/recetas">Ver todas las recetas</Link>
             </Button>
           }
@@ -130,6 +130,7 @@ export function RecipePage() {
     <>
       <PageHeader
         title={recipe.name}
+        innerClassName="max-w-5xl"
         leading={
           <Button variant="ghost" size="icon" className="-ml-2 size-11" aria-label="Volver a las recetas" onClick={() => navigate('/recetas')}>
             <ArrowLeft className="size-5" aria-hidden="true" />
@@ -137,111 +138,121 @@ export function RecipePage() {
         }
       />
 
-      <main className="flex flex-col gap-4 p-4">
-        <div className="flex items-center gap-4">
-          <span className="grid size-20 shrink-0 place-items-center rounded-3xl bg-secondary text-5xl leading-none" aria-hidden="true">
-            {recipe.emoji}
-          </span>
-          <div className="flex flex-col gap-2">
-            <p className="text-sm text-muted-foreground">{recipe.description}</p>
+      <main className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 pt-4 lg:px-8">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:gap-6">
+          <RecipeArt name={recipe.name} className="aspect-[16/9] w-full sm:w-72" />
+          <div className="flex max-w-prose flex-col gap-2">
+            <p className="text-muted-foreground">{recipe.description}</p>
             <RecipeMeta recipe={recipe} />
           </div>
         </div>
 
-        {lists.length === 0 ? (
-          <EmptyState
-            icon={<ListPlus className="size-7" />}
-            title="Crea una lista para añadir los ingredientes"
-            description="Así podrás apuntar de una vez todo lo que necesitas para este plato."
-            action={
-              <Button asChild size="lg">
-                <Link to="/">Crear una lista</Link>
-              </Button>
-            }
-          />
-        ) : (
-          <Card className="gap-4 px-4 py-4">
-            <div className="flex items-baseline justify-between gap-2">
-              <h2 className="font-semibold">Ingredientes</h2>
-              {split && (
-                <span className="text-sm text-muted-foreground">
-                  {split.missing.length === 0 ? 'Ya los tienes todos' : `Te faltan ${split.missing.length} de ${recipe.ingredients.length}`}
-                </span>
+        <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+          {lists.length === 0 ? (
+            <EmptyState
+              icon={<ListPlus />}
+              title="Crea una lista para añadir los ingredientes"
+              description="Así podrás apuntar de una vez todo lo que necesitas para este plato."
+              action={
+                <Button asChild>
+                  <Link to="/">Crear lista</Link>
+                </Button>
+              }
+            />
+          ) : (
+            <section aria-labelledby="ingredients-title" className="-mx-4 border-y bg-card sm:mx-0 sm:rounded-xl sm:border">
+              <div className="flex flex-col gap-3 border-b px-4 py-3">
+                <div className="flex items-baseline justify-between gap-2">
+                  <h2 id="ingredients-title" className="section-title text-base">
+                    Ingredientes
+                  </h2>
+                  {split && (
+                    <span className="text-sm text-muted-foreground tabular-nums">
+                      {split.missing.length === 0 ? 'Ya los tienes todos' : `Te faltan ${split.missing.length} de ${recipe.ingredients.length}`}
+                    </span>
+                  )}
+                </div>
+                {target && <ListPicker lists={lists} value={target.id} onChange={setTargetId} label="Para la lista" />}
+              </div>
+
+              <ul className="divide-y">
+                {recipe.ingredients.map((ingredient) => {
+                  const inList = split?.inList.includes(ingredient) ?? false
+                  const selected = !inList && !skipped.has(ingredient.productId)
+                  return (
+                    <li key={ingredient.productId}>
+                      <label className={cn('flex min-h-[4.5rem] items-center gap-3 px-4 py-2', !inList && 'cursor-pointer transition-colors duration-150 hover:bg-muted/60')}>
+                        {split === null ? (
+                          <Skeleton className="size-5 shrink-0" />
+                        ) : inList ? (
+                          <Check className="size-5 shrink-0 text-primary" aria-hidden="true" />
+                        ) : (
+                          <input
+                            type="checkbox"
+                            checked={selected}
+                            onChange={() => toggleSkipped(ingredient.productId)}
+                            aria-label={`Añadir ${ingredient.name}`}
+                            className="size-6 shrink-0 cursor-pointer rounded-sm accent-primary"
+                          />
+                        )}
+                        <ProductDrawing name={ingredient.name} categoryName={ingredient.categoryName} size="md" />
+                        <span className="flex min-w-0 flex-1 flex-col">
+                          <span className={cn('font-semibold', inList && 'text-muted-foreground')}>{ingredient.name}</span>
+                          <span className="text-sm text-muted-foreground">{ingredient.amount}</span>
+                        </span>
+                        {inList && (
+                          <Badge variant="secondary" className="shrink-0">
+                            En tu lista
+                          </Badge>
+                        )}
+                      </label>
+                    </li>
+                  )
+                })}
+              </ul>
+
+              {target && split && split.missing.length > 0 && (
+                <form
+                  className="border-t px-4 py-3"
+                  onSubmit={(e) => {
+                    e.preventDefault()
+                    addMissing()
+                  }}
+                >
+                  <SubmitButton submitting={adding} submittingLabel="Añadiendo…" className="w-full" disabled={toAdd.length === 0}>
+                    {toAdd.length === 0
+                      ? 'Marca lo que quieras añadir'
+                      : `Añadir ${toAdd.length} ${toAdd.length === 1 ? 'ingrediente' : 'ingredientes'} a «${target.name}»`}
+                  </SubmitButton>
+                </form>
               )}
-            </div>
+              {target && split && split.missing.length === 0 && (
+                <div className="border-t px-4 py-3">
+                  <Button asChild variant="outline" size="lg" className="w-full">
+                    <Link to={`/listas/${target.id}`}>Ver la lista</Link>
+                  </Button>
+                </div>
+              )}
+            </section>
+          )}
 
-            {target && <ListPicker lists={lists} value={target.id} onChange={setTargetId} label="Para la lista" />}
-
-            <ul className="flex flex-col">
-              {recipe.ingredients.map((ingredient) => {
-                const inList = split?.inList.includes(ingredient) ?? false
-                const selected = !inList && !skipped.has(ingredient.productId)
-                return (
-                  <li key={ingredient.productId}>
-                    <label className={cn('flex min-h-14 items-center gap-3 rounded-xl px-1', !inList && 'cursor-pointer hover:bg-muted')}>
-                      <ProductIcon icon={ingredient.icon} categoryName={ingredient.categoryName} size="sm" />
-                      <span className="flex min-w-0 flex-1 flex-col">
-                        <span className={cn('font-medium', inList && 'text-muted-foreground')}>{ingredient.name}</span>
-                        <span className="text-xs text-muted-foreground">{ingredient.amount}</span>
-                      </span>
-                      {split === null ? (
-                        <Skeleton className="size-6 rounded-md" />
-                      ) : inList ? (
-                        <Badge variant="secondary" className="gap-1">
-                          <Check className="size-3" aria-hidden="true" />
-                          En tu lista
-                        </Badge>
-                      ) : (
-                        <input
-                          type="checkbox"
-                          checked={selected}
-                          onChange={() => toggleSkipped(ingredient.productId)}
-                          aria-label={`Añadir ${ingredient.name}`}
-                          className="size-6 shrink-0 cursor-pointer accent-primary"
-                        />
-                      )}
-                    </label>
-                  </li>
-                )
-              })}
-            </ul>
-
-            {target && split && split.missing.length > 0 && (
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault()
-                  addMissing()
-                }}
-              >
-                <SubmitButton submitting={adding} submittingLabel="Añadiendo…" className="w-full" disabled={toAdd.length === 0}>
-                  <ShoppingCart aria-hidden="true" />
-                  {toAdd.length === 0
-                    ? 'Marca lo que quieras añadir'
-                    : `Añadir ${toAdd.length} ${toAdd.length === 1 ? 'ingrediente' : 'ingredientes'} a «${target.name}»`}
-                </SubmitButton>
-              </form>
-            )}
-            {target && split && split.missing.length === 0 && (
-              <Button asChild variant="secondary" size="lg" className="h-11">
-                <Link to={`/listas/${target.id}`}>Ver la lista</Link>
-              </Button>
-            )}
-          </Card>
-        )}
-
-        <Card className="gap-3 px-4 py-4">
-          <h2 className="font-semibold">Preparación</h2>
-          <ol className="flex flex-col gap-3">
-            {recipe.steps.map((step, index) => (
-              <li key={index} className="flex gap-3 text-sm leading-relaxed">
-                <span className="grid size-7 shrink-0 place-items-center rounded-full bg-secondary text-xs font-bold text-secondary-foreground" aria-hidden="true">
-                  {index + 1}
-                </span>
-                <span className="pt-0.5">{step}</span>
-              </li>
-            ))}
-          </ol>
-        </Card>
+          <section aria-labelledby="steps-title" className="px-0 py-1">
+            <h2 id="steps-title" className="section-title mb-3 text-base">
+              Preparación
+            </h2>
+            {/* Los pasos sí son una secuencia: van numerados */}
+            <ol className="flex flex-col divide-y">
+              {recipe.steps.map((step, index) => (
+                <li key={index} className="flex gap-3 py-2.5 leading-relaxed">
+                  <span className="w-5 shrink-0 font-semibold text-muted-foreground tabular-nums" aria-hidden="true">
+                    {index + 1}.
+                  </span>
+                  <span>{step}</span>
+                </li>
+              ))}
+            </ol>
+          </section>
+        </div>
       </main>
     </>
   )

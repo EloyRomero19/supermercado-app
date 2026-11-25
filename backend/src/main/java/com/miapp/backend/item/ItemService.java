@@ -32,8 +32,8 @@ public class ItemService {
 
 	/** Orden del supermercado: por sección (los escritos a mano al final) y luego alfabético. */
 	private static final Comparator<ItemDto> STORE_ORDER = Comparator
-		.comparing(ItemDto::categoryOrder, Comparator.nullsLast(Comparator.naturalOrder()))
-		.thenComparing(ItemDto::name, SPANISH);
+		.comparing((ItemDto item) -> item.categoryOrder(), Comparator.nullsLast(Comparator.naturalOrder()))
+		.thenComparing(item -> item.name(), SPANISH);
 
 	private final ListItemRepository items;
 	private final ListAccessService access;

@@ -7,13 +7,13 @@ import { EmptyState } from './EmptyState'
 export function OfflineScreen() {
   const { retry } = useAuth()
   return (
-    <main className="mx-auto grid min-h-dvh w-full max-w-md place-items-center p-4">
+    <main className="mx-auto w-full max-w-md px-4 pt-[max(2rem,env(safe-area-inset-top))]">
       <EmptyState
-        icon={<WifiOff className="size-7" />}
+        icon={<WifiOff />}
         title="Sin conexión"
         description="No se puede conectar con el servidor. Comprueba tu conexión a internet y vuelve a intentarlo."
         action={
-          <Button size="lg" onClick={retry}>
+          <Button onClick={retry}>
             Reintentar
           </Button>
         }

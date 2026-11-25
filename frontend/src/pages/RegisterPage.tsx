@@ -28,7 +28,7 @@ export function RegisterPage() {
   return (
     <AuthLayout
       title="Crea tu cuenta"
-      subtitle="Comparte listas con tu familia o tus compañeros de piso"
+      subtitle="Para compartir listas con tu familia o con quien vivas."
       footer={
         <>
           ¿Ya tienes cuenta?{' '}

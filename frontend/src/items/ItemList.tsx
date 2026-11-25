@@ -1,15 +1,18 @@
-import { Check, CheckCheck, Hand, MoreHorizontal, ShoppingCart, Trash2, Undo2 } from 'lucide-react'
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
+import { MoreHorizontal, Minus, Plus, Trash2, Undo2, X } from 'lucide-react'
+import { useState } from 'react'
 import type { Item } from '@/api/types'
 import { BottomSheet } from '@/components/BottomSheet'
+import { ChalkStrike } from '@/components/ChalkStrike'
 import { EmptyState } from '@/components/EmptyState'
-import { ProductIcon } from '@/components/ProductIcon'
+import { ProductDrawing } from '@/components/ProductDrawing'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
-import { categoryStyle, OTHER_CATEGORY } from './categoryStyle'
 import { groupByCategory } from './sortItems'
+
+/** Sección de los productos escritos a mano que no se han podido reconocer. */
+export const OTHER_CATEGORY = 'Otros'
 
 type Props = {
   items: Item[]
@@ -17,7 +20,6 @@ type Props = {
   onQuantity: (item: Item, quantity: number) => void
   onNote: (item: Item, note: string) => void
   onDelete: (item: Item) => void
-  onClearChecked: () => void
 }
 
 const HINT_KEY = 'hint-cart-seen'
@@ -31,17 +33,16 @@ function hintSeen(): boolean {
 }
 
 /**
- * Lo que falta por coger, como tarjetas agrupadas por sección del súper. Lo que ya está en el
- * carrito no se muestra aquí: está en la barra del carrito (Cart).
+ * La lista, como en la pizarra de la cocina: agrupada por sección del súper (en el orden de los
+ * pasillos), cada producto con su dibujo de tiza. Lo que se coge se TACHA y se queda en su sitio
+ * (como en una pizarra de verdad) hasta que se termina la compra; tocarlo otra vez le quita la raya.
  */
-export function ItemList({ items, onToggle, onQuantity, onNote, onDelete, onClearChecked }: Props) {
+export function ItemList({ items, onToggle, onQuantity, onNote, onDelete }: Props) {
   // Se guarda el id (no el objeto): si otro miembro lo cambia en tiempo real, el panel muestra
   // siempre la versión actual, y si lo borra, el panel se cierra solo
   const [editingId, setEditingId] = useState<string | null>(null)
   const editing = items.find((item) => item.id === editingId) ?? null
   const [showHint, setShowHint] = useState(() => !hintSeen())
-
-  const pending = items.filter((item) => !item.checked)
 
   const hideHint = () => {
     setShowHint(false)
@@ -52,8 +53,8 @@ export function ItemList({ items, onToggle, onQuantity, onNote, onDelete, onClea
     }
   }
 
-  // Quien ya ha metido algo en el carrito ya sabe cómo va: la pista sobra
-  const toCart = (item: Item) => {
+  // Quien ya ha tachado algo ya sabe cómo va: la pista sobra
+  const toggle = (item: Item) => {
     if (showHint) hideHint()
     onToggle(item)
   }
@@ -61,45 +62,37 @@ export function ItemList({ items, onToggle, onQuantity, onNote, onDelete, onClea
   if (items.length === 0) {
     return (
       <EmptyState
-        icon="🛒"
-        title="Tu lista está vacía"
-        description="Busca arriba lo que necesitas o elige en «Explorar por secciones». Lo que añadas aparecerá aquí."
+        title="La pizarra está vacía"
+        description="Apunta arriba lo que falta en casa, o elige una sección y añádelo desde ahí."
       />
     )
   }
 
   return (
     <>
-      {pending.length === 0 ? (
-        <EmptyState
-          icon="🎉"
-          title="¡Lo tienes todo!"
-          description="Todo lo de la lista está ya en el carrito."
-          action={
-            <Button size="lg" onClick={onClearChecked}>
-              <CheckCheck aria-hidden="true" />
-              Terminar la compra
-            </Button>
-          }
-        />
-      ) : (
-        <>
-          {showHint && <CartHint onDismiss={hideHint} />}
-          {groupByCategory(pending).map((group) => {
-            const style = categoryStyle(group.category)
-            return (
-              <section key={group.category ?? OTHER_CATEGORY} aria-label={group.category ?? OTHER_CATEGORY} style={{ '--tone': style.color } as CSSProperties}>
-                <SectionTitle icon={style.icon} title={group.category ?? OTHER_CATEGORY} count={group.items.length} tone />
-                <TileGrid>
-                  {group.items.map((item) => (
-                    <ItemTile key={item.id} item={item} onToCart={toCart} onMore={() => setEditingId(item.id)} />
-                  ))}
-                </TileGrid>
-              </section>
-            )
-          })}
-        </>
-      )}
+      <div className="flex flex-col gap-6">
+        {showHint && <CartHint onDismiss={hideHint} />}
+        {groupByCategory(items).map((group) => {
+          const title = group.category ?? OTHER_CATEGORY
+          const left = group.items.filter((item) => !item.checked).length
+          return (
+            <section key={title} aria-label={title}>
+              <h2 className="section-title mb-1 inline-flex items-baseline gap-2 text-sm">
+                {title}
+                <span className="font-normal text-muted-foreground tabular-nums">
+                  <span className="sr-only">, faltan </span>
+                  {left}
+                </span>
+              </h2>
+              <ul>
+                {group.items.map((item) => (
+                  <ItemRow key={item.id} item={item} onToggle={toggle} onMore={() => setEditingId(item.id)} />
+                ))}
+              </ul>
+            </section>
+          )
+        })}
+      </div>
 
       {editing && (
         <ItemSheet
@@ -120,119 +113,56 @@ export function ItemList({ items, onToggle, onQuantity, onNote, onDelete, onClea
   )
 }
 
-/** Pista para quien la usa por primera vez: cómo se mete un producto en el carrito. */
+/** Pista para quien la usa por primera vez: cómo se tacha. */
 function CartHint({ onDismiss }: { onDismiss: () => void }) {
   return (
-    <div role="note" className="flex items-start gap-3 rounded-2xl border border-primary/30 bg-secondary p-4 text-secondary-foreground motion-safe:animate-tile-in">
-      <span className="grid size-10 shrink-0 place-items-center rounded-full bg-card text-primary" aria-hidden="true">
-        <Hand className="size-5" />
-      </span>
-      <div className="flex flex-1 flex-col gap-2 text-sm">
-        <p>
-          <strong>Toca un producto cuando lo metas en el carro.</strong> Pasará a tu carrito, abajo. Si te equivocas, lo puedes
-          devolver.
-        </p>
-        <Button size="sm" className="h-9 self-start" onClick={onDismiss}>
-          Entendido
-        </Button>
-      </div>
+    <div role="note" className="flex items-start gap-3 rounded-lg bg-muted py-3 pr-2 pl-4 text-sm">
+      <p className="flex-1 pt-0.5">Cuando cojas algo, tócalo y quedará tachado. Si te equivocas, tócalo otra vez.</p>
+      <button
+        type="button"
+        onClick={onDismiss}
+        aria-label="Cerrar la pista"
+        className="-my-1 grid size-9 shrink-0 place-items-center rounded-full outline-none transition-colors duration-150 hover:bg-background/60 focus-visible:ring-[3px] focus-visible:ring-ring/60"
+      >
+        <X className="chalk size-4" aria-hidden="true" />
+      </button>
     </div>
   )
 }
 
-function SectionTitle({ icon, title, count, tone = false }: { icon: ReactNode; title: string; count: number; tone?: boolean }) {
-  return (
-    <h2 className={cn('mb-2 flex items-center gap-2 px-1 text-sm font-semibold', tone ? 'text-(--tone)' : 'text-muted-foreground')}>
-      <span aria-hidden="true">{icon}</span>
-      {title}
-      <span className={cn('rounded-full px-2 text-xs font-semibold tabular-nums', tone ? 'bg-tone-soft' : 'bg-card')}>{count}</span>
-    </h2>
-  )
-}
-
-function TileGrid({ children }: { children: ReactNode }) {
-  // Tantas columnas de ~6,5rem como quepan: 3 en un móvil, más en pantallas anchas
-  return <ul className="grid grid-cols-[repeat(auto-fill,minmax(6.5rem,1fr))] gap-2.5">{children}</ul>
-}
-
-function prefersReducedMotion() {
-  return window.matchMedia('(prefers-reduced-motion: reduce)').matches
-}
-
-/** Cuánto se ve la confirmación "¡Al carrito!" en la tarjeta antes de que se vaya al carrito. */
-const CONFIRM_MS = 450
-
-function ItemTile({ item, onToCart, onMore }: { item: Item; onToCart: (item: Item) => void; onMore: () => void }) {
-  const style = categoryStyle(item.categoryName)
-  const label = `${item.name}${item.quantity > 1 ? `, ${item.quantity} unidades` : ''}${item.note ? `, ${item.note}` : ''}`
-  // Medio segundo de confirmación en la propia tarjeta: el cliente ve qué ha pasado justo donde
-  // ha tocado, en vez de ver desaparecer el producto sin más
-  const [confirming, setConfirming] = useState(false)
-  const timer = useRef<number | undefined>(undefined)
-  useEffect(() => () => window.clearTimeout(timer.current), [])
-
-  const toCart = () => {
-    if (confirming) return // evita doble toque
-    if (prefersReducedMotion()) return onToCart(item)
-    setConfirming(true)
-    timer.current = window.setTimeout(() => {
-      onToCart(item)
-      setConfirming(false)
-    }, CONFIRM_MS)
-  }
+function ItemRow({ item, onToggle, onMore }: { item: Item; onToggle: (item: Item) => void; onMore: () => void }) {
+  const details = `${item.quantity > 1 ? `, ${item.quantity} unidades` : ''}${item.note ? `, ${item.note}` : ''}`
+  const label = item.checked ? `${item.name}, tachado. Toca para quitarle la raya` : `${item.name}${details}. Toca para tacharlo`
 
   return (
-    <li className="relative motion-safe:animate-tile-in" style={{ '--tone': style.color } as CSSProperties}>
-      {/* Toda la tarjeta es el botón: un toque la mete en el carrito */}
+    <li className="relative">
+      {/* Toda la línea es el botón: un toque la tacha (o le quita la raya) */}
       <button
         type="button"
-        aria-label={`Meter en el carrito: ${label}`}
-        onClick={toCart}
-        className={cn(
-          'flex aspect-[4/5] w-full flex-col items-center justify-center gap-1 rounded-xl border p-2 pt-8 text-center outline-none',
-          'bg-tone-soft border-tone-soft transition-transform duration-200 hover:brightness-[0.98] focus-visible:ring-[3px] focus-visible:ring-ring/50 active:scale-95',
-          confirming && 'scale-95',
-        )}
+        aria-pressed={item.checked}
+        aria-label={label}
+        onClick={() => onToggle(item)}
+        className="-mx-2 flex min-h-[4.5rem] w-[calc(100%+1rem)] items-center gap-4 rounded-lg py-2 pr-14 pl-2 text-left outline-none transition-colors duration-150 hover:bg-foreground/5 focus-visible:bg-foreground/5 focus-visible:ring-[3px] focus-visible:ring-ring/60 focus-visible:ring-inset"
       >
-        <span className="text-4xl leading-none" aria-hidden="true">
-          {item.icon ?? style.icon}
+        <ProductDrawing name={item.name} categoryName={item.categoryName} quantity={item.quantity} size="md" className={cn('transition-opacity duration-200', item.checked && 'opacity-40')} />
+        <span className="relative flex min-w-0 flex-1 flex-col">
+          {/* La raya va sobre el nombre, como al tachar una palabra en la pizarra */}
+          <span className="relative max-w-full self-start">
+            <span className={cn('block truncate text-lg font-semibold transition-opacity duration-200', item.checked && 'opacity-50')}>{item.name}</span>
+            {item.checked && <ChalkStrike className="-left-1.5 w-[calc(100%+0.75rem)]" />}
+          </span>
+          {item.note && <span className={cn('truncate text-sm text-muted-foreground', item.checked && 'opacity-50')}>{item.note}</span>}
         </span>
-        <span className="line-clamp-2 text-sm leading-tight font-semibold">
-          {item.name}
-          {/* La cantidad junto al nombre (una insignia aparte tapaba el texto en tarjetas estrechas) */}
-          {item.quantity > 1 && <span className="font-bold whitespace-nowrap text-(--tone)"> ×{item.quantity}</span>}
-        </span>
-        {item.note && <span className="w-full truncate text-xs text-muted-foreground">{item.note}</span>}
       </button>
-
-      {/* Casilla (decorativa: la acción la describe el aria-label del botón) */}
-      <span
-        aria-hidden="true"
-        className="pointer-events-none absolute top-2 left-2 grid size-7 place-items-center rounded-full border-2 border-muted-foreground/40 bg-card"
-      />
 
       <button
         type="button"
         aria-label={`Opciones de ${item.name}`}
         onClick={onMore}
-        className="absolute top-1 right-1 grid size-9 place-items-center rounded-full text-muted-foreground outline-none hover:bg-foreground/5 focus-visible:ring-[3px] focus-visible:ring-ring/50"
+        className="absolute top-1/2 right-0 grid size-11 -translate-y-1/2 place-items-center rounded-full text-muted-foreground outline-none transition-colors duration-150 hover:bg-foreground/5 hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/60"
       >
-        <MoreHorizontal className="size-5" aria-hidden="true" />
+        <MoreHorizontal className="chalk size-5" aria-hidden="true" />
       </button>
-
-      {confirming && (
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 grid place-items-center rounded-xl bg-primary text-primary-foreground animate-in fade-in zoom-in-90 duration-150"
-        >
-          <span className="flex flex-col items-center gap-1.5 text-sm font-bold">
-            <span className="grid size-11 place-items-center rounded-full bg-primary-foreground text-primary animate-pop">
-              <Check className="size-6" strokeWidth={3} />
-            </span>
-            ¡Al carrito!
-          </span>
-        </span>
-      )}
     </li>
   )
 }
@@ -253,26 +183,36 @@ function ItemSheet({ item, onClose, onToggle, onQuantity, onNote, onDelete }: Sh
   return (
     <BottomSheet open onClose={onClose} title={item.name} description={item.categoryName ?? 'Escrito a mano'}>
       <div className="flex items-center gap-4">
-        <ProductIcon icon={item.icon} categoryName={item.categoryName} size="lg" />
-        <div className="text-sm text-muted-foreground">
-          {item.addedByName && <p>Lo añadió {item.addedByName}</p>}
-          {item.checked && item.checkedByName && <p>✓ Lo cogió {item.checkedByName}</p>}
-        </div>
+        <ProductDrawing name={item.name} categoryName={item.categoryName} size="lg" />
+        <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 text-sm">
+          {item.addedByName && (
+            <>
+              <dt className="text-muted-foreground">Lo apuntó</dt>
+              <dd className="font-semibold">{item.addedByName}</dd>
+            </>
+          )}
+          {item.checked && item.checkedByName && (
+            <>
+              <dt className="text-muted-foreground">Lo tachó</dt>
+              <dd className="font-semibold">{item.checkedByName}</dd>
+            </>
+          )}
+        </dl>
       </div>
 
-      <div className="flex items-center justify-between gap-4">
-        <span className="font-medium" id="quantity-label">
+      <div className="flex items-center justify-between gap-4 border-y py-3">
+        <span className="font-semibold text-section" id="quantity-label">
           Cantidad
         </span>
-        <div className="flex items-center gap-1 rounded-full border bg-muted/50 p-1" role="group" aria-labelledby="quantity-label">
-          <Button variant="ghost" size="icon" className="size-10 rounded-full text-lg" aria-label="Quitar uno" disabled={item.quantity <= 1} onClick={() => onQuantity(item, item.quantity - 1)}>
-            −
+        <div className="flex h-11 items-center rounded-full border border-input" role="group" aria-labelledby="quantity-label">
+          <Button variant="ghost" size="icon" className="size-11" aria-label="Quitar uno" disabled={item.quantity <= 1} onClick={() => onQuantity(item, item.quantity - 1)}>
+            <Minus aria-hidden="true" />
           </Button>
-          <span className="min-w-8 text-center text-lg font-semibold tabular-nums" aria-live="polite">
+          <span key={item.quantity} className="min-w-10 animate-pop-in text-center font-bold tabular-nums" aria-live="polite">
             {item.quantity}
           </span>
-          <Button variant="ghost" size="icon" className="size-10 rounded-full text-lg" aria-label="Añadir uno más" onClick={() => onQuantity(item, item.quantity + 1)}>
-            +
+          <Button variant="ghost" size="icon" className="size-11" aria-label="Añadir uno más" onClick={() => onQuantity(item, item.quantity + 1)}>
+            <Plus aria-hidden="true" />
           </Button>
         </div>
       </div>
@@ -287,28 +227,27 @@ function ItemSheet({ item, onClose, onToggle, onQuantity, onNote, onDelete }: Sh
       >
         <Label htmlFor="item-note">Nota</Label>
         <div className="flex gap-2">
-          <Input id="item-note" className="h-11 flex-1 text-base" placeholder="Marca, tamaño, sin lactosa…" maxLength={200} value={note} onChange={(e) => setNote(e.target.value)} />
-          <Button type="submit" className="h-11" disabled={note === (item.note ?? '')}>
-            Guardar
+          <Input id="item-note" className="h-11 flex-1" placeholder="Marca, tamaño, sin lactosa…" maxLength={200} value={note} onChange={(e) => setNote(e.target.value)} />
+          <Button type="submit" variant="outline" className="h-11" disabled={note === (item.note ?? '')}>
+            Guardar nota
           </Button>
         </div>
       </form>
 
       <div className="grid grid-cols-2 gap-2">
         <Button
-          variant="secondary"
-          className="h-11"
+          size="lg"
           onClick={() => {
             onToggle(item)
             onClose()
           }}
         >
-          {item.checked ? <Undo2 aria-hidden="true" /> : <ShoppingCart aria-hidden="true" />}
-          {item.checked ? 'Devolver' : 'Al carrito'}
+          {item.checked && <Undo2 aria-hidden="true" />}
+          {item.checked ? 'Quitar la raya' : 'Tachar'}
         </Button>
-        <Button variant="outline" className="h-11 text-destructive hover:text-destructive" onClick={() => onDelete(item)}>
+        <Button variant="outline" size="lg" className="text-destructive hover:border-destructive hover:text-destructive" onClick={() => onDelete(item)}>
           <Trash2 aria-hidden="true" />
-          Quitar
+          Borrar de la lista
         </Button>
       </div>
     </BottomSheet>
