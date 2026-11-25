@@ -20,16 +20,16 @@ export function BottomSheet({ open, onClose, title, description, children, class
     <Sheet open={open} onOpenChange={(value) => !value && onClose()}>
       <SheetContent
         side="bottom"
-        className={cn('mx-auto max-h-[90dvh] w-full max-w-xl gap-0 overflow-y-auto rounded-t-2xl pb-safe', className)}
+        className={cn('mx-auto max-h-[90dvh] w-full max-w-xl gap-0 overflow-y-auto pb-safe', className)}
       >
         {/* Asa visual: indica que es un panel deslizable */}
-        <div className="mx-auto mt-2.5 h-1.5 w-10 shrink-0 rounded-full bg-muted" aria-hidden="true" />
-        <SheetHeader className="pb-2">
-          <SheetTitle className="text-lg">{title}</SheetTitle>
+        <div className="mx-auto mt-2.5 h-1.5 w-10 shrink-0 rounded-full bg-border" aria-hidden="true" />
+        <SheetHeader className="px-5 pt-3 pb-3 text-left">
+          <SheetTitle className="chalk-title text-2xl">{title}</SheetTitle>
           {/* Radix pide descripción para lectores de pantalla; si no hay, se oculta visualmente */}
           <SheetDescription className={description ? undefined : 'sr-only'}>{description ?? title}</SheetDescription>
         </SheetHeader>
-        <div className="flex flex-col gap-4 px-4 pb-6">{children}</div>
+        <div className="flex flex-col gap-4 px-5 pb-6">{children}</div>
       </SheetContent>
     </Sheet>
   )

@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -13,25 +14,26 @@ import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 
 @RestController
+@RequestMapping("/api")
 @RequiredArgsConstructor
 class ProductController {
 
 	private final ProductService productService;
 
 	/** Las anotaciones de validación en los parámetros las comprueba Spring MVC y devuelve 400 si fallan. */
-	@GetMapping("/api/products")
+	@GetMapping("/products")
 	List<ProductDto> search(
 			@RequestParam @Size(max = 50, message = "La búsqueda no puede superar 50 caracteres") String q,
 			@RequestParam(defaultValue = "10") @Min(1) @Max(20) int limit) {
 		return productService.search(q, limit);
 	}
 
-	@GetMapping("/api/categories")
+	@GetMapping("/categories")
 	List<CategoryDto> categories() {
 		return productService.categories();
 	}
 
-	@GetMapping("/api/categories/{categoryId}/products")
+	@GetMapping("/categories/{categoryId}/products")
 	List<ProductDto> byCategory(@PathVariable short categoryId) {
 		return productService.byCategory(categoryId);
 	}

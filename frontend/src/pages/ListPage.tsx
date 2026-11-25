@@ -1,4 +1,4 @@
-import { LogOut, QrCode, RefreshCw, Share2, Trash2, UserPlus } from 'lucide-react'
+import { LogOut, QrCode, SearchX, Share2, ShoppingBasket, Trash2, UserPlus } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
@@ -10,6 +10,7 @@ import type { Item, ListDetail, Member, RecentItem } from '@/api/types'
 import { useAuth } from '@/auth/useAuth'
 import { AppSkeleton } from '@/components/AppSkeleton'
 import { BottomSheet } from '@/components/BottomSheet'
+import { BrandMark } from '@/components/BrandMark'
 import { EmptyState } from '@/components/EmptyState'
 import { PageHeader } from '@/components/PageHeader'
 import { ProductSearch } from '@/components/ProductSearch'
@@ -18,10 +19,9 @@ import { UserAvatar } from '@/components/UserAvatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Progress } from '@/components/ui/progress'
 import { Separator } from '@/components/ui/separator'
 import { addWithUndo, errorMessage } from '@/items/itemFeedback'
-import { Cart } from '@/items/Cart'
+import { CartButton, CartPanel, CartSheet } from '@/items/Cart'
 import { ItemList } from '@/items/ItemList'
 import { RecentItems } from '@/items/RecentItems'
 import { sortItems } from '@/items/sortItems'
@@ -32,6 +32,7 @@ import { ListSwitcher } from '@/lists/ListSwitcher'
 import { useListEvents, type ConnectionStatus } from '@/lists/useListEvents'
 import { cn } from '@/lib/utils'
 import { CategoryBrowser } from '@/products/CategoryBrowser'
+import type { CatalogActions } from '@/products/ProductRow'
 
 type LoadState =
   | { status: 'loading' }
@@ -85,6 +86,7 @@ function ListPage({ listId }: { listId: string }) {
   const { confirm, confirmDialog } = useConfirm()
   const [state, setState] = useState<LoadState>({ status: 'loading' })
   const [shareOpen, setShareOpen] = useState(false)
+  const [cartOpen, setCartOpen] = useState(false)
   const [remoteUpdate, setRemoteUpdate] = useState(0)
 
   // Mientras salimos o borramos la lista nosotros mismos, ignoramos los eventos: si no, se vería
@@ -131,13 +133,13 @@ function ListPage({ listId }: { listId: string }) {
   if (state.status === 'loading') return <AppSkeleton label="Cargando la lista" />
   if (state.status === 'error') {
     return (
-      <main className="grid flex-1 place-items-center p-4">
+      <main className="mx-auto w-full max-w-3xl p-4">
         <EmptyState
-          icon="🔍"
+          icon={<SearchX />}
           title="Lista no disponible"
           description={state.message}
           action={
-            <Button asChild size="lg">
+            <Button asChild>
               <Link to="/">Ir a mis listas</Link>
             </Button>
           }
@@ -150,7 +152,6 @@ function ListPage({ listId }: { listId: string }) {
   const isOwner = list.myRole === 'OWNER'
   const others = list.members.filter((member) => member.userId !== user?.id)
   const inCart = items.filter((item) => item.checked).length
-  const pending = items.length - inCart
 
   // Actualizaciones con función (prev => ...): parten del estado más reciente aunque varias
   // respuestas lleguen seguidas, en vez de una copia que podría estar ya desfasada.
@@ -185,23 +186,15 @@ function ListPage({ listId }: { listId: string }) {
   }
 
   /**
-   * Actualización optimista: se marca en pantalla al instante, sin esperar al servidor (en el
-   * súper la cobertura suele ser mala). Si la petición falla, se deshace el cambio.
+   * Tachar o quitar la raya. Actualización optimista: se tacha en pantalla al instante, sin esperar
+   * al servidor (en el súper la cobertura suele ser mala). Si la petición falla, se deshace.
+   * No hace falta un aviso con "Deshacer": lo tachado sigue a la vista y otro toque lo devuelve.
    */
-  const toggle = (item: Item, offerUndo = true) =>
+  const toggle = (item: Item) =>
     run(async () => {
       upsertItem({ ...item, checked: !item.checked, checkedByName: item.checked ? null : (user?.displayName ?? null) })
       try {
-        const saved = await updateItem(list.id, item.id, { checked: !item.checked })
-        upsertItem(saved)
-        // Si se devuelve a la lista, el aviso "al carrito · Deshacer" ya no tiene sentido
-        if (!saved.checked) toast.dismiss(`check-${saved.id}`)
-        if (offerUndo && saved.checked) {
-          toast(`«${saved.name}» al carrito`, {
-            id: `check-${saved.id}`,
-            action: { label: 'Deshacer', onClick: () => toggle(saved, false) },
-          })
-        }
+        upsertItem(await updateItem(list.id, item.id, { checked: !item.checked }))
       } catch (error) {
         upsertItem(item)
         throw error
@@ -236,13 +229,13 @@ function ListPage({ listId }: { listId: string }) {
     run(async () => {
       const ok = await confirm({
         title: '¿Terminar la compra?',
-        description: `Se quitarán de la lista ${inCart === 1 ? 'el producto' : `los ${inCart} productos`} del carrito. Lo que falte se queda para la próxima vez.`,
-        confirmLabel: 'Terminar',
+        description: `Se borrará de la pizarra lo tachado (${inCart}). Lo que falte se queda para la próxima vez.`,
+        confirmLabel: 'Terminar la compra',
       })
       if (!ok) return
       await clearCheckedItems(list.id)
       setItems((current) => current.filter((i) => !i.checked))
-      toast.success('¡Compra terminada!')
+      toast.success('Compra terminada')
     })
 
   const rename = (name: string) =>
@@ -319,68 +312,97 @@ function ListPage({ listId }: { listId: string }) {
       navigate('/', { replace: true })
     })
 
+  // Productos del catálogo que ya están pendientes en la lista, para el selector − 1 + del buscador
+  // y de las secciones. "−" quita una unidad o, si solo queda una, el producto (con su "Deshacer").
+  const pendingByProduct = new Map(items.filter((i) => !i.checked && i.productId !== null).map((i) => [i.productId as number, i]))
+  const catalog: CatalogActions = {
+    quantityOf: (productId) => pendingByProduct.get(productId)?.quantity ?? 0,
+    add: (product) => add({ productId: product.id }),
+    removeOne: (product) => {
+      const item = pendingByProduct.get(product.id)
+      if (!item) return
+      if (item.quantity > 1) changeQuantity(item, item.quantity - 1)
+      else removeItem(item)
+    },
+  }
+
   return (
     <>
+      {/* Cabecera: logo, lista actual, compartir, carrito con contador y el buscador */}
       <PageHeader
+        className="pb-3"
+        innerClassName="max-w-3xl xl:max-w-none"
+        leading={<BrandMark className="size-9 lg:hidden" />}
         title={<ListSwitcher current={list} />}
         actions={
-          // Miembros y compartir en un solo botón: menos elementos sueltos en la cabecera
-          <button
-            type="button"
-            onClick={() => setShareOpen(true)}
-            aria-label={`Compartir la lista (${list.members.length} ${list.members.length === 1 ? 'miembro' : 'miembros'})`}
-            className="flex h-11 items-center gap-2 rounded-full bg-secondary py-1 pr-3.5 pl-1.5 text-secondary-foreground outline-none transition-colors hover:bg-secondary/80 focus-visible:ring-[3px] focus-visible:ring-ring/50 active:scale-95"
-          >
-            <span className="flex -space-x-2" aria-hidden="true">
-              {list.members.slice(0, 3).map((member) => (
-                <UserAvatar key={member.userId} name={member.displayName} className="size-8 text-xs ring-2 ring-secondary" fallbackClassName="bg-card" />
-              ))}
-              {list.members.length > 3 && (
-                <span className="grid size-8 place-items-center rounded-full bg-card text-xs font-semibold ring-2 ring-secondary">
-                  +{list.members.length - 3}
-                </span>
-              )}
-            </span>
-            <UserPlus className="size-5" aria-hidden="true" />
-          </button>
+          <>
+            <button
+              type="button"
+              onClick={() => setShareOpen(true)}
+              aria-label={`Compartir la lista (${list.members.length} ${list.members.length === 1 ? 'miembro' : 'miembros'})`}
+              className="flex h-12 items-center gap-1.5 rounded-full px-3 text-sm font-bold outline-none transition-colors duration-150 hover:bg-foreground/5 focus-visible:ring-[3px] focus-visible:ring-ring/60"
+            >
+              <UserPlus className="chalk size-6" strokeWidth={1.75} aria-hidden="true" />
+              <span className="tabular-nums" aria-hidden="true">
+                {list.members.length}
+              </span>
+            </button>
+            <CartButton className="xl:hidden" count={inCart} onClick={() => setCartOpen(true)} />
+          </>
         }
       >
-        <div className="mt-4 flex items-center justify-between gap-3">
-          <span className="text-sm font-semibold">
-            {items.length === 0 ? 'Añade lo que necesitas' : pending === 0 ? '¡Lo tienes todo!' : pending === 1 ? 'Falta 1 producto' : `Faltan ${pending} productos`}
-          </span>
-          <LiveStatus status={connection} remoteUpdate={remoteUpdate > 0} />
-        </div>
-        {items.length > 0 && (
-          <div className="mt-2.5 flex flex-col gap-1.5">
-            <Progress value={(inCart / items.length) * 100} className="h-2" aria-label={`${inCart} de ${items.length} en el carrito`} />
-            <span className="text-xs text-muted-foreground tabular-nums">
-              {inCart} de {items.length} en el carrito
-            </span>
-          </div>
-        )}
+        <ProductSearch className="mt-1 xl:max-w-3xl" catalog={catalog} onAddCustom={(customName) => add({ customName })} />
       </PageHeader>
 
-      <main className="flex flex-col gap-6 p-4">
-        <ProductSearch onSelect={(product) => add({ productId: product.id })} onAddCustom={(customName) => add({ customName })} />
+      {/* Primero la pizarra con lo que falta (para eso se abre la app); debajo, para añadir más: las
+          secciones y lo comprado otras veces. En pantallas anchas, lo tachado siempre a la vista. */}
+      <div className="flex-1 xl:grid xl:grid-cols-[minmax(0,1fr)_23rem]">
+        <main className={cn('flex w-full max-w-3xl flex-col gap-10 px-4 pt-5 lg:px-8 xl:mx-0', inCart > 0 && 'pb-24 xl:pb-0')}>
+          <section aria-labelledby="list-title" className="flex flex-col gap-5">
+            <h2 id="list-title" className="sr-only">
+              Lo que falta
+            </h2>
+            <ListStatus total={items.length} inCart={inCart} connection={connection} remoteUpdate={remoteUpdate > 0} />
+            <ItemList items={items} onToggle={toggle} onQuantity={changeQuantity} onNote={editNote} onDelete={removeItem} />
+          </section>
 
-        <ItemList items={items} onToggle={toggle} onQuantity={changeQuantity} onNote={editNote} onDelete={removeItem} onClearChecked={clearCart} />
+          <CategoryBrowser catalog={catalog} />
+          <RecentItems recent={recent} items={items} onAdd={add} />
+        </main>
 
-        <RecentItems recent={recent} items={items} onAdd={add} />
+        {/* Escritorio ancho: lo tachado siempre a la vista */}
+        <aside aria-labelledby="cart-title" className="hidden border-l bg-card xl:block">
+          <div className="sticky top-[8.5rem] flex max-h-[calc(100dvh-8.5rem)] flex-col overflow-y-auto px-5 pt-5">
+            <h2 id="cart-title" className="chalk-title mb-2 flex items-center gap-2.5 text-2xl">
+              <ShoppingBasket className="chalk size-7 text-foreground" strokeWidth={1.75} aria-hidden="true" />
+              En la cesta
+              {inCart > 0 && (
+                <span key={inCart} className="grid h-6 min-w-6 animate-bump place-items-center rounded-full bg-primary px-1.5 font-sans text-sm font-bold text-primary-foreground tabular-nums">
+                  {inCart}
+                </span>
+              )}
+            </h2>
+            <CartPanel items={items} onReturn={(item) => toggle(item)} onFinish={clearCart} />
+          </div>
+        </aside>
+      </div>
 
-        <CategoryBrowser items={items} onAdd={(product) => add({ productId: product.id })} />
+      {/* Móvil y tablet: "Terminar la compra" siempre a mano en cuanto hay algo tachado */}
+      {inCart > 0 && (
+        <div className="bottom-above-tabbar fixed inset-x-0 z-30 border-t bg-background/95 px-4 py-3 backdrop-blur-sm lg:left-(--rail-width) xl:hidden">
+          <Button size="lg" className="mx-auto flex w-full max-w-3xl" onClick={clearCart}>
+            Terminar la compra ({inCart})
+          </Button>
+        </div>
+      )}
 
-        {/* Hueco para que la barra del carrito no tape lo último de la página */}
-        {inCart > 0 && <div className="h-16" aria-hidden="true" />}
-      </main>
-
-      <Cart items={items} onReturn={(item) => toggle(item)} onFinish={clearCart} />
+      <CartSheet open={cartOpen} onClose={() => setCartOpen(false)} items={items} onReturn={(item) => toggle(item)} onFinish={clearCart} />
 
       <BottomSheet open={shareOpen} onClose={() => setShareOpen(false)} title="Compartir lista" description="Invita a quien quieras que use esta lista contigo.">
-        <div className="flex flex-col items-center gap-3 rounded-2xl border bg-muted/40 p-4">
+        <div className="flex flex-col items-center gap-3 rounded-lg border p-4">
           {/* El QR contiene el enlace de invitación. Fondo blanco siempre (también en modo oscuro):
               muchos lectores no reconocen un QR con los colores invertidos. */}
-          <div className="rounded-xl bg-white p-2.5 shadow-sm">
+          <div className="rounded-md border bg-white p-2">
             <QRCodeSVG value={inviteUrl(list.inviteCode)} size={176} marginSize={1} bgColor="#ffffff" fgColor="#000000" title={`Código QR para unirse a «${list.name}»`} />
           </div>
           <p className="max-w-xs text-center text-sm text-muted-foreground">
@@ -401,12 +423,12 @@ function ListPage({ listId }: { listId: string }) {
         </div>
 
         <section aria-labelledby="members-title" className="flex flex-col gap-1">
-          <h3 id="members-title" className="text-sm font-semibold text-muted-foreground">
+          <h3 id="members-title" className="text-sm font-semibold">
             Miembros ({list.members.length})
           </h3>
-          <ul className="flex flex-col">
+          <ul className="flex flex-col divide-y">
             {list.members.map((member) => (
-              <li key={member.userId} className="flex min-h-12 items-center gap-3">
+              <li key={member.userId} className="flex min-h-13 items-center gap-3">
                 <UserAvatar name={member.displayName} />
                 <span className="min-w-0 flex-1 truncate font-medium">
                   {member.displayName}
@@ -414,7 +436,7 @@ function ListPage({ listId }: { listId: string }) {
                 </span>
                 {member.role === 'OWNER' && <Badge variant="secondary">Propietario</Badge>}
                 {isOwner && member.userId !== user?.id && (
-                  <Button variant="ghost" size="sm" className="h-9 text-destructive hover:text-destructive" onClick={() => expel(member)}>
+                  <Button variant="ghost" size="sm" className="h-11 text-destructive hover:text-destructive" onClick={() => expel(member)}>
                     Expulsar
                   </Button>
                 )}
@@ -476,28 +498,38 @@ const LIVE_STATUS_TEXT: Record<ConnectionStatus, string> = {
   reconnecting: 'Reconectando…',
 }
 
-/** Indicador sutil de sincronización en tiempo real; parpadea "Actualizado" si otro cambia algo. */
+type ListStatusProps = { total: number; inCart: number; connection: ConnectionStatus; remoteUpdate: boolean }
+
+/**
+ * El titular de la pizarra: cuántos productos faltan, a tiza amarilla y en grande. Al lado, si la
+ * lista está sincronizada en tiempo real; debajo, cuántos hay tachados.
+ */
+function ListStatus({ total, inCart, connection, remoteUpdate }: ListStatusProps) {
+  const pending = total - inCart
+  return (
+    <div className="flex flex-col gap-1">
+      <div className="flex items-end justify-between gap-3">
+        <p className="chalk-title text-4xl tabular-nums">
+          {total === 0 ? 'Nada apuntado' : pending === 0 ? 'No falta nada' : `Falta${pending === 1 ? '' : 'n'} ${pending}`}
+        </p>
+        <LiveStatus status={connection} remoteUpdate={remoteUpdate} />
+      </div>
+      {total > 0 && (
+        <p className="text-sm text-muted-foreground tabular-nums">
+          {inCart === 0 ? 'Nada tachado todavía' : `${inCart} ${inCart === 1 ? 'tachado' : 'tachados'} de ${total}`}
+        </p>
+      )}
+    </div>
+  )
+}
+
+/** Indicador discreto de sincronización; dice "Actualizado" un momento si otra persona cambia algo. */
 function LiveStatus({ status, remoteUpdate }: { status: ConnectionStatus; remoteUpdate: boolean }) {
   const live = status === 'live'
   return (
-    <span role="status" className="flex shrink-0 items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
-      {remoteUpdate && live ? (
-        <>
-          <RefreshCw className="size-3.5 text-primary motion-safe:animate-spin [animation-iteration-count:1]" aria-hidden="true" />
-          <span className="text-primary">Actualizado ahora</span>
-        </>
-      ) : (
-        <>
-          <span
-            className={cn(
-              'size-2 rounded-full',
-              live ? 'bg-success shadow-[0_0_0_3px] shadow-success/20 motion-safe:animate-pulse-dot' : status === 'reconnecting' ? 'bg-warning' : 'bg-muted-foreground/40',
-            )}
-            aria-hidden="true"
-          />
-          {LIVE_STATUS_TEXT[status]}
-        </>
-      )}
+    <span role="status" className="flex items-center gap-1.5 pb-1 text-xs whitespace-nowrap text-muted-foreground">
+      <span className={cn('size-2 rounded-full', live ? 'bg-success' : status === 'reconnecting' ? 'bg-warning' : 'bg-muted-foreground/40', remoteUpdate && live && 'animate-ping')} aria-hidden="true" />
+      {remoteUpdate && live ? <span className="font-semibold text-title">Cambiado por otra persona</span> : LIVE_STATUS_TEXT[status]}
     </span>
   )
 }

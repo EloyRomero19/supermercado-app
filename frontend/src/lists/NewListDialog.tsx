@@ -1,4 +1,3 @@
-import { ShoppingBasket } from 'lucide-react'
 import { useId, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { createList } from '@/api/lists'
@@ -17,12 +16,9 @@ type Props = { open: boolean; onOpenChange: (open: boolean) => void }
 export function NewListDialog({ open, onOpenChange }: Props) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[calc(100%-2rem)] rounded-2xl sm:max-w-md">
-        <DialogHeader className="items-center text-center sm:items-center sm:text-center">
-          <span className="mb-1 grid size-12 place-items-center rounded-2xl bg-secondary text-primary" aria-hidden="true">
-            <ShoppingBasket className="size-6" />
-          </span>
-          <DialogTitle className="text-lg">Nueva lista</DialogTitle>
+      <DialogContent className="max-w-[calc(100%-2rem)] sm:max-w-md">
+        <DialogHeader className="text-left">
+          <DialogTitle className="text-lg font-semibold">Nueva lista</DialogTitle>
           <DialogDescription>Luego podrás compartirla con quien quieras.</DialogDescription>
         </DialogHeader>
         {/* Dentro del contenido: Radix lo desmonta al cerrar, así que cada vez empieza vacío */}

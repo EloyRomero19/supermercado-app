@@ -1,14 +1,13 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 // Tipografía incluida en la app (no se pide a Google Fonts: más privado y funciona sin conexión)
-import '@fontsource-variable/inter'
+import '@fontsource-variable/atkinson-hyperlegible-next/wght.css'
+// Letra de tiza, solo para títulos (un único peso)
+import '@fontsource/cabin-sketch/700.css'
 import './index.css'
 // Importado lo antes posible: captura el aviso de instalación aunque llegue antes de pintar nada
 import './pwa/installPrompt'
 import App from './App.tsx'
-import { initTheme } from './theme/theme'
-
-initTheme()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

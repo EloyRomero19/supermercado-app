@@ -14,7 +14,7 @@ export function RecipeMeta({ recipe }: { recipe: Pick<RecipeSummary, 'minutes' |
         <Users className="size-3.5" aria-hidden="true" />
         {recipe.servings} {recipe.servings === 1 ? 'ración' : 'raciones'}
       </span>
-      <Badge variant="secondary" className="h-5 px-1.5 text-[0.7rem]">
+      <Badge variant="outline" className="h-5 px-1.5 text-[0.7rem] font-medium text-muted-foreground">
         {recipe.difficulty}
       </Badge>
     </span>

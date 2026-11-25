@@ -37,7 +37,7 @@ class CustomItemIconsTests {
 	})
 	void guessesAnIconThatMakesSense(String text, String icon, String category) {
 		assertThat(customIcons.guess(text)).get()
-			.extracting(IconGuess::icon, IconGuess::categoryName)
+			.extracting(guess -> guess.icon(), guess -> guess.categoryName())
 			.containsExactly(icon, category);
 	}
 

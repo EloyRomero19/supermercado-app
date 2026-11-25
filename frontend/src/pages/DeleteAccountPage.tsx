@@ -48,7 +48,7 @@ export function DeleteAccountPage() {
       />
 
       <main className="flex flex-col gap-4 p-4 pb-safe">
-        <Card className="flex-row gap-3 border-destructive/30 bg-destructive/5 px-4 py-4">
+        <Card className="flex-row gap-3 border-destructive/40 px-4 py-4">
           <TriangleAlert className="mt-0.5 size-5 shrink-0 text-destructive" aria-hidden="true" />
           <div className="flex min-w-0 flex-col gap-1 text-sm leading-relaxed">
             <p className="font-semibold text-destructive">No se puede deshacer</p>
@@ -106,12 +106,12 @@ function ListsImpact() {
 
   return (
     <Card className="gap-4 px-4 py-5">
-      <h2 className="font-semibold">Qué pasará con tus listas</h2>
+      <h2 className="section-title">Qué pasará con tus listas</h2>
 
       {!lists && !failed && (
         <div className="flex flex-col gap-3" aria-label="Cargando tus listas">
-          <Skeleton className="h-12 rounded-xl" />
-          <Skeleton className="h-12 rounded-xl" />
+          <Skeleton className="h-12" />
+          <Skeleton className="h-12" />
         </div>
       )}
 
@@ -159,8 +159,8 @@ function ImpactRow({ Icon, title, detail, names, tone }: ImpactRowProps) {
       <span
         className={
           tone === 'destructive'
-            ? 'grid size-9 shrink-0 place-items-center rounded-xl bg-destructive/10 text-destructive'
-            : 'grid size-9 shrink-0 place-items-center rounded-xl bg-secondary text-primary'
+            ? 'grid size-9 shrink-0 place-items-center rounded-md bg-destructive/10 text-destructive'
+            : 'grid size-9 shrink-0 place-items-center rounded-md bg-muted text-muted-foreground'
         }
         aria-hidden="true"
       >
@@ -172,7 +172,7 @@ function ImpactRow({ Icon, title, detail, names, tone }: ImpactRowProps) {
         {names && (
           <div className="flex flex-wrap gap-1.5">
             {names.map((name, i) => (
-              <span key={`${name}-${i}`} className="max-w-full truncate rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium">
+              <span key={`${name}-${i}`} className="max-w-full truncate rounded-sm border px-2 py-0.5 text-xs font-medium">
                 {name}
               </span>
             ))}

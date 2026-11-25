@@ -1,17 +1,15 @@
 import { CircleAlert, CircleCheck, Info, LoaderCircle } from 'lucide-react'
 import type { CSSProperties } from 'react'
 import { Toaster as Sonner, type ToasterProps } from 'sonner'
-import { useTheme } from '@/theme/theme'
 
 /**
  * Avisos tipo "toast" (sonner) con los colores de la app. Arriba en el centro: abajo está la
- * barra de navegación. Sigue el tema elegido en Cuenta (o el del sistema), como el resto.
+ * barra de navegación. Siempre en oscuro, como la pizarra.
  */
 export function Toaster(props: ToasterProps) {
-  const { theme } = useTheme()
   return (
     <Sonner
-      theme={theme}
+      theme="dark"
       position="top-center"
       offset={{ top: 'max(0.75rem, env(safe-area-inset-top))' }}
       mobileOffset={{ top: 'max(0.75rem, env(safe-area-inset-top))' }}
@@ -29,7 +27,7 @@ export function Toaster(props: ToasterProps) {
           '--border-radius': 'var(--radius)',
         } as CSSProperties
       }
-      toastOptions={{ classNames: { toast: 'font-sans shadow-lg', actionButton: '!bg-primary !text-primary-foreground !font-semibold' } }}
+      toastOptions={{ classNames: { toast: 'font-sans !rounded-md !shadow-md', actionButton: '!bg-primary !text-primary-foreground !font-semibold' } }}
       {...props}
     />
   )

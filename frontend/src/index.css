@@ -1,102 +1,95 @@
 @import 'tailwindcss';
-/* Animaciones de entrada/salida que usan los componentes de shadcn/ui (paneles, avisos…) */
+/* Animaciones de apertura/cierre que usan los componentes de shadcn/ui (paneles, avisos…) */
 @import 'tw-animate-css';
 
-/* El modo oscuro depende de <html data-theme="dark"> (lo pone public/theme-init.js según lo que
-   elija el usuario en Cuenta, o según el sistema). Las clases dark: de Tailwind/shadcn, también. */
+/* La pizarra siempre es oscura: index.html lleva <html data-theme="dark"> fijo, así las clases dark:
+   de los componentes de shadcn/ui se aplican siempre. */
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
 
 /* =========================================================================
-   Tokens de diseño. Los componentes NUNCA usan colores sueltos: usan estas variables
-   a través de las clases de Tailwind (bg-primary, text-muted-foreground…).
-   Colores en OKLCH: luminosidad, croma y tono por separado, fácil de ajustar a mano.
-   Contraste comprobado (WCAG AA ≥ 4,5:1) para texto sobre fondo, tarjeta y botones.
+   "La pizarra de la cocina". Tokens de diseño: los componentes NUNCA usan colores sueltos,
+   usan estas variables a través de las clases de Tailwind (bg-primary, text-title…).
+   Contraste comprobado (WCAG AA: texto ≥ 4,5:1, bordes de controles ≥ 3:1) sobre la pizarra,
+   los paneles y los bloques suaves.
+
+   Cada tiza tiene UN significado, siempre el mismo, para que se entienda sin leer:
+   - Blanca: el contenido (los productos, el texto).
+   - Amarilla: los títulos (la lista, "Faltan 6", la cabecera de cada pantalla).
+   - Azul: los nombres de sección y las etiquetas de los campos.
+   - Verde: lo que haces y lo hecho (botones, la raya al tachar, la cuenta de la cesta).
+   - Roja: borrar y errores.
+   - Salvia: lo secundario (notas, quién lo añadió, ayudas).
    ========================================================================= */
 :root {
-  /* Controles nativos (select, casillas, barras de desplazamiento) en el mismo tema */
-  color-scheme: light;
-  --radius: 0.875rem;
+  color-scheme: dark;
+  /* 10px: paneles y campos. Botones en píldora; paneles que suben 20px (ver @theme) */
+  --radius: 0.625rem;
 
-  /* Neutros con un toque verde para que todo combine con la marca */
-  --background: oklch(0.985 0.004 145);
-  --foreground: oklch(0.21 0.02 150);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.21 0.02 150);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.21 0.02 150);
-  --muted: oklch(0.965 0.006 150);
-  --muted-foreground: oklch(0.5 0.02 150);
-  --border: oklch(0.91 0.01 150);
-  --input: oklch(0.89 0.012 150);
+  --background: oklch(0.298 0.015 169); /* #26302c la pizarra */
+  --foreground: oklch(0.951 0.011 95.2); /* #f1efe7 tiza blanca: 11,8:1 */
+  --card: oklch(0.336 0.018 168); /* #2e3a35 paneles que flotan sobre la pizarra */
+  --card-foreground: oklch(0.951 0.011 95.2);
+  --popover: oklch(0.336 0.018 168);
+  --popover-foreground: oklch(0.951 0.011 95.2);
+  --muted: oklch(0.362 0.02 165.6); /* #34413b bloques suaves (buscador, pistas) */
+  --muted-foreground: oklch(0.755 0.013 156.9); /* #a9b2ac salvia: 6,3:1 en la pizarra, 4,9:1 en muted */
+  --border: oklch(0.42 0.021 163.8); /* #43514a filetes de tiza borrada */
+  --input: oklch(0.619 0.016 162.2); /* #7e8983 borde de campos: 3,8:1 */
 
-  /* Marca: verde supermercado (#0a7e3a). Texto blanco encima: 5,0:1 */
-  --primary: oklch(0.52 0.14 150);
-  --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.95 0.035 150);
-  --secondary-foreground: oklch(0.36 0.09 150);
-  --accent: oklch(0.95 0.035 150);
-  --accent-foreground: oklch(0.36 0.09 150);
-  --ring: oklch(0.6 0.14 150);
+  /* Verde: acción y "hecho". Pizarra encima: 8,4:1 */
+  --primary: oklch(0.834 0.101 139.7); /* #a6d99a */
+  --primary-hover: oklch(0.88 0.09 139.7);
+  --primary-foreground: oklch(0.298 0.015 169);
+  --secondary: oklch(0.38 0.045 145); /* verde muy apagado: seleccionado */
+  --secondary-foreground: oklch(0.9 0.07 139.7);
+  --accent: oklch(0.362 0.02 165.6);
+  --accent-foreground: oklch(0.951 0.011 95.2);
+  /* El foco del teclado, en amarillo: se ve siempre sobre la pizarra */
+  --ring: oklch(0.866 0.112 94);
 
-  /* Estados */
-  --success: oklch(0.52 0.14 150);
-  --destructive: oklch(0.55 0.2 27);
-  --destructive-foreground: oklch(0.99 0 0);
-  --warning: oklch(0.78 0.15 75);
+  /* Las tizas de colores con significado (ver arriba) */
+  --title: oklch(0.866 0.112 94); /* #ebd27a amarilla: 9,1:1 */
+  --section: oklch(0.813 0.06 233.8); /* #9cc9e3 azul: 7,7:1 */
 
-  /* Un color por sección del súper (y para distinguir listas). Se usan con color-mix()
-     para tintar fondos suaves, así el mismo valor vale en modo claro y oscuro. */
-  --cat-1: #2e9d4f; /* Frutas y verduras */
-  --cat-2: #d64545; /* Carnicería */
-  --cat-3: #2b7bd6; /* Pescadería */
-  --cat-4: #d99a00; /* Charcutería y quesos */
-  --cat-5: #4f63d2; /* Lácteos y huevos */
-  --cat-6: #b8692e; /* Panadería y bollería */
-  --cat-7: #e0622a; /* Despensa */
-  --cat-8: #c2417e; /* Desayuno y dulces */
-  --cat-9: #1a9fb0; /* Congelados */
-  --cat-10: #7a4fd1; /* Bebidas */
-  --cat-11: #14907f; /* Limpieza */
-  --cat-12: #a347b8; /* Higiene y cuidado personal */
-  --cat-13: #d6880f; /* Bebé y mascotas */
-  --cat-other: #6b7a72;
-  /* Texto sobre un color de sección (insignias de cantidad, "+"…) */
-  --on-tone: oklch(1 0 0);
+  --success: oklch(0.834 0.101 139.7);
+  --destructive: oklch(0.77 0.113 26); /* #f4978e roja: 6,3:1 */
+  --destructive-foreground: oklch(0.298 0.015 169);
+  --warning: oklch(0.866 0.112 94);
+
+  /* Velo detrás de paneles y diálogos */
+  --overlay: oklch(0.15 0.01 169 / 0.65);
+  /* Sombra solo para lo que flota (paneles, menús) */
+  --shadow-float: 0 16px 40px -12px oklch(0 0 0 / 0.6), 0 2px 6px oklch(0 0 0 / 0.3);
 
   /* Alto de la barra inferior (para reservar su hueco al final de cada página) */
-  --tabbar-height: 4rem;
+  --tabbar-height: 4.25rem;
+  /* Ancho del menú lateral en escritorio (sustituye a la barra inferior) */
+  --rail-width: 15rem;
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Modo oscuro: elegido en Cuenta o, en "Automático", según el sistema */
-:root[data-theme='dark'] {
-  color-scheme: dark;
-  --background: oklch(0.17 0.01 150);
-  --foreground: oklch(0.96 0.005 150);
-  --card: oklch(0.21 0.012 150);
-  --card-foreground: oklch(0.96 0.005 150);
-  --popover: oklch(0.21 0.012 150);
-  --popover-foreground: oklch(0.96 0.005 150);
-  --muted: oklch(0.25 0.012 150);
-  --muted-foreground: oklch(0.72 0.02 150);
-  --border: oklch(0.3 0.015 150);
-  --input: oklch(0.33 0.015 150);
-
-  --primary: oklch(0.74 0.16 150);
-  --primary-foreground: oklch(0.18 0.03 150);
-  --secondary: oklch(0.28 0.04 150);
-  --secondary-foreground: oklch(0.9 0.05 150);
-  --accent: oklch(0.28 0.04 150);
-  --accent-foreground: oklch(0.9 0.05 150);
-  --ring: oklch(0.66 0.14 150);
-
-  --success: oklch(0.74 0.16 150);
-  --destructive: oklch(0.7 0.17 25);
-  --destructive-foreground: oklch(0.18 0.03 25);
-}
-
-/* Las variables anteriores, convertidas en clases de Tailwind (bg-card, text-primary, rounded-xl…) */
 @theme inline {
-  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /* Dos letras con papeles distintos:
+     - Cabin Sketch: SOLO títulos. Parece escrita con tiza; a tamaño grande se lee bien.
+     - Atkinson Hyperlegible Next: todo lo demás. Diseñada para que no se confundan letras ni
+       números (I/l/1, O/0); se lee de reojo y con prisa, como en el pasillo del súper.
+     Escala: 13 / 15 / 17 / 20 / 28 / 44 px; pesos 400, 600 y 700. */
+  --font-sans: 'Atkinson Hyperlegible Next Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-chalk: 'Cabin Sketch', 'Atkinson Hyperlegible Next Variable', cursive;
+
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: 1.35;
+  --text-sm: 0.9375rem;
+  --text-sm--line-height: 1.4;
+  --text-base: 1.0625rem;
+  --text-base--line-height: 1.45;
+  --text-lg: 1.25rem;
+  --text-lg--line-height: 1.3;
+  --text-2xl: 1.75rem;
+  --text-2xl--line-height: 1.15;
+  --text-4xl: 2.75rem;
+  --text-4xl--line-height: 1;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -109,96 +102,147 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-ring: var(--ring);
+  --color-title: var(--title);
+  --color-section: var(--section);
   --color-success: var(--success);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-warning: var(--warning);
-  --color-on-tone: var(--on-tone);
+  --color-overlay: var(--overlay);
 
-  --radius-sm: calc(var(--radius) - 6px);
-  --radius-md: calc(var(--radius) - 3px);
+  --shadow-float: var(--shadow-float);
+
+  /* Radios: insignias 6px, paneles y campos 10px, paneles que suben 20px; botones en píldora */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-xl: calc(var(--radius) + 2px);
   --radius-2xl: calc(var(--radius) + 10px);
 
-  /* Microinteracciones: "pop" al marcar un producto, entrada suave de tarjetas nuevas */
-  --animate-pop: pop 0.28s ease-out;
-  --animate-tile-in: tile-in 0.25s ease-out;
-  --animate-pulse-dot: pulse-dot 2s ease-in-out infinite;
+  --ease-out: var(--ease-out);
 
-  @keyframes pop {
-    50% {
-      transform: scale(1.15);
-    }
-  }
+  --animate-bump: bump 320ms var(--ease-out);
+  --animate-pop-in: pop-in 260ms var(--ease-out) both;
+  /* La raya de tiza al tachar: se "dibuja" de izquierda a derecha */
+  --animate-chalk-strike: chalk-strike 280ms var(--ease-out) both;
+}
 
-  @keyframes tile-in {
-    from {
-      opacity: 0;
-      transform: scale(0.92);
-    }
+/* El contador de la cesta da un salto cuando cambia */
+@keyframes bump {
+  0% {
+    transform: scale(1);
   }
+  40% {
+    transform: scale(1.28);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
 
-  @keyframes pulse-dot {
-    50% {
-      box-shadow: 0 0 0 5px transparent;
-    }
+/* Algo que aparece porque lo has pedido (un número nuevo, una casilla marcada) */
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
   }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes chalk-strike {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* Lo que va escrito a tiza (iconos, rayas, subrayados): trazo irregular y granulado. El filtro
+   #chalk está en index.html (un SVG oculto al principio de <body>). */
+@utility chalk {
+  filter: url(#chalk);
+}
+
+/* Título escrito a tiza amarilla */
+@utility chalk-title {
+  font-family: var(--font-chalk);
+  font-weight: 700;
+  color: var(--title);
+}
+
+/* Nombre de sección: tiza azul, negrita, con un subrayado de tiza (un trazo irregular dibujado
+   con un SVG de fondo, del color de la sección). */
+@utility section-title {
+  color: var(--section);
+  font-weight: 700;
+  padding-bottom: 0.3rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 6' preserveAspectRatio='none'%3E%3Cpath d='M2 4 C30 1.5 60 5 90 2.5 C104 1.5 112 3 118 3.5' fill='none' stroke='%239cc9e3' stroke-width='2' stroke-linecap='round' opacity='.7'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: left bottom;
+  background-size: min(100%, 9rem) 0.375rem;
 }
 
 /* Áreas seguras del iPhone (notch y barra de inicio) */
 @utility pt-safe {
-  padding-top: max(1rem, env(safe-area-inset-top));
+  padding-top: max(0.5rem, env(safe-area-inset-top));
 }
 
 @utility pb-safe {
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* Hueco al final de las páginas con barra inferior, para que no tape el contenido */
+/* Hueco al final de las páginas con barra inferior, para que no tape el contenido.
+   En escritorio no hay barra inferior (hay menú lateral). */
 @utility pb-tabbar {
   padding-bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom) + 1.5rem);
+  @media (width >= 64rem) {
+    padding-bottom: 2rem;
+  }
 }
 
-/* Elementos flotantes justo encima de la barra inferior (la barra del carrito) */
+/* Elementos fijos justo encima de la barra inferior (la barra de "Terminar la compra") */
 @utility bottom-above-tabbar {
-  bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom) + 0.75rem);
-}
-
-/* Fondo tintado con el color de la sección (--tone): bg-tone/15 no funciona con variables
-   arbitrarias, así que se define una utilidad propia */
-@utility bg-tone-soft {
-  background-color: color-mix(in oklab, var(--tone) 14%, var(--card));
-}
-
-@utility border-tone-soft {
-  border-color: color-mix(in oklab, var(--tone) 30%, transparent);
+  bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom));
+  @media (width >= 64rem) {
+    bottom: 0;
+  }
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border outline-ring/60;
   }
 
   html {
-    /* Inter: "1" con base y "a" de un piso, más legibles en números y nombres de productos */
-    font-feature-settings: 'cv11', 'ss01';
     -webkit-tap-highlight-color: transparent;
   }
 
+  /* La pizarra: el color de fondo y un polvo de tiza muy leve por encima (un SVG de ruido en
+     data: URI, que la CSP permite en img-src) */
   body {
-    @apply min-h-dvh bg-background font-sans text-foreground antialiased;
+    @apply min-h-dvh bg-background font-sans text-base text-foreground antialiased;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='d'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' seed='2'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .06 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23d)'/%3E%3C/svg%3E");
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--muted-foreground);
   }
 
   /* Foco visible SOLO con teclado (no al pulsar con el dedo o el ratón) */
   :focus-visible {
-    @apply outline-2 outline-offset-2 outline-ring;
+    @apply outline-3 outline-offset-2 outline-ring;
   }
 }
 

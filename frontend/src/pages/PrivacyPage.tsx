@@ -3,7 +3,6 @@ import type { ReactNode } from 'react'
 import { useNavigate } from 'react-router'
 import { PageHeader } from '@/components/PageHeader'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
 
 // PENDIENTE: pon aquí el email al que la gente puede escribir para ejercer sus derechos
 const CONTACT_EMAIL = 'contacto@tudominio.com'
@@ -21,7 +20,7 @@ export function PrivacyPage() {
           </Button>
         }
       />
-      <main className="flex flex-col gap-3 p-4 pb-safe">
+      <main className="mx-auto flex max-w-prose flex-col divide-y px-4 pb-safe">
         <Section title="Qué datos guardamos">
           <ul className="list-disc space-y-1 pl-5">
             <li>Tu email y tu nombre, para identificarte y mostrarte a los miembros de tus listas.</li>
@@ -53,9 +52,9 @@ export function PrivacyPage() {
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <Card className="gap-2 px-5 py-5 text-sm leading-relaxed">
-      <h2 className="text-base font-semibold">{title}</h2>
+    <section className="flex flex-col gap-2 py-5 leading-relaxed">
+      <h2 className="section-title">{title}</h2>
       {children}
-    </Card>
+    </section>
   )
 }

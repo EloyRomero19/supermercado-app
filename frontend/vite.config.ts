@@ -87,8 +87,8 @@ export default defineConfig({
         scope: '/',
         display: 'standalone', // se abre como una app, sin la barra del navegador
         // Colores del tema (index.css): fondo de la pantalla de inicio en Android y barra del sistema
-        background_color: '#f8fbf8',
-        theme_color: '#0a7e3a',
+        background_color: '#26302c',
+        theme_color: '#26302c',
         icons: [
           { src: 'pwa-64x64.png', sizes: '64x64', type: 'image/png' },
           { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' },
@@ -99,7 +99,7 @@ export default defineConfig({
       workbox: {
         // Se guardan en caché los archivos de la app (el "app shell"): abre al instante y sin red
         // De la tipografía, solo los alfabetos que usamos (el navegador descarga los demás si hicieran falta)
-        globPatterns: ['**/*.{js,css,html,svg,png,ico}', '**/inter-latin-*.woff2'],
+        globPatterns: ['**/*.{js,css,html,svg,png,ico}', '**/atkinson-hyperlegible-next-latin-*wght-normal.woff2', '**/cabin-sketch-latin-700-normal.woff2'],
         // Las pantallas de inicio de iPhone no se precachean: cada dispositivo pide solo la suya
         globIgnores: ['**/apple-splash-*.png'],
         cleanupOutdatedCaches: true,

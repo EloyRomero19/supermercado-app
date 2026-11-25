@@ -22,13 +22,13 @@ export function LoginPage() {
 
   return (
     <AuthLayout
-      title="Hola de nuevo"
-      subtitle="Entra para ver tus listas compartidas"
+      title="Iniciar sesión"
+      subtitle="Entra para ver tus listas de la compra."
       footer={
         <>
           ¿No tienes cuenta?{' '}
           <Link to="/registro" state={location.state} className="font-semibold text-primary underline-offset-4 hover:underline">
-            Regístrate gratis
+            Crear una cuenta
           </Link>
         </>
       }

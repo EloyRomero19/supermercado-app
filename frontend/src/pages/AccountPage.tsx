@@ -1,20 +1,10 @@
-import { ChevronRight, LogOut, Monitor, Moon, ShieldCheck, Sun, Trash2 } from 'lucide-react'
+import { ChevronRight, LogOut, ShieldCheck } from 'lucide-react'
 import { Link } from 'react-router'
 import { useAuth } from '@/auth/useAuth'
 import { PageHeader } from '@/components/PageHeader'
 import { useConfirm } from '@/components/useConfirm'
 import { UserAvatar } from '@/components/UserAvatar'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { cn } from '@/lib/utils'
 import { InstallCard } from '@/pwa/InstallCard'
-import { useTheme, type ThemePreference } from '@/theme/theme'
-
-const THEME_OPTIONS: { value: ThemePreference; label: string; Icon: typeof Sun }[] = [
-  { value: 'system', label: 'Automático', Icon: Monitor },
-  { value: 'light', label: 'Claro', Icon: Sun },
-  { value: 'dark', label: 'Oscuro', Icon: Moon },
-]
 
 export function AccountPage() {
   const { user, logout } = useAuth()
@@ -30,76 +20,41 @@ export function AccountPage() {
   return (
     <>
       <PageHeader title="Cuenta" />
-      <main className="flex flex-col gap-4 p-4">
-        <Card className="flex-row items-center gap-4 px-4 py-5">
-          <UserAvatar name={user.displayName} className="size-16 text-xl" />
+      <main className="flex w-full max-w-3xl flex-col gap-7 px-4 pt-5 lg:px-8">
+        <div className="flex items-center gap-3">
+          <UserAvatar name={user.displayName} className="size-14 text-xl" />
           <div className="min-w-0">
-            <h2 className="truncate text-lg font-semibold">{user.displayName}</h2>
+            <h2 className="truncate text-lg font-bold">{user.displayName}</h2>
             <p className="truncate text-sm text-muted-foreground">{user.email}</p>
           </div>
-        </Card>
-
-        <ThemePicker />
+        </div>
 
         <InstallCard />
 
-        <Card className="gap-0 px-2 py-2">
+        <div className="divide-y border-y">
           <Link
             to="/privacidad"
-            className="flex min-h-12 items-center gap-3 rounded-lg px-3 outline-none hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            className="flex min-h-14 items-center gap-3 px-1 outline-none transition-colors duration-150 hover:bg-muted/60 focus-visible:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring/40 focus-visible:ring-inset"
           >
-            <ShieldCheck className="size-5 text-primary" aria-hidden="true" />
+            <ShieldCheck className="size-5 text-muted-foreground" strokeWidth={1.75} aria-hidden="true" />
             Privacidad
             <ChevronRight className="ml-auto size-5 text-muted-foreground" aria-hidden="true" />
           </Link>
-        </Card>
+          <button
+            type="button"
+            onClick={signOut}
+            className="flex min-h-14 w-full items-center gap-3 px-1 text-left outline-none transition-colors duration-150 hover:bg-muted/60 focus-visible:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring/40 focus-visible:ring-inset"
+          >
+            <LogOut className="size-5 text-muted-foreground" strokeWidth={1.75} aria-hidden="true" />
+            Cerrar sesión
+          </button>
+        </div>
 
-        <Button variant="outline" size="lg" className="h-11 text-destructive hover:text-destructive" onClick={signOut}>
-          <LogOut aria-hidden="true" />
-          Cerrar sesión
-        </Button>
-
-        <Button asChild variant="ghost" className="h-11 self-center text-muted-foreground hover:text-destructive">
-          <Link to="/cuenta/borrar">
-            <Trash2 aria-hidden="true" />
-            Borrar mi cuenta
-          </Link>
-        </Button>
+        <Link to="/cuenta/borrar" className="self-start text-sm text-destructive underline-offset-4 outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50">
+          Borrar mi cuenta
+        </Link>
       </main>
       {confirmDialog}
     </>
-  )
-}
-
-/** Claro, oscuro o automático. Radios nativos (ocultos) dentro de las tarjetas: teclado y lector de pantalla gratis. */
-function ThemePicker() {
-  const { preference, theme, setPreference } = useTheme()
-  return (
-    <Card className="gap-3 px-4 py-4">
-      <fieldset className="flex flex-col gap-3">
-        <legend className="mb-3 font-semibold">Apariencia</legend>
-        <div className="grid grid-cols-3 gap-2">
-          {THEME_OPTIONS.map(({ value, label, Icon }) => (
-            <label
-              key={value}
-              className={cn(
-                'flex min-h-20 cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border-2 text-sm font-medium transition-colors',
-                'has-focus-visible:ring-[3px] has-focus-visible:ring-ring/50',
-                preference === value ? 'border-primary bg-secondary text-secondary-foreground' : 'border-border text-muted-foreground hover:bg-muted',
-              )}
-            >
-              <input type="radio" name="theme" value={value} checked={preference === value} onChange={() => setPreference(value)} className="sr-only" />
-              <Icon className="size-5" aria-hidden="true" />
-              {label}
-            </label>
-          ))}
-        </div>
-      </fieldset>
-      <p className="text-xs text-muted-foreground">
-        {preference === 'system'
-          ? `Como tu dispositivo (ahora, ${theme === 'dark' ? 'oscuro' : 'claro'}).`
-          : 'Se guarda en este dispositivo.'}
-      </p>
-    </Card>
   )
 }

@@ -26,21 +26,21 @@ export function JoinPage() {
   }, [code, navigate])
 
   return (
-    <main className="mx-auto grid min-h-dvh w-full max-w-md place-items-center p-4">
+    <main className="mx-auto w-full max-w-md px-4 pt-[max(2rem,env(safe-area-inset-top))]">
       {error ? (
         <EmptyState
-          icon={<UserRoundX className="size-7" />}
+          icon={<UserRoundX />}
           title="No se pudo unir a la lista"
           description={error}
           action={
-            <Button asChild size="lg">
+            <Button asChild>
               <Link to="/">Ir a mis listas</Link>
             </Button>
           }
         />
       ) : (
-        <div role="status" className="flex flex-col items-center gap-3 text-muted-foreground">
-          <LoaderCircle className="size-8 animate-spin text-primary" aria-hidden="true" />
+        <div role="status" className="flex items-center gap-2 text-sm text-muted-foreground">
+          <LoaderCircle className="size-5 animate-spin text-primary" aria-hidden="true" />
           Uniéndote a la lista…
         </div>
       )}
