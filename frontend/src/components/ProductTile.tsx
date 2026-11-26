@@ -40,7 +40,7 @@ export function ProductTile({ name, categoryName, tone, label, onClick, onLongPr
   const press = useLongPress(onLongPress)
 
   return (
-    <li className="relative" style={transitionName ? ({ viewTransitionName: transitionName } as CSSProperties) : undefined}>
+    <li className="relative min-w-0" style={transitionName ? ({ viewTransitionName: transitionName } as CSSProperties) : undefined}>
       <button
         type="button"
         aria-label={label}
@@ -51,16 +51,26 @@ export function ProductTile({ name, categoryName, tone, label, onClick, onLongPr
           onClick()
         }}
         {...press.handlers}
+        // Cuadrada, pero si el nombre no cabe la ficha CRECE hacia abajo. Truco: una rejilla de una
+        // sola celda con dos cosas encima una de otra (col/row-start-1): un hueco invisible cuadrado y
+        // el contenido. La celda mide lo que el más alto de los dos: como poco un cuadrado.
+        // grid-cols-1 = minmax(0, 1fr): la columna nunca pasa del ancho de la ficha (con "auto" mediría
+        // el texto en una sola línea y ensancharía la página). h-full: las demás fichas de la fila se
+        // estiran hasta la más alta y la rejilla sigue alineada.
         className={cn(
-          'flex aspect-square w-full flex-col items-center justify-center gap-1 rounded-lg px-1.5 pt-2 pb-2.5 text-center text-foreground outline-none select-none [-webkit-touch-callout:none]',
-          'transition-[background-color,transform] duration-150 active:scale-[0.96] focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+          'grid h-full w-full grid-cols-1 rounded-lg text-center text-foreground outline-none select-none [-webkit-touch-callout:none]',
+          'transition-[background-color,transform] duration-150 active:scale-96 focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
           'disabled:opacity-60',
           TONES[tone],
         )}
       >
-        <img src={productDrawing(name, categoryName)} alt="" decoding="async" draggable={false} className="pointer-events-none size-[52%] min-h-0" />
-        <span className="line-clamp-2 w-full text-sm leading-tight font-semibold break-words">{name}</span>
-        {note && <span className="-mt-0.5 w-full truncate text-xs opacity-85">{note}</span>}
+        <span className="col-start-1 row-start-1 aspect-square w-full" aria-hidden="true" />
+        <span className="col-start-1 row-start-1 flex min-w-0 flex-col items-center justify-center gap-1 px-1.5 pt-2 pb-2.5">
+          <img src={productDrawing(name, categoryName)} alt="" decoding="async" draggable={false} className="pointer-events-none aspect-square w-[52%] shrink-0" />
+          {/* El nombre siempre entero (nada de cortarlo con "…"); hyphens: parte las palabras largas por sílabas */}
+          <span className="w-full text-sm leading-tight font-semibold hyphens-auto break-words">{name}</span>
+          {note && <span className="-mt-0.5 line-clamp-2 w-full text-xs break-words opacity-85">{note}</span>}
+        </span>
       </button>
 
       {quantity > 1 && (

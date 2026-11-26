@@ -342,6 +342,8 @@ function ListPage({ listId }: { listId: string }) {
 
       <ProductSearch
         pendingOf={(productId) => pendingByProduct.get(productId)}
+        // Como el backend (findFirstCustom): mismo texto sin distinguir mayúsculas
+        pendingCustom={(name) => items.find((i) => i.productId === null && i.name.trim().toLowerCase() === name.trim().toLowerCase())}
         onAdd={(product) => add({ productId: product.id })}
         onTake={take}
         onAddCustom={(customName) => add({ customName })}

@@ -1,13 +1,16 @@
-import { PencilLine, Plus, Search, X } from 'lucide-react'
+import { Plus, Search, X } from 'lucide-react'
 import { useId, useState } from 'react'
 import type { Item, Product } from '@/api/types'
 import { ProductTile } from '@/components/ProductTile'
 import { Skeleton } from '@/components/ui/skeleton'
+import { normalize } from '@/products/drawings'
 import { useProductSearch } from '@/products/useProductSearch'
 
 type Props = {
-  /** El producto pendiente en la lista, si lo está */
+  /** El producto del catálogo pendiente en la lista, si lo está */
   pendingOf: (productId: number) => Item | undefined
+  /** El producto escrito a mano con ese nombre pendiente en la lista, si lo está */
+  pendingCustom: (name: string) => Item | undefined
   onAdd: (product: Product) => void
   onTake: (item: Item) => void
   /** Añadir lo escrito tal cual, aunque no esté en el catálogo */
@@ -17,9 +20,12 @@ type Props = {
 /**
  * Buscador fijo abajo, a mano del pulgar (encima de la barra de pestañas). Al escribir, los
  * resultados suben en fichas como las de la lista: teja si ya está (un toque lo quita), azul si no
- * (un toque lo añade). Tras elegir, el campo se vacía para apuntar lo siguiente.
+ * (un toque lo añade). Solo salen los productos cuyo nombre empieza por lo escrito; lo escrito tal
+ * cual es UNA FICHA MÁS al final (con su dibujo, adivinado por las palabras), que no sale si
+ * coincide exactamente con un producto. Si nada empieza así, solo se ve esa ficha.
+ * Tras elegir, el campo se vacía.
  */
-export function ProductSearch({ pendingOf, onAdd, onTake, onAddCustom }: Props) {
+export function ProductSearch({ pendingOf, pendingCustom, onAdd, onTake, onAddCustom }: Props) {
   const [query, setQuery] = useState('')
   const search = useProductSearch(query)
   const inputId = useId()
@@ -27,22 +33,66 @@ export function ProductSearch({ pendingOf, onAdd, onTake, onAddCustom }: Props) 
   const text = query.trim()
   const open = text.length > 0
 
+  // Comparar sin mayúsculas ni tildes: "platano" encuentra "Plátano"
+  const wanted = normalize(text)
+  const ready = search.status === 'done' || search.status === 'error'
+  // Solo lo que EMPIEZA por lo escrito ("leche" → "Leche entera"), y el singular de un plural
+  // ("tomates" → "Tomate"). Lo que solo lo contiene en medio ("avena" → "Bebida de avena"), lo
+  // que es más corto ("turrón de jijona" → "Turrón") o lo que se le parece (la búsqueda por
+  // similitud del backend) no se enseña: despista. Si no queda nada, solo se ve la ficha de
+  // apuntarlo tal cual.
+  const isSameName = (name: string) => wanted === name || wanted === `${name}s` || wanted === `${name}es`
+  // Para "empieza por", la ñ es una letra propia: si no, "pan" enseñaría "Pañales"
+  const strictWanted = withEnye(text)
+  const shown = search.products.filter((product) => {
+    return wanted.length > 0 && (withEnye(product.name).startsWith(strictWanted) || isSameName(normalize(product.name)))
+  })
+  // Exacto también en plural: con "tomates" ya está "Tomate", apuntarlo aparte sería repetirlo
+  const exact = shown.find((product) => isSameName(normalize(product.name)))
+  const showCustom = ready && wanted.length > 0 && !exact
+
   const done = () => setQuery('')
-  const addCustom = () => {
-    if (!text) return
-    onAddCustom(text)
+  const pick = (product: Product) => {
+    const pending = pendingOf(product.id)
+    if (pending) onTake(pending)
+    else onAdd(product)
     done()
   }
-  // Enter o "+": el primer resultado si lo hay; si no, lo escrito tal cual
-  const submit = () => {
-    if (!text) return
-    if (search.status === 'done' && search.products.length > 0) {
-      const first = search.products[0]
-      const pending = pendingOf(first.id)
-      if (!pending) onAdd(first)
-      done()
-    } else if (search.status !== 'loading') addCustom()
+  const pickCustom = () => {
+    const pending = pendingCustom(text)
+    if (pending) onTake(pending)
+    else onAddCustom(text)
+    done()
   }
+  // Enter o "+": lo que coincide exactamente; si no, la primera ficha que se ve
+  const submit = () => {
+    if (!text || search.status === 'loading') return
+    if (exact) {
+      if (!pendingOf(exact.id)) onAdd(exact)
+      done()
+    } else if (shown.length === 0) {
+      if (!pendingCustom(text)) onAddCustom(text)
+      done()
+    } else {
+      if (!pendingOf(shown[0].id)) onAdd(shown[0])
+      done()
+    }
+  }
+
+  const pendingText = showCustom ? pendingCustom(text) : undefined
+  const customTile = showCustom && (
+    <ProductTile
+      key="custom"
+      tone={pendingText ? 'need' : 'stock'}
+      // Si ya está apuntado, con el nombre guardado (no como se ha tecleado ahora)
+      name={pendingText?.name ?? text}
+      categoryName={pendingText?.categoryName ?? null}
+      note={pendingText ? null : 'Apuntar tal cual'}
+      quantity={pendingText?.quantity}
+      label={pendingText ? `${pendingText.name} ya está en la lista. Toca para quitarlo` : `Apuntar «${text}» tal cual, aunque no esté en el catálogo`}
+      onClick={pickCustom}
+    />
+  )
 
   return (
     <>
@@ -54,55 +104,36 @@ export function ProductSearch({ pendingOf, onAdd, onTake, onAddCustom }: Props) 
       <div className="bottom-above-tabbar fixed inset-x-0 z-30 lg:left-(--rail-width)" style={{ viewTransitionName: 'search-bar' }}>
         <div className="mx-auto w-full max-w-4xl rounded-t-2xl border-t bg-card shadow-float lg:mx-8 lg:w-auto xl:mx-auto">
           {open && (
-            <div id={resultsId} className="max-h-[min(30rem,55dvh)] overflow-y-auto overscroll-contain px-4 pt-4">
+            <div id={resultsId} className="max-h-[min(30rem,55dvh)] overflow-y-auto overscroll-contain px-4 pt-4 pb-1">
               {search.status === 'error' && <p className="pb-3 text-sm text-destructive">{search.error}</p>}
 
-              {search.status === 'loading' && search.products.length === 0 && (
+              {search.status === 'loading' && shown.length === 0 ? (
                 <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-4 lg:grid-cols-6" aria-hidden="true">
                   {[0, 1, 2].map((i) => (
                     <Skeleton key={i} className="aspect-square rounded-lg" />
                   ))}
                 </div>
-              )}
-
-              {search.status === 'done' && search.products.length === 0 && (
-                <p className="pb-1 text-sm text-muted-foreground">«{text}» no está en el catálogo, pero puedes apuntarlo tal cual.</p>
-              )}
-
-              {search.products.length > 0 && (
-                <ul className="grid grid-cols-3 gap-1.5 sm:grid-cols-4 lg:grid-cols-6">
-                  {search.products.map((product) => {
-                    const pending = pendingOf(product.id)
-                    return (
-                      <ProductTile
-                        key={product.id}
-                        tone={pending ? 'need' : 'stock'}
-                        name={product.name}
-                        categoryName={product.categoryName}
-                        quantity={pending?.quantity}
-                        label={pending ? `${product.name} ya está en la lista. Toca para quitarlo` : `Añadir ${product.name} a la lista`}
-                        onClick={() => {
-                          if (pending) onTake(pending)
-                          else onAdd(product)
-                          done()
-                        }}
-                      />
-                    )
-                  })}
-                </ul>
-              )}
-
-              {search.status !== 'loading' && (
-                <button
-                  type="button"
-                  onClick={addCustom}
-                  className="-mx-4 mt-2 flex min-h-13 w-[calc(100%+2rem)] items-center gap-3 border-t px-4 text-left outline-none transition-colors duration-150 hover:bg-muted focus-visible:bg-muted"
-                >
-                  <PencilLine className="chalk size-5 shrink-0 text-primary" aria-hidden="true" />
-                  <span className="min-w-0 flex-1 truncate">
-                    Apuntar «<span className="font-semibold">{text}</span>» tal cual
-                  </span>
-                </button>
+              ) : (
+                <>
+                  {showCustom && shown.length === 0 && <p className="pb-2 text-sm text-muted-foreground">No está en el catálogo: se apunta tal cual.</p>}
+                  <ul className="grid grid-cols-3 gap-1.5 sm:grid-cols-4 lg:grid-cols-6">
+                    {shown.map((product) => {
+                      const pending = pendingOf(product.id)
+                      return (
+                        <ProductTile
+                          key={product.id}
+                          tone={pending ? 'need' : 'stock'}
+                          name={product.name}
+                          categoryName={product.categoryName}
+                          quantity={pending?.quantity}
+                          label={pending ? `${product.name} ya está en la lista. Toca para quitarlo` : `Añadir ${product.name} a la lista`}
+                          onClick={() => pick(product)}
+                        />
+                      )
+                    })}
+                    {customTile}
+                  </ul>
+                </>
               )}
             </div>
           )}
@@ -110,7 +141,7 @@ export function ProductSearch({ pendingOf, onAdd, onTake, onAddCustom }: Props) 
           {/* aria-live: los lectores de pantalla anuncian el resultado de la búsqueda */}
           <p className="sr-only" aria-live="polite">
             {search.status === 'loading' && 'Buscando…'}
-            {search.status === 'done' && `${search.products.length} resultados`}
+            {search.status === 'done' && (shown.length > 0 ? `${shown.length} en el catálogo` : 'No está en el catálogo')}
           </p>
 
           <form
@@ -163,4 +194,9 @@ export function ProductSearch({ pendingOf, onAdd, onTake, onAddCustom }: Props) 
       </div>
     </>
   )
+}
+
+/** Como normalize (sin mayúsculas ni tildes) pero conservando la ñ: "Pañales" → "pañales", no "panales". */
+function withEnye(text: string): string {
+  return normalize(text.toLowerCase().replaceAll('ñ', 'nyy')).replaceAll('nyy', 'ñ')
 }

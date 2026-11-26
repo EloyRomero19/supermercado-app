@@ -93,8 +93,13 @@ docker compose -f docker-compose.prod.yml up -d --build   # producción (ver REA
   "Faltan N" + "En directo". Después: lo que falta (`items/ItemList`), «Otras veces» (`items/RecentItems`) y, al final, las
   secciones (`products/SectionLinks`, cada una abre `pages/CategoryPage` en `/listas/:listId/seccion/:categoryId`: todos sus
   productos de la A a la Z). Buscador FIJO abajo, encima de la barra de pestañas (`components/ProductSearch`: resultados en
-  fichas que suben; "+" o Enter añade el primer resultado o lo escrito tal cual).
-  Todo producto se ve como una FICHA cuadrada (`components/ProductTile`: dibujo + nombre + nota, cantidad en una esquina):
+  fichas que suben). SOLO se enseñan los productos cuyo nombre EMPIEZA por lo escrito (con la ñ como letra propia: "pan"
+  no enseña "Pañales"), más el singular de un plural ("tomates" → "Tomate"); nada de "lo contiene en medio" ni de la
+  similitud del backend: despistan. Lo escrito tal cual es UNA FICHA MÁS al final ("Apuntar tal cual"), oculta si
+  coincide con un producto (también en plural); si nada empieza así, es lo ÚNICO que sale. En teja si ya está apuntado.
+  "+" o Enter: la coincidencia exacta, si no la primera ficha que se ve.
+  Todo producto se ve como una FICHA cuadrada (`components/ProductTile`: dibujo + nombre + nota, cantidad en una esquina;
+  el nombre NUNCA se corta: la ficha crece hacia abajo, con un hueco cuadrado invisible en la misma celda de rejilla):
   teja (`bg-need`) = está en la lista, un toque lo QUITA (optimista, con "Deshacer"); azul pizarra (`bg-stock`) = se puede
   añadir, un toque lo añade. Mantener pulsado (o clic derecho, o el botón oculto que aparece con el foco del teclado) abre
   cantidad y nota. SIN carrito ni tachado: la lista es SOLO lo que falta; quitar = `DELETE` del item (no hay estado

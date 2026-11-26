@@ -8,8 +8,8 @@
  * Si ninguna encaja, el dibujo de su sección; si tampoco hay sección, una bolsa de la compra.
  */
 
-/** Minúsculas y sin tildes (como ProductService.normalize del backend). */
-function normalize(text: string): string {
+/** Minúsculas, sin tildes ni signos (como ProductService.normalize del backend). Sirve para comparar nombres. */
+export function normalize(text: string): string {
   return text
     .toLowerCase()
     .normalize('NFD')
