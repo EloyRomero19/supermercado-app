@@ -1,64 +1,54 @@
-import { ShoppingBasket } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
-import { ChalkStrike } from './ChalkStrike'
-import { ProductDrawing } from './ProductDrawing'
+import { prefersReducedMotion } from '@/lib/viewTransition'
+import { productDrawing } from '@/products/drawings'
 
 const DEMO_ITEMS = [
-  { name: 'Tomate', category: 'Frutas y verduras', note: 'Maduros, para ensalada', quantity: 4 },
-  { name: 'Leche entera', category: 'Lácteos y huevos', note: null, quantity: 6 },
-  { name: 'Pan de barra', category: 'Panadería y bollería', note: null, quantity: 1 },
+  { name: 'Pan de barra', category: 'Panadería y bollería' },
+  { name: 'Tomate', category: 'Frutas y verduras' },
+  { name: 'Leche entera', category: 'Lácteos y huevos' },
 ]
 
-/** Cuándo se tacha el primero tras abrir la página: lo justo para que se vea la lista quieta. */
-const STRIKE_MS = 1400
+/** Cuándo se coge el primero tras abrir la página: lo justo para que se vea la lista quieta. */
+const TAKE_MS = 1400
+/** Lo que tarda la ficha en irse (igual que la transición de CSS de abajo). */
+const LEAVE_MS = 220
 
-function reducedMotion() {
-  return window.matchMedia('(prefers-reduced-motion: reduce)').matches
-}
+type Phase = 'shown' | 'leaving' | 'gone'
 
 /**
- * Demostración de cómo funciona la app, en la pantalla de entrada: una pizarra pequeña en la que,
- * una sola vez, alguien coge los tomates y quedan tachados. Explica la idea sin texto de más a
- * quien llega nuevo. Decorativa (aria-hidden): el texto de al lado ya lo cuenta.
+ * Demostración de cómo funciona la app, en la pantalla de entrada: tres fichas de lo que falta y,
+ * una sola vez, alguien coge el pan y su ficha desaparece. Explica la idea sin texto de más a quien
+ * llega nuevo. Decorativa (aria-hidden): el texto de al lado ya lo cuenta.
  * Con "reducir movimiento" se ve directamente el resultado.
  */
 export function ListDemo({ className }: { className?: string }) {
-  const [struck, setStruck] = useState(reducedMotion)
+  const [phase, setPhase] = useState<Phase>(() => (prefersReducedMotion() ? 'gone' : 'shown'))
 
   useEffect(() => {
-    if (struck) return
-    const timer = window.setTimeout(() => setStruck(true), STRIKE_MS)
+    if (phase === 'gone') return
+    const timer = window.setTimeout(() => setPhase(phase === 'shown' ? 'leaving' : 'gone'), phase === 'shown' ? TAKE_MS : LEAVE_MS)
     return () => window.clearTimeout(timer)
-  }, [struck])
+  }, [phase])
+
+  const items = phase === 'gone' ? DEMO_ITEMS.slice(1) : DEMO_ITEMS
 
   return (
     <div className={cn('rounded-2xl border-2 border-border p-4', className)} aria-hidden="true">
-      <div className="mb-1 flex items-center justify-between">
-        <p className="chalk-title text-3xl tabular-nums">Faltan {struck ? 2 : 3}</p>
-        <span className="relative grid size-11 place-items-center">
-          <ShoppingBasket className="chalk size-7" strokeWidth={1.75} />
-          {struck && (
-            <span className="absolute top-0 -right-1 grid size-5.5 animate-bump place-items-center rounded-full bg-primary text-xs font-bold text-primary-foreground">1</span>
-          )}
-        </span>
-      </div>
-      <ul>
-        {DEMO_ITEMS.map((item, index) => {
-          const crossed = index === 0 && struck
-          return (
-            <li key={item.name} className="relative flex min-h-16 items-center gap-4 py-1.5">
-              <ProductDrawing name={item.name} categoryName={item.category} quantity={item.quantity} size="md" className={cn('transition-opacity duration-200', crossed && 'opacity-40')} />
-              <span className="flex min-w-0 flex-col">
-                <span className="relative max-w-full self-start">
-                  <span className={cn('block truncate text-lg font-semibold transition-opacity duration-200', crossed && 'opacity-50')}>{item.name}</span>
-                  {crossed && <ChalkStrike className="-left-1.5 w-[calc(100%+0.75rem)]" />}
-                </span>
-                {item.note && <span className={cn('truncate text-sm text-muted-foreground', crossed && 'opacity-50')}>{item.note}</span>}
-              </span>
-            </li>
-          )
-        })}
+      <p className="chalk-title mb-3 text-3xl tabular-nums">Faltan {phase === 'gone' ? 2 : 3}</p>
+      <ul className="grid grid-cols-3 gap-1.5">
+        {items.map((item, index) => (
+          <li
+            key={item.name}
+            className={cn(
+              'flex aspect-square flex-col items-center justify-center gap-1 rounded-lg bg-need px-1.5 text-center transition-[opacity,transform] duration-200',
+              index === 0 && phase === 'leaving' && 'scale-75 opacity-0',
+            )}
+          >
+            <img src={productDrawing(item.name, item.category)} alt="" draggable={false} className="size-[52%]" />
+            <span className="line-clamp-2 text-sm leading-tight font-semibold">{item.name}</span>
+          </li>
+        ))}
       </ul>
     </div>
   )

@@ -8,7 +8,7 @@ type Props = { title: string; subtitle: string; children: ReactNode; footer: Rea
 /**
  * Pantallas sin sesión (login y registro). Quien llega nuevo tiene que entender qué es esto antes
  * de dar su email: arriba (a la izquierda en escritorio) qué hace la app, con una pizarra de
- * ejemplo en la que se tachan los tomates; después, el formulario.
+ * ejemplo en la que alguien coge el pan y su ficha desaparece; después, el formulario.
  */
 export function AuthLayout({ title, subtitle, children, footer }: Props) {
   return (
@@ -23,7 +23,7 @@ export function AuthLayout({ title, subtitle, children, footer }: Props) {
             Lo que falta en casa, a un toque.
           </h1>
           <p className="mt-4 max-w-[34ch] text-pretty lg:text-lg">
-            Apúntalo en casa y táchalo en el súper. Los de casa lo ven al momento.
+            Apúntalo en casa y, en el súper, tócalo cuando lo cojas. Los de casa lo ven al momento.
           </p>
           <ListDemo className="mt-7" />
         </div>

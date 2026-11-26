@@ -83,21 +83,24 @@ docker compose -f docker-compose.prod.yml up -d --build   # producción (ver REA
   (`RecentItemRepository`). En el frontend, `applyListEvent` lo actualiza con cada producto nuevo que llega por SSE.
 - Navegación: las páginas con sesión cuelgan de `layout/AppLayout` (barra inferior `TabBar`: Listas, Recetas, Cuenta).
   Pestaña Listas (`/`, `HomePage`) = redirige a la lista principal (`pickListToShop`: la última abierta o la de más pendientes);
-  solo muestra contenido si no hay listas. Se cambia de lista con `lists/ListSwitcher` (el nombre de la lista con ▾ en la cabecera, DropdownMenu con
+  solo muestra contenido si no hay listas. Se cambia de lista con `lists/ListSwitcher` (píldora «Mis listas ▾» arriba a la izquierda, DropdownMenu con
   `modal={false}`), que también abre `NewListDialog`/`JoinListDialog`. `ListRoute` monta `ListPage` con `key={listId}`.
   Recetas (`pages/RecipesPage`, `RecipePage`): tablas `recipe`/`recipe_ingredient` (V7, ingredientes = productos del catálogo);
   muestra qué falta en la lista elegida (`recipes/missingIngredients`, por defecto `pickListToShop`) y lo añade con
   `POST /api/lists/{id}/items/bulk` (una transacción: todo o nada; "Deshacer" borra los nuevos y devuelve a su cantidad
-  los que el backend sumó a uno ya pendiente). Nuevas recetas = nueva migración. Pantalla de lista: cabecera fija (logo,
-  lista ▾, compartir con nº de miembros, cesta con contador, buscador con resultados desplegables); debajo, PRIMERO lo que
-  falta ("Faltan N" a tiza amarilla + "En directo", `ListStatus`) y después, para añadir más, las secciones
-  (`products/CategoryBrowser`) y "Otras veces habéis comprado" (`items/RecentItems`). Lista agrupada por sección
-  (`items/ItemList`): dibujo + nombre; un toque = TACHAR (raya de tiza `components/ChalkStrike`, que se dibuja al aparecer);
-  lo tachado se queda en su sitio hasta "Terminar la compra", y otro toque le quita la raya. Pista de primer uso
-  (`hint-cart-seen` en localStorage). En el buscador y las secciones, cada producto es una `products/ProductRow` con
-  "Añadir" → selector − 1 + (`QuantityStepper`, vía `CatalogActions`: añadir otra vez suma cantidad; "−" baja una o quita
-  el producto; mueve el foco al cambiar de estado). Lo tachado también se ve en `items/Cart` (`CartButton` en la cabecera
-  + `CartSheet` en el móvil; columna lateral `CartPanel` desde `xl`; "Terminar la compra" fijo abajo en el móvil).
+  los que el backend sumó a uno ya pendiente). Nuevas recetas = nueva migración. Pantalla de lista (`pages/ListPage`): arriba «Mis listas ▾» (`lists/ListSwitcher`, píldora)
+  y «Compartir» (QR, miembros, renombrar, salir/borrar); debajo el nombre a tiza, las iniciales de los miembros y
+  "Faltan N" + "En directo". Después: lo que falta (`items/ItemList`), «Otras veces» (`items/RecentItems`) y, al final, las
+  secciones (`products/SectionLinks`, cada una abre `pages/CategoryPage` en `/listas/:listId/seccion/:categoryId`: todos sus
+  productos de la A a la Z). Buscador FIJO abajo, encima de la barra de pestañas (`components/ProductSearch`: resultados en
+  fichas que suben; "+" o Enter añade el primer resultado o lo escrito tal cual).
+  Todo producto se ve como una FICHA cuadrada (`components/ProductTile`: dibujo + nombre + nota, cantidad en una esquina):
+  teja (`bg-need`) = está en la lista, un toque lo QUITA (optimista, con "Deshacer"); azul pizarra (`bg-stock`) = se puede
+  añadir, un toque lo añade. Mantener pulsado (o clic derecho, o el botón oculto que aparece con el foco del teclado) abre
+  cantidad y nota. SIN carrito ni tachado: la lista es SOLO lo que falta (los `checked` de versiones antiguas se ocultan;
+  el backend aún tiene `checked` y el borrado de marcados). Las fichas que cambian de sitio se animan con View Transitions
+  (`lib/viewTransition.ts`: mismo `view-transition-name` en «Otras veces» y en lo que falta, así la ficha viaja); el buscador
+  y la `TabBar` llevan nombre propio para quedar por encima durante la transición.
   No hay precios, ofertas, stock ni checkout: la API no los tiene y no se inventan.
 - Diseño ("la pizarra de la cocina"): Tailwind 4 + shadcn/ui. Tokens (colores OKLCH con contraste AA comprobado, radios,
   fuentes, sombras, animaciones) SOLO en `src/index.css`; los componentes usan clases (`bg-primary`, `text-title`,
@@ -105,24 +108,24 @@ docker compose -f docker-compose.prod.yml up -d --build   # producción (ver REA
   `<html data-theme="dark">` fijo (así se aplican las clases `dark:` de shadcn) y no hay selector de tema.
   Cada tiza tiene un significado fijo: blanca = contenido; amarilla (`title`, utilidad `chalk-title`) = títulos;
   azul (`section`, utilidad `section-title` con subrayado de tiza) = secciones y etiquetas; verde (`primary`) = lo que se
-  toca y lo hecho (botones, raya al tachar, contador de la cesta); roja (`destructive`) = borrar/errores; salvia
+  toca (botones, el "+" de añadir); roja (`destructive`) = borrar/errores; fichas teja (`need`) = lo que falta y azul pizarra (`stock`) = lo que se puede añadir; salvia
   (`muted-foreground`) = lo secundario. Fuentes: Cabin Sketch SOLO en títulos (`font-chalk`) y Atkinson Hyperlegible Next
   para todo lo demás (escala 13/15/17/20/28/44 px; pesos 400/600/700). Filtro SVG `#chalk` (definido una vez en
   `index.html`, utilidad `chalk`) para iconos y rayas; polvo de tiza en el fondo del `body`.
   Radios: paneles y campos 10px, paneles que suben 20px, botones en píldora (`rounded-full`). Sombra (`shadow-float`)
   solo en lo que flota. Listas con filetes (`divide-y`) mejor que tarjetas; todo alineado a la izquierda.
   CERO emojis en la interfaz: los `icon`/`emoji` que manda la API no se pintan. Cada producto lleva un DIBUJO de tiza
-  (`components/ProductDrawing`, sin ficha detrás): SVG en `public/dibujos`, todos con el mismo estilo (trazo de tiza
+  (`components/ProductDrawing` sueltos, o dentro de una `ProductTile`): SVG en `public/dibujos`, todos con el mismo estilo (trazo de tiza
   blanca de 2,6 px, sin rellenos, filtro de tiza dentro de cada SVG), generados por `frontend/scripts/dibujos/generar.py`
   (envases a partir de plantillas: botella, bote, lata, bolsa, brick…). Qué dibujo toca lo decide `products/drawings.ts`
   por palabras del nombre (reglas de lo concreto a lo general, plurales en español; sirve para lo escrito a mano); si no
   encaja, el de su sección; si no, una bolsa. Producto nuevo en el catálogo = regla nueva (y dibujo si hace falta): el
   test `drawings.test.ts` exige dibujo propio para todo el catálogo. Recetas: sus ingredientes principales dibujados
   (`recipes/RecipeArt`, lista en `drawings.ts`).
-  Movimiento: solo el que responde a una acción (la raya que se dibuja con `animate-chalk-strike`, el contador que salta
+  Movimiento: solo el que responde a una acción (las fichas que viajan o se recolocan, el contador que salta
   con `animate-bump`, números con `animate-pop-in`, paneles que se abren) y UNA demostración en la entrada
   (`components/ListDemo`). Nada de animaciones de entrada por sección ni en bucle. Las de CSS las anula el bloque
-  `prefers-reduced-motion` de index.css.
+  `prefers-reduced-motion` de index.css; las de JS comprueban `prefersReducedMotion()`.
   Entrada (login/registro, `components/AuthLayout`): qué es la app + la demostración antes del formulario.
   Navegación: `TabBar` es barra inferior en el móvil y menú lateral (`--rail-width`) desde `lg`.
   Componentes shadcn en `src/components/ui/` (generados por la CLI y retocados: botones en píldora, `bg-overlay`, `shadow-float`;

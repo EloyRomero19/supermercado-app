@@ -19,8 +19,8 @@ import { NewListDialog } from './NewListDialog'
 type Props = { current: { id: string; name: string } }
 
 /**
- * Título de la lista que, al tocarlo, despliega "Mis listas" para cambiar a otra, crear una nueva
- * o unirse con un enlace. Así la pantalla principal muestra una sola lista sin perder las demás.
+ * Botón "Mis listas" (arriba a la izquierda): despliega tus listas para cambiar a otra, crear una
+ * nueva o unirse con un enlace. Así la pantalla principal muestra una sola lista sin perder las demás.
  */
 export function ListSwitcher({ current }: Props) {
   const navigate = useNavigate()
@@ -46,10 +46,9 @@ export function ListSwitcher({ current }: Props) {
     <>
       {/* modal={false}: si no, al pasar del menú a un modal Radix puede dejar la página sin clics */}
       <DropdownMenu modal={false} onOpenChange={(open) => open && load()}>
-        <DropdownMenuTrigger className="chalk-title flex h-12 max-w-full min-w-0 items-center gap-1.5 rounded-full px-2 text-left text-3xl outline-none transition-colors duration-150 hover:bg-foreground/5 focus-visible:ring-[3px] focus-visible:ring-ring/60">
-          <span className="sr-only">Mis listas: </span>
-          <span className="truncate">{current.name}</span>
-          <ChevronDown className="chalk size-5 shrink-0 text-title" strokeWidth={2.5} aria-hidden="true" />
+        <DropdownMenuTrigger className="flex h-11 shrink-0 items-center gap-1.5 rounded-full border-2 border-border pr-3 pl-4 font-semibold outline-none transition-colors duration-150 hover:bg-foreground/5 focus-visible:ring-[3px] focus-visible:ring-ring/60 data-[state=open]:bg-foreground/5">
+          Mis listas
+          <ChevronDown className="chalk size-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
         </DropdownMenuTrigger>
 
         <DropdownMenuContent align="start" sideOffset={6} className="w-[min(22rem,calc(100vw-2rem))] p-1.5">
@@ -99,7 +98,7 @@ export function ListSwitcher({ current }: Props) {
 
 function listStatus(list: ListSummary): string {
   const pending = list.itemCount - list.checkedCount
-  const status = list.itemCount === 0 ? 'Vacía' : pending === 0 ? 'Todo cogido' : `${pending} por comprar`
+  const status = list.itemCount === 0 ? 'Vacía' : pending === 0 ? 'No falta nada' : `Faltan ${pending}`
   const people = list.memberCount === 1 ? 'solo tú' : `${list.memberCount} personas`
   return `${status}, ${people}`
 }

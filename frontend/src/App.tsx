@@ -5,6 +5,7 @@ import { GuestOnly, RequireAuth } from './auth/RouteGuards'
 import { HomePage } from './pages/HomePage'
 import { JoinPage } from './pages/JoinPage'
 import { ListRoute } from './pages/ListPage'
+import { CategoryPage } from './pages/CategoryPage'
 import { LoginPage } from './pages/LoginPage'
 import { PrivacyPage } from './pages/PrivacyPage'
 import { RegisterPage } from './pages/RegisterPage'
@@ -26,6 +27,7 @@ function App() {
             <Route element={<AppLayout />}>
               <Route index element={<HomePage />} />
               <Route path="listas/:listId" element={<ListRoute />} />
+              <Route path="listas/:listId/seccion/:categoryId" element={<CategoryPage />} />
               <Route path="recetas" element={<RecipesPage />} />
               <Route path="recetas/:recipeId" element={<RecipePage />} />
               <Route path="cuenta" element={<AccountPage />} />

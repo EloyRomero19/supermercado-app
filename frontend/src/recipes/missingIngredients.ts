@@ -2,7 +2,7 @@ import type { Ingredient, Item } from '@/api/types'
 
 /**
  * Separa los ingredientes de una receta en los que ya están pendientes en la lista y los que
- * faltan. Lo que ya está en el carrito cuenta como "falta": hay que volver a comprarlo.
+ * faltan. Lo marcado como cogido (versiones antiguas de la app) cuenta como "falta".
  */
 export function splitIngredients(ingredients: Ingredient[], items: Item[]): { inList: Ingredient[]; missing: Ingredient[] } {
   const pending = new Set(items.filter((item) => !item.checked && item.productId !== null).map((item) => item.productId))

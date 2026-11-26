@@ -20,6 +20,8 @@ export function TabBar() {
   return (
     <nav
       aria-label="Navegación principal"
+      // Con nombre propio: queda por encima de las fichas que viajan (ver lib/viewTransition.ts)
+      style={{ viewTransitionName: 'tab-bar' }}
       className={cn(
         'fixed inset-x-0 bottom-0 z-40 border-t-2 bg-background pb-safe',
         'lg:inset-x-auto lg:top-0 lg:left-0 lg:w-(--rail-width) lg:border-t-0 lg:border-r-2 lg:px-4 lg:pt-5 lg:pb-4',

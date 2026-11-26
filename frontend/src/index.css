@@ -16,7 +16,7 @@
    - Blanca: el contenido (los productos, el texto).
    - Amarilla: los títulos (la lista, "Faltan 6", la cabecera de cada pantalla).
    - Azul: los nombres de sección y las etiquetas de los campos.
-   - Verde: lo que haces y lo hecho (botones, la raya al tachar, la cuenta de la cesta).
+   - Verde: lo que haces (botones, el "+" de añadir).
    - Roja: borrar y errores.
    - Salvia: lo secundario (notas, quién lo añadió, ayudas).
    ========================================================================= */
@@ -46,6 +46,15 @@
   --accent-foreground: oklch(0.951 0.011 95.2);
   /* El foco del teclado, en amarillo: se ve siempre sobre la pizarra */
   --ring: oklch(0.866 0.112 94);
+
+  /* Las fichas de productos (dibujo de tiza blanca encima: contraste comprobado con la tiza blanca):
+     - Teja: lo que FALTA (está en la lista). Un toque y desaparece. 4,6:1
+     - Azul pizarra: lo que se puede añadir (otras veces, el catálogo, el buscador). 6,1:1
+     Al pasar el ratón se oscurecen (oscurecer sube el contraste del texto; aclarar lo bajaría). */
+  --need: oklch(0.543 0.141 29.9); /* #b3493b */
+  --need-hover: oklch(0.5 0.13 29.9);
+  --stock: oklch(0.47 0.045 222); /* #41626f */
+  --stock-hover: oklch(0.43 0.045 222);
 
   /* Las tizas de colores con significado (ver arriba) */
   --title: oklch(0.866 0.112 94); /* #ebd27a amarilla: 9,1:1 */
@@ -116,6 +125,10 @@
   --color-destructive-foreground: var(--destructive-foreground);
   --color-warning: var(--warning);
   --color-overlay: var(--overlay);
+  --color-need: var(--need);
+  --color-need-hover: var(--need-hover);
+  --color-stock: var(--stock);
+  --color-stock-hover: var(--stock-hover);
 
   --shadow-float: var(--shadow-float);
 
@@ -130,8 +143,6 @@
 
   --animate-bump: bump 320ms var(--ease-out);
   --animate-pop-in: pop-in 260ms var(--ease-out) both;
-  /* La raya de tiza al tachar: se "dibuja" de izquierda a derecha */
-  --animate-chalk-strike: chalk-strike 280ms var(--ease-out) both;
 }
 
 /* El contador de la cesta da un salto cuando cambia */
@@ -159,13 +170,17 @@
   }
 }
 
-@keyframes chalk-strike {
-  from {
-    clip-path: inset(0 100% 0 0);
-  }
-  to {
-    clip-path: inset(0 0 0 0);
-  }
+/* Fichas que cambian de sitio (lib/viewTransition.ts): al añadir algo de "Otras veces" la ficha
+   viaja a la rejilla de lo que falta; al quitar una, las demás se recolocan. La página entera no
+   se anima (root sin animación), solo las fichas. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+
+::view-transition-group(*) {
+  animation-duration: 240ms;
+  animation-timing-function: var(--ease-out);
 }
 
 /* Lo que va escrito a tiza (iconos, rayas, subrayados): trazo irregular y granulado. El filtro
