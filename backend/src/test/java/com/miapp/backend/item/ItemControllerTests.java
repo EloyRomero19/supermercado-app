@@ -70,8 +70,9 @@ class ItemControllerTests {
 			.andExpect(jsonPath("$.categoryName").value("Pescadería"))
 			.andExpect(jsonPath("$.quantity").value(2))
 			.andExpect(jsonPath("$.note").value("sin sal"))
-			.andExpect(jsonPath("$.checked").value(false))
-			.andExpect(jsonPath("$.addedByName").value("Test"));
+			.andExpect(jsonPath("$.addedByName").value("Test"))
+			// Sin carrito: ya no existe el estado "cogido"
+			.andExpect(jsonPath("$.checked").doesNotExist());
 	}
 
 	@Test
@@ -83,16 +84,6 @@ class ItemControllerTests {
 		add(ana, "{\"customName\": \"Pilas AA\"}");
 		add(ana, "{\"customName\": \"  pilas aa \"}").andExpect(jsonPath("$.quantity").value(2));
 
-		as(ana, get(items)).andExpect(jsonPath("$.length()").value(2));
-	}
-
-	@Test
-	void addingAProductThatIsAlreadyInTheCartCreatesANewOne() throws Exception {
-		long pan = productId("pan de barra");
-		String itemId = JsonPath.read(body(add(ana, "{\"productId\": %d}".formatted(pan))), "$.id");
-		update(ana, itemId, "{\"checked\": true}");
-
-		add(ana, "{\"productId\": %d}".formatted(pan)).andExpect(jsonPath("$.quantity").value(1));
 		as(ana, get(items)).andExpect(jsonPath("$.length()").value(2));
 	}
 
@@ -121,22 +112,6 @@ class ItemControllerTests {
 	}
 
 	@Test
-	void checkAndUncheck() throws Exception {
-		String itemId = JsonPath.read(body(add(ana, "{\"customName\": \"Pilas\"}")), "$.id");
-
-		update(beto, itemId, "{\"checked\": true}")
-			.andExpect(jsonPath("$.checked").value(true))
-			.andExpect(jsonPath("$.checkedAt").isNotEmpty());
-		// Marcar otra vez no cambia quién lo cogió
-		update(ana, itemId, "{\"checked\": true}").andExpect(jsonPath("$.checkedByName").value("Test"));
-
-		update(ana, itemId, "{\"checked\": false}")
-			.andExpect(jsonPath("$.checked").value(false))
-			.andExpect(jsonPath("$.checkedByName").value(nullValue()))
-			.andExpect(jsonPath("$.checkedAt").value(nullValue()));
-	}
-
-	@Test
 	void updateQuantityAndNote() throws Exception {
 		String itemId = JsonPath.read(body(add(ana, "{\"customName\": \"Pilas\", \"note\": \"AA\"}")), "$.id");
 
@@ -146,20 +121,18 @@ class ItemControllerTests {
 	}
 
 	@Test
-	void removeAndClearChecked() throws Exception {
+	void removeOneItem() throws Exception {
 		String a = JsonPath.read(body(add(ana, "{\"customName\": \"A\"}")), "$.id");
-		String b = JsonPath.read(body(add(ana, "{\"customName\": \"B\"}")), "$.id");
-		add(ana, "{\"customName\": \"C\"}");
-		update(ana, a, "{\"checked\": true}");
-		update(ana, b, "{\"checked\": true}");
+		add(ana, "{\"customName\": \"B\"}");
 
-		as(ana, delete(items).param("checked", "false")).andExpect(status().isBadRequest());
-		as(beto, delete(items).param("checked", "true")).andExpect(status().isNoContent());
-		as(ana, get(items)).andExpect(jsonPath("$[*].name").value(contains("C")));
+		// Lo quita cualquier miembro; la segunda vez ya no está
+		as(beto, delete(items + "/" + a)).andExpect(status().isNoContent());
+		as(ana, delete(items + "/" + a)).andExpect(status().isNotFound());
+		as(ana, get(items)).andExpect(jsonPath("$[*].name").value(contains("B")));
 
-		String c = JsonPath.read(body(as(ana, get(items))), "$[0].id");
-		as(ana, delete(items + "/" + c)).andExpect(status().isNoContent());
-		as(ana, delete(items + "/" + c)).andExpect(status().isNotFound());
+		// El borrado en bloque de lo "cogido" ya no existe: nada puede vaciar la lista de golpe
+		as(ana, delete(items).param("checked", "true")).andExpect(status().isMethodNotAllowed());
+		as(ana, get(items)).andExpect(jsonPath("$.length()").value(1));
 	}
 
 	@Test
@@ -181,7 +154,7 @@ class ItemControllerTests {
 
 		as(carla, get(items)).andExpect(status().isNotFound());
 		add(carla, "{\"customName\": \"Intruso\"}").andExpect(status().isNotFound());
-		update(carla, itemId, "{\"checked\": true}").andExpect(status().isNotFound());
+		update(carla, itemId, "{\"quantity\": 2}").andExpect(status().isNotFound());
 		as(carla, delete(items + "/" + itemId)).andExpect(status().isNotFound());
 	}
 
@@ -191,10 +164,10 @@ class ItemControllerTests {
 		String carlasList = JsonPath.read(body(as(carla, post("/api/lists"), "{\"name\": \"Mía\"}")), "$.id");
 
 		// Carla es miembro de SU lista, pero el item es de la de Ana: ataque IDOR
-		as(carla, patch("/api/lists/" + carlasList + "/items/" + itemId), "{\"checked\": true}")
+		as(carla, patch("/api/lists/" + carlasList + "/items/" + itemId), "{\"quantity\": 2}")
 			.andExpect(status().isNotFound());
 		as(carla, delete("/api/lists/" + carlasList + "/items/" + itemId)).andExpect(status().isNotFound());
-		as(ana, get(items)).andExpect(jsonPath("$[0].checked").value(false));
+		as(ana, get(items)).andExpect(jsonPath("$[0].quantity").value(1));
 	}
 
 	@Test

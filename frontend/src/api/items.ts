@@ -5,7 +5,7 @@ const itemsUrl = (listId: string) => `/api/lists/${listId}/items`
 
 /** Del catálogo (productId) o texto libre (customName); cantidad y nota opcionales (el backend ya las acepta). */
 export type NewItem = ({ productId: number } | { customName: string }) & { quantity?: number; note?: string }
-export type ItemChanges = Partial<{ checked: boolean; quantity: number; note: string }>
+export type ItemChanges = Partial<{ quantity: number; note: string }>
 
 export const getItems = (listId: string) => api<Item[]>(itemsUrl(listId))
 
@@ -22,6 +22,3 @@ export const updateItem = (listId: string, itemId: string, changes: ItemChanges)
 
 export const deleteItem = (listId: string, itemId: string) =>
   api<void>(`${itemsUrl(listId)}/${itemId}`, { method: 'DELETE' })
-
-export const clearCheckedItems = (listId: string) =>
-  api<void>(`${itemsUrl(listId)}?checked=true`, { method: 'DELETE' })

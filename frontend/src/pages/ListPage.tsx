@@ -148,10 +148,7 @@ function ListPage({ listId }: { listId: string }) {
     )
   }
 
-  const { list, items: allItems, recent } = state
-  // Sin carrito: la lista es SOLO lo que falta. (Lo marcado como cogido con versiones anteriores
-  // de la app no se muestra.)
-  const items = allItems.filter((item) => !item.checked)
+  const { list, items, recent } = state
   const isOwner = list.myRole === 'OWNER'
   const others = list.members.filter((member) => member.userId !== user?.id)
 

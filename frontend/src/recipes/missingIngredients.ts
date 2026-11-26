@@ -1,11 +1,8 @@
 import type { Ingredient, Item } from '@/api/types'
 
-/**
- * Separa los ingredientes de una receta en los que ya están pendientes en la lista y los que
- * faltan. Lo marcado como cogido (versiones antiguas de la app) cuenta como "falta".
- */
+/** Separa los ingredientes de una receta en los que ya están en la lista y los que faltan. */
 export function splitIngredients(ingredients: Ingredient[], items: Item[]): { inList: Ingredient[]; missing: Ingredient[] } {
-  const pending = new Set(items.filter((item) => !item.checked && item.productId !== null).map((item) => item.productId))
+  const pending = new Set(items.filter((item) => item.productId !== null).map((item) => item.productId))
   return {
     inList: ingredients.filter((ingredient) => pending.has(ingredient.productId)),
     missing: ingredients.filter((ingredient) => !pending.has(ingredient.productId)),

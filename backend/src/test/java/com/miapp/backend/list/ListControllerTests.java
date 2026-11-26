@@ -187,16 +187,16 @@ class ListControllerTests {
 	}
 
 	@Test
-	void myListsShowShoppingProgress() throws Exception {
+	void myListsShowWhatIsMissing() throws Exception {
 		String id = (String) createList(ana, "Casa").get("id");
 		String items = "/api/lists/" + id + "/items";
 		String first = JsonPath.read(body(as(ana, post(items), "{\"customName\": \"A\"}")), "$.id");
 		as(ana, post(items), "{\"customName\": \"B\"}");
-		as(ana, patch(items + "/" + first), "{\"checked\": true}");
+		as(ana, delete(items + "/" + first));
 
 		as(ana, get("/api/lists"))
-			.andExpect(jsonPath("$[0].itemCount").value(2))
-			.andExpect(jsonPath("$[0].checkedCount").value(1));
+			.andExpect(jsonPath("$[0].itemCount").value(1))
+			.andExpect(jsonPath("$[0].checkedCount").doesNotExist());
 	}
 
 	@Test

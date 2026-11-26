@@ -31,7 +31,6 @@ final class ItemRequests {
 
 	/** PATCH: solo se cambian los campos que vienen (null = no tocar). Nota vacía = quitar la nota. */
 	record Update(
-			Boolean checked,
 			@Min(value = 1, message = "La cantidad mínima es 1")
 			@Max(value = ListItem.MAX_QUANTITY, message = "La cantidad máxima es 999") Integer quantity,
 			@Size(max = 200, message = "La nota no puede superar 200 caracteres") String note) {

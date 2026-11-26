@@ -17,9 +17,6 @@ public record ItemDto(
 		Short categoryOrder,
 		short quantity,
 		String note,
-		boolean checked,
-		String checkedByName,
-		Instant checkedAt,
 		String addedByName,
 		Instant createdAt) {
 
@@ -28,16 +25,16 @@ public record ItemDto(
 		if (product != null) {
 			var category = product.getCategory();
 			return new ItemDto(item.getId(), product.getId(), product.getName(), product.getIcon(), category.getId(),
-					category.getName(), category.getSortOrder(), item.getQuantity(), item.getNote(), item.isChecked(),
-					nameOf(item.getCheckedBy()), item.getCheckedAt(), nameOf(item.getAddedBy()), item.getCreatedAt());
+					category.getName(), category.getSortOrder(), item.getQuantity(), item.getNote(),
+					nameOf(item.getAddedBy()), item.getCreatedAt());
 		}
 		// Escrito a mano: el icono y la sección se deducen del texto (y se recalculan en cada lectura,
 		// así las mejoras del diccionario se aplican también a los productos ya añadidos)
 		var guess = customIcons.guess(item.getCustomName()).orElse(null);
 		return new ItemDto(item.getId(), null, item.getCustomName(), guess != null ? guess.icon() : null,
 				guess != null ? guess.categoryId() : null, guess != null ? guess.categoryName() : null,
-				guess != null ? guess.categoryOrder() : null, item.getQuantity(), item.getNote(), item.isChecked(),
-				nameOf(item.getCheckedBy()), item.getCheckedAt(), nameOf(item.getAddedBy()), item.getCreatedAt());
+				guess != null ? guess.categoryOrder() : null, item.getQuantity(), item.getNote(),
+				nameOf(item.getAddedBy()), item.getCreatedAt());
 	}
 
 	private static String nameOf(AppUser user) {

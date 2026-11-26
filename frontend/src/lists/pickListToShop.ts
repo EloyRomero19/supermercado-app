@@ -8,6 +8,5 @@ import type { ListSummary } from '../api/types'
 export function pickListToShop(lists: ListSummary[], lastListId: string | null): ListSummary | null {
   const last = lists.find((list) => list.id === lastListId)
   if (last) return last
-  const pending = (list: ListSummary) => list.itemCount - list.checkedCount
-  return [...lists].sort((a, b) => pending(b) - pending(a))[0] ?? null
+  return [...lists].sort((a, b) => b.itemCount - a.itemCount)[0] ?? null
 }

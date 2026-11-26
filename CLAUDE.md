@@ -4,7 +4,7 @@ PWA para gestionar listas de la compra compartidas entre varios usuarios:
 1. Login con email/contraseña (JWT). Sin login con Google (quitado en V8) ni recuperación de contraseña por email (quitada en V9).
 2. Buscador de productos (catálogo propio + productos de texto libre).
 3. Varias listas por usuario, compartidas mediante código de invitación (roles `OWNER` / `MEMBER`).
-4. Marcar productos como cogidos en tiempo real (SSE).
+4. Quitar de la lista lo que ya se tiene, en tiempo real (SSE). Sin carrito: la lista es solo lo que falta (V10 quitó el estado "cogido").
 
 ## Modo de trabajo (importante)
 - El usuario está **aprendiendo**. Claude escribe el código y **explica el porqué** de cada pieza.
@@ -61,7 +61,7 @@ docker compose -f docker-compose.prod.yml up -d --build   # producción (ver REA
 - Autorización de listas SIEMPRE con `ListAccessService.requireMember/requireOwner` (404 a no-miembros, 403 a miembros sin permiso).
 - Entidades con clave asignada por nosotros (p. ej. `ListMember`) implementan `Persistable` para que `save()` haga INSERT y no merge.
 - Items siempre por `(listId, itemId)` (`findByIdAndListId`) para evitar IDOR. `ListItem` usa `@Version` (409 si hay edición concurrente).
-- FKs cuyo nombre no sigue la convención JPA `<campo>_id` necesitan `@JoinColumn(name = ...)` (p. ej. `checked_by`, `added_by`).
+- FKs cuyo nombre no sigue la convención JPA `<campo>_id` necesitan `@JoinColumn(name = ...)` (p. ej. `added_by`).
 - Tiempo real: los servicios publican `common.ListEvent` (tipos en sus constantes) con `ApplicationEventPublisher`;
   `realtime.ListEventBroadcaster` los envía por SSE con `@TransactionalEventListener(AFTER_COMMIT)`.
   Las conexiones viven en memoria (`ListSubscriptions`): con varias instancias habría que usar p. ej. LISTEN/NOTIFY.
@@ -97,8 +97,8 @@ docker compose -f docker-compose.prod.yml up -d --build   # producción (ver REA
   Todo producto se ve como una FICHA cuadrada (`components/ProductTile`: dibujo + nombre + nota, cantidad en una esquina):
   teja (`bg-need`) = está en la lista, un toque lo QUITA (optimista, con "Deshacer"); azul pizarra (`bg-stock`) = se puede
   añadir, un toque lo añade. Mantener pulsado (o clic derecho, o el botón oculto que aparece con el foco del teclado) abre
-  cantidad y nota. SIN carrito ni tachado: la lista es SOLO lo que falta (los `checked` de versiones antiguas se ocultan;
-  el backend aún tiene `checked` y el borrado de marcados). Las fichas que cambian de sitio se animan con View Transitions
+  cantidad y nota. SIN carrito ni tachado: la lista es SOLO lo que falta; quitar = `DELETE` del item (no hay estado
+  "cogido": V10 borró `checked`/`checked_by`/`checked_at`; `itemCount` de `ListSummary` = lo que falta). Las fichas que cambian de sitio se animan con View Transitions
   (`lib/viewTransition.ts`: mismo `view-transition-name` en «Otras veces» y en lo que falta, así la ficha viaja); el buscador
   y la `TabBar` llevan nombre propio para quedar por encima durante la transición.
   No hay precios, ofertas, stock ni checkout: la API no los tiene y no se inventan.

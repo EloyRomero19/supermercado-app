@@ -72,25 +72,13 @@ class ListEventsTests {
 
 		String item = body(as(ana, post(items()), "{\"customName\": \"Pilas\"}"));
 		String itemId = JsonPath.read(item, "$.id");
-		assertThat(stream(betoStream)).contains("event:item-saved", "\"name\":\"Pilas\"", "\"checked\":false");
+		assertThat(stream(betoStream)).contains("event:item-saved", "\"name\":\"Pilas\"", "\"quantity\":1");
 
-		as(ana, patch(items() + "/" + itemId), "{\"checked\": true}");
-		assertThat(stream(betoStream)).contains("\"checked\":true");
+		as(ana, patch(items() + "/" + itemId), "{\"quantity\": 3}");
+		assertThat(stream(betoStream)).contains("\"quantity\":3");
 
 		as(ana, delete(items() + "/" + itemId));
 		assertThat(stream(betoStream)).contains("event:items-deleted", itemId);
-	}
-
-	@Test
-	void clearingTheCartSendsTheDeletedIds() throws Exception {
-		String checked = JsonPath.read(body(as(ana, post(items()), "{\"customName\": \"A\"}")), "$.id");
-		String pending = JsonPath.read(body(as(ana, post(items()), "{\"customName\": \"B\"}")), "$.id");
-		as(ana, patch(items() + "/" + checked), "{\"checked\": true}");
-		MvcResult betoStream = subscribe(beto);
-
-		as(ana, delete(items()).param("checked", "true"));
-
-		assertThat(stream(betoStream)).contains("event:items-deleted", checked).doesNotContain(pending);
 	}
 
 	@Test

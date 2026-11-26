@@ -14,8 +14,7 @@ interface ListMemberRepository extends JpaRepository<ListMember, ListMemberId> {
 	@Query("""
 			select new com.miapp.backend.list.ListSummary(l.id, l.name, me.role,
 				(select count(m) from ListMember m where m.list = l),
-				(select count(i) from ListItem i where i.list = l),
-				(select count(i) from ListItem i where i.list = l and i.checked = true))
+				(select count(i) from ListItem i where i.list = l))
 			from ListMember me join me.list l
 			where me.user.id = :userId
 			order by l.createdAt desc

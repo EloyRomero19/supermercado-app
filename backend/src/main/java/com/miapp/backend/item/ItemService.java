@@ -48,7 +48,7 @@ public class ItemService {
 		return items.findAllForList(listId).stream().map(item -> ItemDto.from(item, customIcons)).sorted(STORE_ORDER).toList();
 	}
 
-	/** Si ya hay uno igual pendiente de coger, suma la cantidad en vez de duplicarlo. */
+	/** Si ya está en la lista, suma la cantidad en vez de duplicarlo. */
 	@Transactional
 	public ItemDto add(UUID listId, UUID userId, ItemRequests.Add request) {
 		ListMember me = access.requireMember(listId, userId);
@@ -64,10 +64,10 @@ public class ItemService {
 		if (request.productId() != null) {
 			product = products.findById(request.productId())
 				.orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "Ese producto no existe en el catálogo"));
-			existing = items.findFirstByListIdAndProductIdAndCheckedFalse(listId, product.getId());
+			existing = items.findFirstByListIdAndProductId(listId, product.getId());
 		}
 		else {
-			existing = items.findUncheckedCustom(listId, customName);
+			existing = items.findFirstCustom(listId, customName);
 		}
 		// Ya validado: queda en "utilizados recientemente" aunque luego se quite de la lista
 		if (product != null) {
@@ -91,7 +91,7 @@ public class ItemService {
 
 	/**
 	 * Añade varios productos en UNA transacción: si uno falla (p. ej. un producto que no existe),
-	 * no se añade ninguno. Cada uno se comporta como add() (suma cantidad si ya estaba pendiente).
+	 * no se añade ninguno. Cada uno se comporta como add() (suma cantidad si ya estaba en la lista).
 	 */
 	@Transactional
 	public List<ItemDto> addAll(UUID listId, UUID userId, List<ItemRequests.Add> requests) {
@@ -116,16 +116,8 @@ public class ItemService {
 
 	@Transactional
 	public ItemDto update(UUID listId, UUID itemId, UUID userId, ItemRequests.Update request) {
-		ListMember me = access.requireMember(listId, userId);
+		access.requireMember(listId, userId);
 		ListItem item = findItem(listId, itemId);
-		if (request.checked() != null) {
-			if (request.checked()) {
-				item.check(me.getUser());
-			}
-			else {
-				item.uncheck();
-			}
-		}
 		if (request.quantity() != null) {
 			item.setQuantity(request.quantity().shortValue());
 		}
@@ -140,19 +132,6 @@ public class ItemService {
 		access.requireMember(listId, userId);
 		items.delete(findItem(listId, itemId));
 		events.publishEvent(ListEvent.of(listId, ListEvent.ITEMS_DELETED, Map.of("ids", List.of(itemId))));
-	}
-
-	/**
-	 * "Vaciar el carro": borra los ya cogidos. Se avisa con los ids concretos borrados (no
-	 * "borrad los marcados"): si alguien marcó otro justo después, ese sigue en la lista.
-	 */
-	@Transactional
-	public void clearChecked(UUID listId, UUID userId) {
-		access.requireMember(listId, userId);
-		List<UUID> deleted = items.deleteCheckedReturningIds(listId);
-		if (!deleted.isEmpty()) {
-			events.publishEvent(ListEvent.of(listId, ListEvent.ITEMS_DELETED, Map.of("ids", deleted)));
-		}
 	}
 
 	private ItemDto saved(UUID listId, ListItem item) {

@@ -97,8 +97,7 @@ export function ListSwitcher({ current }: Props) {
 }
 
 function listStatus(list: ListSummary): string {
-  const pending = list.itemCount - list.checkedCount
-  const status = list.itemCount === 0 ? 'Vacía' : pending === 0 ? 'No falta nada' : `Faltan ${pending}`
+  const status = list.itemCount === 0 ? 'No falta nada' : `Falta${list.itemCount === 1 ? '' : 'n'} ${list.itemCount}`
   const people = list.memberCount === 1 ? 'solo tú' : `${list.memberCount} personas`
   return `${status}, ${people}`
 }

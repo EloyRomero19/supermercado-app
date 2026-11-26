@@ -1,5 +1,6 @@
 package com.miapp.backend;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.Test;
@@ -31,6 +32,17 @@ class MigrationsTests {
 				"insert into app_user (email, display_name, password_hash) values ('ANA@mail.com', 'Ana 2', 'x')"))
 			.isInstanceOf(DataIntegrityViolationException.class)
 			.hasMessageContaining("app_user_email_lower_uk");
+	}
+
+	/** V10: sin carrito, list_item ya no guarda si algo está "cogido". */
+	@Test
+	void listItemsHaveNoCheckedState() {
+		Integer columns = jdbc.queryForObject("""
+				select count(*) from information_schema.columns
+				where table_name = 'list_item' and column_name like 'checked%'
+				""", Integer.class);
+
+		assertThat(columns).isZero();
 	}
 
 }

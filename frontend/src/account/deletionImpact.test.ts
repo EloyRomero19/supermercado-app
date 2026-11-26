@@ -8,7 +8,6 @@ const list = (name: string, myRole: ListSummary['myRole'], memberCount: number):
   myRole,
   memberCount,
   itemCount: 0,
-  checkedCount: 0,
 })
 
 describe('deletionImpact', () => {

@@ -11,12 +11,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.miapp.backend.auth.CurrentUserId;
-import com.miapp.backend.common.ApiException;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -56,16 +54,6 @@ class ItemController {
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	void remove(@CurrentUserId UUID userId, @PathVariable UUID listId, @PathVariable UUID itemId) {
 		itemService.remove(listId, itemId, userId);
-	}
-
-	/** DELETE /items?checked=true. Exigir el parámetro evita vaciar la lista entera por error. */
-	@DeleteMapping
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	void clearChecked(@CurrentUserId UUID userId, @PathVariable UUID listId, @RequestParam boolean checked) {
-		if (!checked) {
-			throw new ApiException(HttpStatus.BAD_REQUEST, "Solo se pueden borrar en bloque los productos ya cogidos");
-		}
-		itemService.clearChecked(listId, userId);
 	}
 
 }

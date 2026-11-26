@@ -3,7 +3,6 @@ package com.miapp.backend.item;
 import static org.hamcrest.Matchers.contains;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -69,8 +68,7 @@ class RecentItemsTests {
 	void staysAfterRemovingFromTheList() throws Exception {
 		String bought = JsonPath.read(body(add("{\"customName\": \"Velas\"}")), "$.id");
 		String removed = JsonPath.read(body(add("{\"productId\": %d}".formatted(productId("salmon")))), "$.id");
-		as(patch(items + "/" + bought), "{\"checked\": true}");
-		as(delete(items).param("checked", "true"));
+		as(delete(items + "/" + bought));
 		as(delete(items + "/" + removed));
 
 		as(get(items)).andExpect(jsonPath("$.length()").value(0));

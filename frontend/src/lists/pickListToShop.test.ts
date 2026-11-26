@@ -2,12 +2,12 @@ import { describe, expect, it } from 'vitest'
 import type { ListSummary } from '../api/types'
 import { pickListToShop } from './pickListToShop'
 
-const list = (id: string, itemCount: number, checkedCount = 0): ListSummary => ({
-  id, name: id, myRole: 'OWNER', memberCount: 1, itemCount, checkedCount,
+const list = (id: string, itemCount: number): ListSummary => ({
+  id, name: id, myRole: 'OWNER', memberCount: 1, itemCount,
 })
 
 describe('pickListToShop', () => {
-  const lists = [list('casa', 3), list('playa', 10, 2), list('vacia', 0)]
+  const lists = [list('casa', 3), list('playa', 8), list('vacia', 0)]
 
   it('abre la última lista usada si sigue siendo nuestra', () => {
     expect(pickListToShop(lists, 'casa')?.id).toBe('casa')

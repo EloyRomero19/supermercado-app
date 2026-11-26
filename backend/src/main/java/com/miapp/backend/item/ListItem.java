@@ -48,15 +48,7 @@ public class ListItem {
 	@Setter
 	private String note;
 
-	private boolean checked;
-
-	// Por convención JPA buscaría "checked_by_id"; la columna se llama "checked_by"
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "checked_by")
-	private AppUser checkedBy;
-
-	private Instant checkedAt;
-
+	// Por convención JPA buscaría "added_by_id"; la columna se llama "added_by"
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "added_by")
 	private AppUser addedBy;
@@ -82,21 +74,6 @@ public class ListItem {
 		this.quantity = quantity;
 		this.note = note;
 		this.addedBy = addedBy;
-	}
-
-	/** Idempotente: marcar dos veces conserva quién y cuándo lo marcó primero. */
-	void check(AppUser by) {
-		if (!checked) {
-			checked = true;
-			checkedBy = by;
-			checkedAt = Instant.now();
-		}
-	}
-
-	void uncheck() {
-		checked = false;
-		checkedBy = null;
-		checkedAt = null;
 	}
 
 	/** Al volver a añadir algo que ya está pendiente, se suman las cantidades (con tope). */

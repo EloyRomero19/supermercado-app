@@ -6,10 +6,10 @@ const ana: Member = { userId: 'ana', displayName: 'Ana', role: 'OWNER' }
 const beto: Member = { userId: 'beto', displayName: 'Beto', role: 'MEMBER' }
 const list: ListDetail = { id: 'l1', name: 'Casa', inviteCode: 'ABCD2345', myRole: 'MEMBER', members: [ana, beto] }
 
-function item(id: string, name: string, checked = false): Item {
+function item(id: string, name: string, quantity = 1): Item {
   return {
-    id, productId: null, name, icon: null, categoryId: null, categoryName: null, categoryOrder: null, quantity: 1, note: null,
-    checked, checkedByName: null, checkedAt: null, addedByName: null, createdAt: '',
+    id, productId: null, name, icon: null, categoryId: null, categoryName: null, categoryOrder: null, quantity, note: null,
+    addedByName: null, createdAt: '',
   }
 }
 
@@ -21,9 +21,9 @@ describe('applyListEvent', () => {
     const added = viewOf(applyListEvent(view, 'item-saved', item('3', 'Azúcar'), 'beto'))
     expect(added?.items.map((i) => i.name)).toEqual(['Azúcar', 'Pilas', 'Velas'])
 
-    const checked = viewOf(applyListEvent(view, 'item-saved', item('1', 'Pilas', true), 'beto'))
-    expect(checked?.items).toHaveLength(2)
-    expect(checked?.items.find((i) => i.id === '1')?.checked).toBe(true)
+    const more = viewOf(applyListEvent(view, 'item-saved', item('1', 'Pilas', 3), 'beto'))
+    expect(more?.items).toHaveLength(2)
+    expect(more?.items.find((i) => i.id === '1')?.quantity).toBe(3)
   })
 
   it('aplicar dos veces el mismo evento no duplica nada', () => {
@@ -61,14 +61,14 @@ describe('applyListEvent', () => {
     expect(viewOf(applyListEvent(view, 'algo-nuevo', {}, 'beto'))).toBe(view)
   })
 
-  it('lo que se añade pasa a "recientes" el primero y sin duplicados; los cambios de estado no', () => {
+  it('lo que se añade pasa a "recientes" el primero y sin duplicados; los cambios de cantidad no', () => {
     const added = viewOf(applyListEvent(view, 'item-saved', item('3', 'Azúcar'), 'beto'))!
     expect(added.recent.map((r) => r.name)).toEqual(['Azúcar'])
 
     const again = viewOf(applyListEvent({ ...added, items: [] }, 'item-saved', item('4', 'azúcar '), 'beto'))!
     expect(again.recent.map((r) => r.name)).toEqual(['azúcar '])
 
-    const checked = viewOf(applyListEvent(added, 'item-saved', item('3', 'Azúcar', true), 'beto'))!
-    expect(checked.recent).toBe(added.recent)
+    const more = viewOf(applyListEvent(added, 'item-saved', item('3', 'Azúcar', 2), 'beto'))!
+    expect(more.recent).toBe(added.recent)
   })
 })

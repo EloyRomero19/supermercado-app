@@ -19,8 +19,8 @@
 ---
 
 Create a list, share it with your family or flatmates through a **QR code or a link**, and everyone adds
-what's running out at home. At the supermarket, whatever goes into the cart is **checked off instantly
-on everyone's phone**. And if you don't know what to cook, the recipe book tells you which ingredients
+what's running out at home. At the supermarket, tap whatever you pick up and it **disappears from
+everyone's phone at once**. And if you don't know what to cook, the recipe book tells you which ingredients
 you're missing and adds them all to the list at once.
 
 It runs in any browser, is designed mobile-first and can be installed on the home screen like an app.
@@ -30,7 +30,6 @@ It runs in any browser, is designed mobile-first and can be installed on the hom
 <table>
   <tr>
     <td align="center"><img src="docs/capturas/2-lista.webp" width="200" alt="List grouped by supermarket section"><br><sub><b>What's missing, by section</b></sub></td>
-    <td align="center"><img src="docs/capturas/4-carrito.webp" width="200" alt="Cart with what has already been picked up"><br><sub><b>The cart: who picked up what</b></sub></td>
     <td align="center"><img src="docs/capturas/3-mis-listas.webp" width="200" alt="List switcher"><br><sub><b>Several lists</b></sub></td>
     <td align="center"><img src="docs/capturas/5-compartir.webp" width="200" alt="Sharing a list with a QR code or a link"><br><sub><b>Share with a QR code or link</b></sub></td>
   </tr>
@@ -46,11 +45,11 @@ It runs in any browser, is designed mobile-first and can be installed on the hom
 | Feature | What it does |
 |---|---|
 | 🛒 **Shared lists** | Several lists (home, beach flat, a birthday party…), each with an owner and members. The app opens the one you're using; switch from the title, «Mis listas ▾» (*my lists*). |
-| ⚡ **Real time** | Whatever someone adds, edits or puts in the cart shows up instantly on everyone else's phone. |
+| ⚡ **Real time** | Whatever someone adds, edits or picks up shows up instantly on everyone else's phone. |
 | 🔗 **Invites** | Through a QR code or a link, which arrives on WhatsApp or Telegram with a rich preview card. The owner can renew the code or remove members. |
 | 🔎 **Search** | 220 products across 13 supermarket sections. Tolerant to missing accents and typos («platano», «yogurt»). Anything not in the catalog can be typed in, and the app guesses its section and drawing. |
-| 🧺 **By section** | The list is sorted by aisle (fruit, butcher, dairy…), with quantity and a note per product, plus «Otras veces habéis comprado» (*bought before*) to re-add anything with one tap. |
-| ✅ **Cart** | One tap crosses a product off, like on a kitchen chalkboard; another tap undoes it. You can see who picked up each item, and «Terminar la compra» (*finish shopping*) leaves the list ready for next time. |
+| 🧺 **By section** | The list is sorted by aisle (fruit, butcher, dairy…), with quantity and a note per product, plus «Otras veces» (*bought before*) to re-add anything with one tap and every section's products from A to Z. |
+| ✅ **Only what's missing** | Each product is a tile: tap it when you have it and it leaves the list, with «Deshacer» (*undo*). No cart to empty afterwards. |
 | 🍳 **Recipes** | 15 classic Spanish dishes. Each one marks which ingredients you're missing and adds them all to the list at once. |
 | 🖍️ **Chalkboard look** | Hand-drawn chalk illustrations for every product and a colour code that reads at a glance. Offline notice and an «En directo» (*live*) indicator. |
 | 📱 **Installable** | Add it to the home screen; it opens instantly thanks to the *service worker* cache. |
@@ -179,7 +178,7 @@ session cookie can be `SameSite=Strict`.
 │       ├── auth/           session and protected routes
 │       ├── pages/          screens
 │       ├── components/     reusable components (and shadcn's ui/)
-│       ├── items/          list, cart, recent items
+│       ├── items/          list tiles, recent items
 │       ├── lists/          list switcher, invites, real time
 │       ├── products/       search and catalog sections
 │       ├── recipes/        recipe logic

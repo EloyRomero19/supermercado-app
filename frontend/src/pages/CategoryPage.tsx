@@ -65,7 +65,7 @@ export function CategoryPage() {
   if (!loaded) return <AppSkeleton label="Cargando la sección" />
 
   const { category, products, items } = loaded
-  const pendingOf = (productId: number) => items.find((item) => !item.checked && item.productId === productId)
+  const pendingOf = (productId: number) => items.find((item) => item.productId === productId)
   const inList = products.filter((product) => pendingOf(product.id)).length
   // Tres dibujos distintos de la sección para la cabecera
   const headerDrawings = [...new Set(products.map((p) => productDrawing(p.name, p.categoryName)))].slice(0, HEADER_TILTS.length)

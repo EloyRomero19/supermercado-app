@@ -100,7 +100,7 @@ export function RecipePage() {
     // Cómo estaba cada producto antes de añadir. Normalmente todos son nuevos, pero si alguien añade
     // el mismo producto mientras miras la receta, el backend suma la cantidad a SU producto: al
     // deshacer, ese se devuelve a como estaba en vez de borrarlo.
-    const before = new Map((items ?? []).filter((item) => !item.checked).map((item) => [item.id, item]))
+    const before = new Map((items ?? []).map((item) => [item.id, item]))
     setAdding(true)
     try {
       const saved = await addItems(

@@ -42,8 +42,8 @@ export type ListSummary = {
   name: string
   myRole: ListRole
   memberCount: number
+  /** Productos en la lista (lo que falta) */
   itemCount: number
-  checkedCount: number
 }
 
 export type Member = {
@@ -71,9 +71,6 @@ export type Item = {
   categoryOrder: number | null
   quantity: number
   note: string | null
-  checked: boolean
-  checkedByName: string | null
-  checkedAt: string | null
   addedByName: string | null
   createdAt: string
 }
