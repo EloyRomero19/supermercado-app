@@ -12,7 +12,7 @@ export function recentKey(productId: number | null, name: string): string {
 }
 
 /** Pone el producto el primero en "recientes" (sin duplicarlo), como hace el backend al añadirlo. */
-export function rememberRecent(recent: RecentItem[], item: Item): RecentItem[] {
+function rememberRecent(recent: RecentItem[], item: Item): RecentItem[] {
   const key = recentKey(item.productId, item.name)
   const entry: RecentItem = {
     productId: item.productId,

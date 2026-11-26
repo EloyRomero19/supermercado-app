@@ -2,10 +2,8 @@ import { createAppleSplashScreens, defineConfig, minimal2023Preset } from '@vite
 
 // Genera los iconos y las pantallas de inicio de la PWA a partir de public/favicon.svg:
 //   npm run generate-pwa-assets
-// Los colores son los del tema (index.css): la pizarra (de marca y de fondo, en claro y en oscuro).
+// El color es el de la pizarra (index.css): la app tiene un único tema, siempre oscuro.
 const BRAND = '#26302c'
-const BACKGROUND_LIGHT = '#26302c'
-const BACKGROUND_DARK = '#26302c'
 
 export default defineConfig({
   headLinkOptions: { preset: '2023' },
@@ -16,12 +14,11 @@ export default defineConfig({
     maskable: { ...minimal2023Preset.maskable, resizeOptions: { background: BRAND } },
     apple: { ...minimal2023Preset.apple, resizeOptions: { background: BRAND } },
     // Pantalla de inicio en iPhone mientras arranca la app instalada (Android la crea solo a partir
-    // del manifiesto). Una imagen por tamaño de pantalla, en claro y en oscuro.
+    // del manifiesto). Una imagen por tamaño de pantalla (sin versión clara/oscura: hay un solo tema).
     appleSplashScreens: createAppleSplashScreens(
       {
         padding: 0.35,
-        resizeOptions: { background: BACKGROUND_LIGHT, fit: 'contain' },
-        darkResizeOptions: { background: BACKGROUND_DARK, fit: 'contain' },
+        resizeOptions: { background: BRAND, fit: 'contain' },
         linkMediaOptions: { log: true, addMediaScreen: true, xhtml: false },
         png: { compressionLevel: 9, quality: 70 },
       },

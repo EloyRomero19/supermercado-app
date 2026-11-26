@@ -125,7 +125,11 @@ function ListPage({ listId }: { listId: string }) {
       })
     },
     onReconnected: () => {
-      loadList(listId).then(setState)
+      // Si la recarga falla (p. ej. la red vuelve a caerse justo ahora) se conserva lo que ya se
+      // ve: la conexión acaba de abrirse, así que la lista sigue existiendo y seguimos siendo miembros.
+      loadList(listId).then((loaded) => {
+        if (loaded.status === 'ready' && !leavingRef.current) setState(loaded)
+      })
     },
     onGone: () => setState({ status: 'error', message: 'Esta lista no existe o ya no tienes acceso a ella.' }),
   })

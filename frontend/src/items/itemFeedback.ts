@@ -19,12 +19,12 @@ export function errorMessage(error: unknown): string {
  * pendiente, el backend suma la cantidad: entonces "Deshacer" vuelve a la cantidad anterior en vez
  * de borrar el producto entero.
  */
-export async function addWithUndo(listId: string, newItem: NewItem, current: Item[], callbacks: Callbacks, listName?: string) {
+export async function addWithUndo(listId: string, newItem: NewItem, current: Item[], callbacks: Callbacks) {
   try {
     const saved = await addItem(listId, newItem)
     const before = current.find((item) => item.id === saved.id)
     callbacks.onSaved(saved)
-    const message = before ? `${saved.name}: ahora ×${saved.quantity}` : `«${saved.name}» añadido${listName ? ` a ${listName}` : ''}`
+    const message = before ? `${saved.name}: ahora ×${saved.quantity}` : `«${saved.name}» añadido`
     toast.success(message, {
       action: {
         label: 'Deshacer',

@@ -98,8 +98,13 @@ export default defineConfig({
       },
       workbox: {
         // Se guardan en caché los archivos de la app (el "app shell"): abre al instante y sin red
-        // De la tipografía, solo los alfabetos que usamos (el navegador descarga los demás si hicieran falta)
-        globPatterns: ['**/*.{js,css,html,svg,png,ico}', '**/atkinson-hyperlegible-next-latin-*wght-normal.woff2', '**/cabin-sketch-latin-700-normal.woff2'],
+        // De la tipografía, solo los alfabetos que usamos (el navegador descarga los demás si hicieran falta).
+        // El "-*" final es el hash que Vite añade al nombre (…-normal-BcXVPD7q.woff2): sin él no encaja nada.
+        globPatterns: [
+          '**/*.{js,css,html,svg,png,ico}',
+          '**/atkinson-hyperlegible-next-latin-*wght-normal-*.woff2',
+          '**/cabin-sketch-latin-700-normal-*.woff2',
+        ],
         // Las pantallas de inicio de iPhone no se precachean: cada dispositivo pide solo la suya
         globIgnores: ['**/apple-splash-*.png'],
         cleanupOutdatedCaches: true,

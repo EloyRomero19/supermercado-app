@@ -315,7 +315,7 @@ const CATEGORY_DRAWING: Record<string, string> = {
   'Bebé y mascotas': 'panal',
 }
 
-export const FALLBACK_DRAWING = 'bolsa'
+const FALLBACK_DRAWING = 'bolsa'
 
 function contains(haystack: string[], needle: readonly string[]): boolean {
   for (let i = 0; i + needle.length <= haystack.length; i++) {
@@ -330,11 +330,11 @@ export function matchDrawing(name: string): string | null {
   return PREPARED.find(([phrase]) => contains(nameWords, phrase))?.[1] ?? null
 }
 
-export function categoryDrawing(categoryName: string | null): string {
+function categoryDrawing(categoryName: string | null): string {
   return (categoryName && CATEGORY_DRAWING[categoryName]) || FALLBACK_DRAWING
 }
 
-export const drawingUrl = (key: string) => `/dibujos/${key}.svg`
+const drawingUrl = (key: string) => `/dibujos/${key}.svg`
 
 /** URL del dibujo de un producto: el suyo, el de su sección o la bolsa de la compra. */
 export function productDrawing(name: string, categoryName: string | null): string {

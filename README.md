@@ -37,7 +37,6 @@ It runs in any browser, is designed mobile-first and can be installed on the hom
   <tr>
     <td align="center"><img src="docs/capturas/6-recetas.webp" width="200" alt="Recipe book"><br><sub><b>Recipe book</b></sub></td>
     <td align="center"><img src="docs/capturas/7-receta.webp" width="200" alt="Recipe showing the missing ingredients"><br><sub><b>What you need to cook it</b></sub></td>
-    <td align="center"><img src="docs/capturas/8-lista-oscuro.webp" width="200" alt="List in dark mode"><br><sub><b>Dark mode</b></sub></td>
     <td align="center"><img src="docs/capturas/1-login.webp" width="200" alt="Sign in"><br><sub><b>Sign in</b></sub></td>
   </tr>
 </table>
@@ -49,11 +48,11 @@ It runs in any browser, is designed mobile-first and can be installed on the hom
 | 🛒 **Shared lists** | Several lists (home, beach flat, a birthday party…), each with an owner and members. The app opens the one you're using; switch from the title, «Mis listas ▾» (*my lists*). |
 | ⚡ **Real time** | Whatever someone adds, edits or puts in the cart shows up instantly on everyone else's phone. |
 | 🔗 **Invites** | Through a QR code or a link, which arrives on WhatsApp or Telegram with a rich preview card. The owner can renew the code or remove members. |
-| 🔎 **Search** | 220 products across 13 supermarket sections. Tolerant to missing accents and typos («platano», «yogurt»). Anything not in the catalog can be typed in, and the app guesses its icon and section. |
-| 🧺 **By section** | The list is sorted by aisle (fruit, butcher, dairy…), with quantity and a note per product, plus «Utilizados recientemente» (*recently used*) to re-add anything with one tap. |
-| ✅ **Cart** | One tap puts a product in the cart, with «Deshacer» (*undo*). You can see who picked up each item, and «Terminar la compra» (*finish shopping*) leaves the list ready for next time. |
+| 🔎 **Search** | 220 products across 13 supermarket sections. Tolerant to missing accents and typos («platano», «yogurt»). Anything not in the catalog can be typed in, and the app guesses its section and drawing. |
+| 🧺 **By section** | The list is sorted by aisle (fruit, butcher, dairy…), with quantity and a note per product, plus «Otras veces habéis comprado» (*bought before*) to re-add anything with one tap. |
+| ✅ **Cart** | One tap crosses a product off, like on a kitchen chalkboard; another tap undoes it. You can see who picked up each item, and «Terminar la compra» (*finish shopping*) leaves the list ready for next time. |
 | 🍳 **Recipes** | 15 classic Spanish dishes. Each one marks which ingredients you're missing and adds them all to the list at once. |
-| 🌗 **Your way** | Light, dark or automatic theme. Offline notice and an «En directo» (*live*) indicator. |
+| 🖍️ **Chalkboard look** | Hand-drawn chalk illustrations for every product and a colour code that reads at a glance. Offline notice and an «En directo» (*live*) indicator. |
 | 📱 **Installable** | Add it to the home screen; it opens instantly thanks to the *service worker* cache. |
 | 🔐 **Your account, your data** | Email and password. You can delete your account from the app, which first shows what will happen to each of your lists. |
 
@@ -126,7 +125,7 @@ session cookie can be `SameSite=Strict`.
 | **React 19** | Component-based UI. |
 | **Vite 8** | Instant dev server and optimized production build. Proxies `/api` to the backend during development. |
 | **React Router 8** | Client-side navigation between screens. |
-| **Tailwind CSS 4** | Utility-class styling. Colors are OKLCH CSS variables with verified AA contrast; dark mode only swaps those variables. |
+| **Tailwind CSS 4** | Utility-class styling. Colors are OKLCH CSS variables with verified AA contrast (a single dark «chalkboard» theme). |
 | **shadcn/ui + Radix UI** | Accessible components (sheets, dialogs, menus) with focus, keyboard and screen-reader support built in. |
 | **fetch-event-source** | SSE client that sends the *token* in a header and reconnects automatically. |
 | **vite-plugin-pwa** | Manifest, icons, iPhone splash screens and the *service worker* (caches the app, never API data). |
@@ -185,7 +184,6 @@ session cookie can be `SameSite=Strict`.
 │       ├── products/       search and catalog sections
 │       ├── recipes/        recipe logic
 │       ├── account/        account deletion
-│       ├── theme/          light/dark mode
 │       └── pwa/            install and updates
 ├── backup/                 backups (self-hosting)
 ├── docker-compose.yml      PostgreSQL for development

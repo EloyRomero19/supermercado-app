@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils'
 import { groupByCategory } from './sortItems'
 
 /** Sección de los productos escritos a mano que no se han podido reconocer. */
-export const OTHER_CATEGORY = 'Otros'
+const OTHER_CATEGORY = 'Otros'
 
 type Props = {
   items: Item[]

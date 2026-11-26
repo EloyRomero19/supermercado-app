@@ -2,7 +2,7 @@ import { ArrowLeft, Check, ChefHat, ListPlus } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { toast } from 'sonner'
-import { addItems, deleteItem, getItems } from '@/api/items'
+import { addItems, deleteItem, getItems, updateItem } from '@/api/items'
 import { getMyLists } from '@/api/lists'
 import { getRecipe } from '@/api/recipes'
 import type { Item, ListSummary, RecipeDetail } from '@/api/types'
@@ -97,6 +97,10 @@ export function RecipePage() {
 
   const addMissing = async () => {
     if (!target || toAdd.length === 0) return
+    // Cómo estaba cada producto antes de añadir. Normalmente todos son nuevos, pero si alguien añade
+    // el mismo producto mientras miras la receta, el backend suma la cantidad a SU producto: al
+    // deshacer, ese se devuelve a como estaba en vez de borrarlo.
+    const before = new Map((items ?? []).filter((item) => !item.checked).map((item) => [item.id, item]))
     setAdding(true)
     try {
       const saved = await addItems(
@@ -110,9 +114,26 @@ export function RecipePage() {
           label: 'Deshacer',
           onClick: async () => {
             try {
-              // Solo se añadieron los que faltaban, así que todos son nuevos: deshacer = quitarlos
-              await Promise.all(saved.map((item) => deleteItem(target.id, item.id)))
-              setListItems((current) => current && { ...current, items: current.items.filter((i) => !saved.some((s) => s.id === i.id)) })
+              const restored = await Promise.all(
+                saved.map(async (item) => {
+                  const previous = before.get(item.id)
+                  if (!previous) {
+                    await deleteItem(target.id, item.id)
+                    return null
+                  }
+                  return updateItem(target.id, item.id, { quantity: previous.quantity, note: previous.note ?? '' })
+                }),
+              )
+              setListItems(
+                (current) =>
+                  current && {
+                    ...current,
+                    items: [
+                      ...current.items.filter((i) => !saved.some((s) => s.id === i.id)),
+                      ...restored.filter((item): item is Item => item !== null),
+                    ],
+                  },
+              )
             } catch (e) {
               toast.error(errorMessage(e))
             }
