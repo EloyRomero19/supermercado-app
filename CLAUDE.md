@@ -14,7 +14,7 @@ PWA para gestionar listas de la compra compartidas entre varios usuarios:
 - Comunicación en español.
 
 ## Stack
-- **Backend** (`backend/`): Spring Boot 4.1, Java 21, Maven wrapper. Web MVC, Data JPA, Security (Resource Server para el JWT), Validation, Flyway, Lombok.
+- **Backend** (`backend/`): Spring Boot 4.2, Java 21, Maven wrapper. Web MVC, Data JPA, Security (Resource Server para el JWT), Validation, Flyway, Lombok.
 - **Frontend** (`frontend/`): React 19, Vite 8, TypeScript 6, Tailwind CSS 4, shadcn/ui (Radix), lucide-react, sonner, oxlint.
 - **BD**: PostgreSQL 18 en Docker (`docker-compose.yml` en la raíz).
 

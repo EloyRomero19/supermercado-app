@@ -10,7 +10,7 @@
 
 [![Try it live](https://img.shields.io/badge/Try_it_live-supermercado--app--seven.vercel.app-0a7e3a?style=for-the-badge&logo=vercel&logoColor=white)](https://supermercado-app-seven.vercel.app)
 
-[![CI](https://github.com/EloyRomero19/supermercado-app/actions/workflows/ci.yml/badge.svg)](https://github.com/EloyRomero19/supermercado-app/actions/workflows/ci.yml) ![Java 21](https://img.shields.io/badge/Java-21-ED8B00?logo=openjdk&logoColor=white) ![Spring Boot 4.1](https://img.shields.io/badge/Spring_Boot-4.1-6DB33F?logo=springboot&logoColor=white) ![React 19](https://img.shields.io/badge/React-19-149ECA?logo=react&logoColor=white) ![TypeScript](https://img.shields.io/badge/TypeScript-6-3178C6?logo=typescript&logoColor=white) ![PostgreSQL 18](https://img.shields.io/badge/PostgreSQL-18-4169E1?logo=postgresql&logoColor=white) ![PWA](https://img.shields.io/badge/PWA-installable-5A0FC8?logo=pwa&logoColor=white)
+[![CI](https://github.com/EloyRomero19/supermercado-app/actions/workflows/ci.yml/badge.svg)](https://github.com/EloyRomero19/supermercado-app/actions/workflows/ci.yml) ![Java 21](https://img.shields.io/badge/Java-21-ED8B00?logo=openjdk&logoColor=white) ![Spring Boot 4.2](https://img.shields.io/badge/Spring_Boot-4.2-6DB33F?logo=springboot&logoColor=white) ![React 19](https://img.shields.io/badge/React-19-149ECA?logo=react&logoColor=white) ![TypeScript](https://img.shields.io/badge/TypeScript-6-3178C6?logo=typescript&logoColor=white) ![PostgreSQL 18](https://img.shields.io/badge/PostgreSQL-18-4169E1?logo=postgresql&logoColor=white) ![PWA](https://img.shields.io/badge/PWA-installable-5A0FC8?logo=pwa&logoColor=white)
 
 [Screenshots](#screenshots) · [Features](#features) · [Under the hood](#under-the-hood) · [Tech stack](#tech-stack) · [Run it locally](#run-it-locally) · [Deployment](#deployment)
 
@@ -94,7 +94,7 @@ session cookie can be `SameSite=Strict`.
 | Layer | Technologies |
 |---|---|
 | **Languages** | Java 21 (~3,100 lines + 1,800 of tests) · TypeScript (~5,900) · SQL · CSS (Tailwind) |
-| **Backend** | Spring Boot 4.1 · Spring Web MVC · Spring Security (JWT, BCrypt) · Spring Data JPA / Hibernate · JdbcClient · Bean Validation · Flyway · SSE · Lombok · Maven |
+| **Backend** | Spring Boot 4.2 · Spring Web MVC · Spring Security (JWT, BCrypt) · Spring Data JPA / Hibernate · JdbcClient · Bean Validation · Flyway · SSE · Lombok · Maven |
 | **Database** | PostgreSQL 18 · `pg_trgm` + `unaccent` · Neon in production |
 | **Frontend** | React 19 · Vite 8 · React Router 8 · Tailwind CSS 4 · shadcn/ui + Radix UI · lucide-react · sonner · fetch-event-source · qrcode.react · vite-plugin-pwa (Workbox) |
 | **Infrastructure** | Vercel (static web app + API container) · Docker and Docker Compose · Caddy (automatic HTTPS) · GitHub Actions |
@@ -107,7 +107,7 @@ session cookie can be `SameSite=Strict`.
 
 | Technology | Purpose |
 |---|---|
-| **Spring Boot 4.1** | The API framework. Code is organized by feature (`auth`, `list`, `item`, `recipe`…) and in layers: *Controller* → *Service* → *Repository*. |
+| **Spring Boot 4.2** | The API framework. Code is organized by feature (`auth`, `list`, `item`, `recipe`…) and in layers: *Controller* → *Service* → *Repository*. |
 | **Spring Web MVC** | REST *endpoints* under `/api` (JSON). Errors follow the *Problem Details* standard (RFC 9457). |
 | **Spring Security** | Validates the JWT on every request (*OAuth2 Resource Server*). Passwords hashed with **BCrypt**. |
 | **Spring Data JPA / Hibernate** | Reading and writing users, lists and items without hand-written SQL. Optimistic locking (`@Version`) so two simultaneous edits don't overwrite each other. |
